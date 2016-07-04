@@ -29,6 +29,7 @@
 #define STAR_OP		1
 #define PATHLENGTH	150
 #define NAMESIZE	30
+#define FILE_COUNT	999
 
 extern
 struct parse_ts_id parse_ts_id;
@@ -63,7 +64,7 @@ struct recode_file {
 struct filter_file_story_t {
 	int			count;
 	char			path[PATHLENGTH];
-	struct recode_file	recode_t[NAMESIZE];
+	struct recode_file	recode_t[FILE_COUNT];
 };
 
 struct filter_file_story_t	story_t;
@@ -339,12 +340,13 @@ static int get_ts_name( char *tsname, int item, int item_count )
 /*
  * 在设备中找文件
  */
+static int i_next = 0;
 static int64_t  seach_fts( const char *path, int flag )
 {
 	int64_t sum;
-	int	i;
+	int	i, isdir_count = 0, isdir_falg = 0;
 
-	static struct stat statres;
+	static struct stat statres, statr;
 
 	static char	nextpath[PATHSIZE];
 	glob_t		globres;
@@ -360,13 +362,13 @@ static int64_t  seach_fts( const char *path, int flag )
 
 	/* aa/bb//cc/ee/ff */
 	strncpy( nextpath, path, PATHSIZE );
-	strncat( nextpath, "/*.ts", PATHSIZE );
+	strncat( nextpath, "/*", PATHSIZE );
 	if ( glob( nextpath, 0, NULL, &globres ) == GLOB_NOMATCH )
 		fprintf( stderr, "for no found matches\n" );
 
 
 	strncpy( nextpath, path, PATHSIZE );
-	strncat( nextpath, "/*.ts", PATHSIZE );
+	strncat( nextpath, "*.ts", PATHSIZE );
 	if ( glob( nextpath, GLOB_APPEND, NULL, &globres ) == GLOB_NOMATCH )
 		fprintf( stderr, "for no found matches\n" );
 
@@ -378,12 +380,28 @@ static int64_t  seach_fts( const char *path, int flag )
 		if ( path_noloop( globres.gl_pathv[i] ) )
 			sum += seach_fts( globres.gl_pathv[i], flag );
 
-		if ( flag != 0 )
+		if ( lstat( globres.gl_pathv[i], &statr ) < 0 )
 		{
-			if ( get_ts_name( globres.gl_pathv[i], i, itemcount ) < 0 )
+			perror( "lstat()" );
+			exit( 1 );
+		}
+		if ( S_ISDIR( statr.st_mode ) )
+		{
+			++isdir_count;
+			isdir_falg = 1;
+		}else
+			isdir_falg = 0;
+
+		if ( flag != 0 && isdir_falg != 1 )
+		{
+			if ( get_ts_name( globres.gl_pathv[i], i_next, itemcount ) < 0 )
 				goto __exit;
+			++i_next;
+
 		}
 	}
+
+	i_next = 0;
 
 	if ( globres.gl_pathc == 0 )
 	{
@@ -392,9 +410,7 @@ static int64_t  seach_fts( const char *path, int flag )
 	}
 
 	if ( flag == 0 )
-	{
-		itemcount = globres.gl_pathc;
-	}
+		itemcount += globres.gl_pathc - isdir_count;
 
 
 __exit:
@@ -582,7 +598,7 @@ uint8_t usb_ts_inf()
 		return(ret);
 	}
 
-
+	itemcount = 0;
 	ret	= seach_fts( get_stata_path()->hostusbpath, 0 );
 	ret	= seach_fts( get_stata_path()->hostusbpath, 1 );
 
@@ -651,6 +667,7 @@ static int64_t  ts_archives( const char *path, const char* _name )
 		fprintf( stderr, "for no found matches\n" );
 
 
+
 	for ( i = 0; i < globres.gl_pathc; i++ )
 	{
 		/*
@@ -666,8 +683,6 @@ static int64_t  ts_archives( const char *path, const char* _name )
 		char	*tmp	= rindex( globres.gl_pathv[i], '/' );
 		size_t	tmplen	= strlen( tmp );
 
-		if ( globres.gl_pathc >= NAMESIZE )
-			return(ret);
 
 /* 不是循环ts */
 		if ( !get_string_last_digit_str( dig_buf, tmp, 3 ) )
@@ -717,6 +732,13 @@ static int64_t  ts_archives( const char *path, const char* _name )
 		if ( strncasecmp( tmp_ts_name, ts_name, tmplen ) == 0 )
 		{
 			story_t.count = i + 1;
+
+			if ( story_t.count >= FILE_COUNT )
+			{
+				story_t.count = FILE_COUNT;
+				break;
+			}
+
 			memset( story_t.path, 0, PATHLENGTH );
 			memset( story_t.recode_t[i].name, 0, NAMESIZE );
 			int len = strlen( path );
@@ -725,7 +747,7 @@ static int64_t  ts_archives( const char *path, const char* _name )
 
 			snprintf( ts_name, tmplen, "%s", tmp + 1 );
 			ret = count = i;
-			DEBUG( "count :%d  name:%s ", count, story_t.recode_t[i].name );
+
 		}
 	}
 
@@ -1088,13 +1110,6 @@ int32_t read_usb( void *usb_hand )
 		return(ret);
 	}
 
-	if ( st.st_size < MEMSIZE_2M )
-	{
-		DEBUG( "file too litter : %lld\n", st.st_size );
-		return(ret);
-	}
-
-
 	ts_lenth = st.st_size;
 
 	DEBUG( "file size : %lld\n", st.st_size );
@@ -1112,7 +1127,7 @@ int32_t read_usb( void *usb_hand )
 	loop_cl_cah();
 
 	nano_sleep( 1, 0 );
-
+	
 	paren_menu();
 
 	return(ret);

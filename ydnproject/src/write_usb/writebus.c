@@ -28,7 +28,7 @@
 #define STOP_OP		0
 #define STAR_OP		1
 #define TMIEROUT	800000 * 9
-#define MAX_FREE	(60)
+#define MAX_FREE	(2048)
 #define MYTPF_MAX	100
 #define PATHLENGTH	150
 #define NAMESIZE	30
@@ -41,12 +41,13 @@ int	BUFFER_SIZE_2M	= sizeof(uint8_t) * 5578 * 188 * 2;
 extern s_config		config;
 extern pthread_t	usb_sig;
 static uint8_t		* sharemem_base = NULL;
-static uint8_t		stop		= 1;
+static int8_t		stop		= 1;
 #define CPS		(1)
 #define BURST		(50)
 #define SEG_FLAG	(0x20)
 #define SEG_SFLAG	(0x30)
 #define SEG_GFLAG	(0x00)
+#define DISC_FREE_MAX	(0x3c00000)
 
 typedef struct init_bus_ {
 	bus_init	bus_t;
@@ -73,7 +74,8 @@ typedef struct job_squeue_t {
 job_squeue_t squeue_t;
 
 static usb_token	*job[MYTPF_MAX];
-static usb_token	*token = NULL;
+static usb_token	*token		= NULL;
+static char		*tmp_dsplay	= NULL;
 static uint8_t		*jobsqueue_date[MYTPF_MAX];
 
 static int32_t writ_usb( void * );
@@ -370,13 +372,14 @@ int _destroy( usb_token *ptr )
 	return(0);
 }
 
+
 /*
  * 节点
  */
 static int node_seach()
 {
 	int node = -1;
-	
+
 	if ( squeue_t.flag == SEG_FLAG )
 	{
 		node		= 0;
@@ -389,8 +392,9 @@ static int node_seach()
 		squeue_t.node	= 0;
 	}
 
-	return node;
+	return(node);
 }
+
 
 /*
  * 清理
@@ -398,12 +402,12 @@ static int node_seach()
 
 static void clean_date()
 {
-	int count ,node;
+	int count, node;
 
 	s_config *dconfig = config_get_config();
 	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
 	nano_sleep( 1, 0 );
-	
+
 	count = fetch_token( token, BURST );
 	if ( count < 0 )
 	{
@@ -411,27 +415,58 @@ static void clean_date()
 		return;
 	}
 
-	if( (node = node_seach()) < 0)
-		return ;
+	if ( (node = node_seach() ) < 0 )
+		return;
 
 	if ( count > 0 )
 		destory_date( count, node );
-	
-
 }
 
-static int  creat_job_thread( void *init_b )
+
+/*
+ * 写设备
+ * sfd 文件描述符
+ * node_count 写入的节点总数
+ * node 节点的位置
+ * wr_size 写入总大小(M)
+ */
+static int  wr_usb( int sfd, int node_count, int node, size_t *wr_size )
 {
-	int		result = -1, sfd, i_count = 0, count = 0;
-	int		node = 0, i_mod;
-	char		path_name[PATHSIZE]	= "";
-	size_t		wr_size			= 0;
-	init_bus_t	* init			= (init_bus_t *) init_b;
-	s_config	* dconfig		= config_t();
-	size_t		i_size			= dconfig->configParam.usb_tsfilesize;
-	i_mod = init->mod;
-	size_t		stacksize = 20480;
-	pthread_attr_t	attr;
+	int	i_count = 0;
+	ssize_t ret	= -1;
+
+
+	while ( i_count < node_count )
+	{
+		size_t len = BUFFER_SIZE_1M;
+
+		while ( len > 0 )
+		{
+			ret = write( sfd, jobsqueue_date[node + i_count], len );
+			if ( ret < 0 )
+			{
+				if ( errno == EINTR )
+					continue;
+				perror( "write()" );
+				return(-1);
+			}
+			len		-= ret;
+			*wr_size	+= (ret / 1024 / 1024);
+		}
+
+		++i_count;
+	}
+
+	return(ret);
+}
+
+
+static int  creat_thread( void *init_b, pthread_attr_t *re_attr )
+{
+	int			result		= -1;
+	size_t			stacksize	= 20480;
+	static pthread_attr_t	attr;
+	init_bus_t		* init = (init_bus_t *) init_b;
 
 	result = pthread_attr_init( &attr );
 	if ( result != 0 )
@@ -447,11 +482,94 @@ static int  creat_job_thread( void *init_b )
 		DEBUG( "create thread fail \n" );
 		return(result);
 	}
-	int test_incom_count = 0;
+	re_attr = &attr;
+	return(result);
+}
+
+
+static void desory_thread( void *init_b, pthread_attr_t *attr )
+{
+	int result = -1;
+
+	init_bus_t * init = (init_bus_t *) init_b;
+
+	if ( pthread_join( init->cache_copy, NULL ) == 0 )
+		DEBUG( "init_bus_base->cache_copy finish \n" );
+
+	result = pthread_attr_destroy( attr );
+	if ( result != 0 )
+	{
+		DEBUG( "pthread_attr_init :%s", strerror( errno ) );
+	}
+}
+
+
+/*
+ * 磁盘检查
+ * 返回值
+ * -1 磁盘空间不足 ,0 磁盘空间充足
+ */
+static int disk_check( void )
+{
+	int free_size, ret = -1;
+	free_size = get_storage_dev_info( get_stata_path()->hostusbpath, FREE_CAPACITY );
+	if ( MAX_FREE > free_size )
+	{
+		fprintf( stderr, "%s", "USB space is too small" );
+		return(ret);
+	}
+
+	return(0);
+}
+
+
+/*
+ * 处理写入设备
+ */
+static int  creat_job_thread( void *init_b )
+{
+	int		result			= -1, sfd = -1, count = 0, off = 0;
+	int		node			= 0, i_mod, disc_flag = 1;
+	char		path_name[PATHSIZE]	= "";
+	pthread_attr_t	attr;
+	size_t		wr_size			= 0;
+	int		test_incom_count	= 57;
+
+	init_bus_t	* init		= (init_bus_t *) init_b;
+	s_config	* dconfig	= config_t();
+	size_t		i_size		= dconfig->configParam.usb_tsfilesize;
+	i_mod = init->mod;
+
+	if ( creat_thread( init_b, &attr ) != 0 )
+		return(result);
+
 	do
 	{
 next_file:
+
+		DEBUG("-----%x---%d--",mod_manage( i_mod ),off);
+		if ( disk_check() < 0 && (off == 0) )
+		{
+				
+			if ( mod_manage( i_mod ) == USB_RECORD_LOOP )
+			{
+				disc_flag		= 0;
+				off			= 1;
+				test_incom_count	= 0;    /* 循环从头开始 */
+			}else{
+				wr_size		= i_size + 1;  /* 分段退出 */
+				disc_flag	= 1;
+				s_config *dconfig = config_get_config();
+				send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
+
+				DEBUG("----------");
+				break;
+			}
+			
+		}
+
 		++test_incom_count;
+
 		if ( management_document( init->path, dconfig->configParam.usb_tsfilename, test_incom_count, path_name ) < 0 )
 		{
 			return(result);
@@ -469,14 +587,22 @@ next_file:
 	}
 	while ( sfd < 0 );
 
-	DEBUG( "path_name :%s", path_name );
-
+	tmp_dsplay = rindex( path_name, '/' );
+	DEBUG( "path_name :%s", tmp_dsplay );
+	DEBUG( "wr_size :%d  i_size :%d", wr_size, i_size );
 	while ( wr_size <= i_size )
 	{
+		if ( disk_check() < 0 && (disc_flag != 0) )
+		{       /* not loop */
+			fprintf( stderr, "%s", "USB space is too small" );
+			break;
+		}
+
 		if ( (stop = recv_usb_notify() ) <= 0 )
 			break;
 
 		nano_sleep( 2, 0 );
+
 		count = fetch_token( token, BURST );
 		if ( count < 0 )
 		{
@@ -488,53 +614,31 @@ next_file:
 		if ( count == 0 )
 			continue;
 
-		if( (node = node_seach()) < 0)
+		if ( (node = node_seach() ) < 0 )
 			continue;
 
-		while ( i_count < count )
+
+		if ( (result = wr_usb( sfd, count, node, &wr_size ) ) < 0 )
 		{
-			ssize_t ret;
-			size_t	len = BUFFER_SIZE_1M;
-
-			while ( len > 0 )
-			{
-				ret = write( sfd, jobsqueue_date[node + i_count], len );
-				if ( ret < 0 )
-				{
-					if ( errno == EINTR )
-						continue;
-					perror( "write()" );
-					return(-1);
-				}
-				len	-= ret;
-				wr_size += (ret / 1024 / 1024);
-			}
-
-			++i_count;
+			destory_date( count, node );
+			break;
 		}
-
-		i_count = 0;
 
 		destory_date( count, node );
 	}
-	wr_size = 0;
-	if ( mod_manage( i_mod ) != USB_RECORD_SIG && stop > 0 )
-		goto next_file;
 
-	clean_date();
 	
+	if ( mod_manage( i_mod ) != USB_RECORD_SIG )
+		if ( stop > 0 )
+			goto next_file;
+	
+	clean_date();
+
 	close( sfd );
 
 	_destroy( token );
 
-	if ( pthread_join( init->cache_copy, NULL ) == 0 )
-		DEBUG( "init_bus_base->cache_copy finish \n" );
-
-	result = pthread_attr_destroy( &attr );
-	if ( result != 0 )
-	{
-		DEBUG( "pthread_attr_init :%s", strerror( errno ) );
-	}
+	desory_thread( init, &attr );
 
 	return(result);
 }
@@ -559,11 +663,20 @@ static void chech_message()
 	case 0:
 	{
 		lcd_Write_String( 0, ch );
-		lcd_Write_String( 1, " Record ...     " );
+		lcd_Write_String( 1, " Record...      " );
 		count++;
 	}
 	break;
 	case 1:
+	{
+		int len = strlen( tmp_dsplay );
+		snprintf( ch_1, len + 1, "%s", tmp_dsplay + 1 );
+		lcd_Write_String( 0, ch );
+		lcd_Write_String( 1, ch_1 );
+		count++;
+	}
+	break;
+	case 2:
 	{
 		float usbrbitrate;
 
@@ -578,7 +691,7 @@ static void chech_message()
 	}
 
 
-	if ( count >= 2 )
+	if ( count >= 3 )
 		count = 1;
 }
 
@@ -763,7 +876,7 @@ static int  usb_write_handler( char *i_path, off_t size, int play_mod )
 
 static int32_t writ_usb( void *usb_hand )
 {
-	int ret = -1, free_size;
+	int ret = -1;
 
 	if ( is_usb_online() != DEVACTT )
 		return(ret);
@@ -772,8 +885,7 @@ static int32_t writ_usb( void *usb_hand )
 		return(ret);
 
 
-	free_size = get_storage_dev_info( get_stata_path()->hostusbpath, FREE_CAPACITY );
-	if ( MAX_FREE > free_size )
+	if ( disk_check() < 0 )
 	{
 		fprintf( stderr, "%s", "USB space is too small" );
 		return(ret);
@@ -781,7 +893,7 @@ static int32_t writ_usb( void *usb_hand )
 
 	usb_operation_t *usb_action = (usb_operation_t *) usb_hand;
 
-#if 1
+#if 0
 	DEBUG( "size :%lld ", (int64_t) usb_action->ts_size );
 	DEBUG( "record_mod :%d ", usb_action->op_mod );
 	DEBUG( "is_start :%d ", usb_action->is_start );
@@ -798,11 +910,11 @@ static int32_t writ_usb( void *usb_hand )
 
 	s_config *dconfig = config_get_config();
 	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
-	
+
 	loop_cl_cah();
 
 	paren_menu();
-	DEBUG( "------over-----" );
+
 	return(0);
 }
 

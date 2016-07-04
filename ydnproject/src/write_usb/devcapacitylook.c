@@ -5,6 +5,7 @@
 #include <devcapacitylook.h>
 #include <sys/vfs.h>
 #include <defineident.h>
+#include <debug.h>
 
 
 
@@ -16,7 +17,7 @@ int get_storage_dev_info(char * mount_point,int option)
 	uint64_t used_bytes	= 0;
 	uint64_t free_bytes	= 0;
 	uint64_t tota_bytes  = 0;
-	uint64_t end_space	= 0;
+	int end_space	= 0;
 
 	if (ERR == statfs(mount_point, &stat_fs)) {
 		perror("get_storage_dev_info()\n");
@@ -44,8 +45,6 @@ int get_storage_dev_info(char * mount_point,int option)
 	default:
 		return ERR;
 	}
-
-
 
 	return end_space;
 

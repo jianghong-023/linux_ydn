@@ -63,11 +63,6 @@ uint8_t scan_key_resvale( uint8_t choose );
 static void sighandler_str( int sgn );
 
 
-/* static void append_str_bak( dis_contrl * dis_contrl, char* setchr, char *bakorgchr ); */
-
-
-/* static void append_str_rec( dis_contrl * dis_contrl, char *bakorgchr ); */
-
 static void monitor_opt( int coder, int flags );
 
 
@@ -75,9 +70,6 @@ static void set_rtr_arr( signed char userChoose, signed char displaystart, uint8
 
 
 static void loop_hand( void );
-
-
-/* static int string_filter_cpy( char *src, char *des ); */
 
 
 static void esc_rtr_arr( uint8_t subscripts );
@@ -106,8 +98,6 @@ static void menu_selected_cfg( char **arr, int size, char * );
 
 static int check_pwrd( char *pwd );
 
-
-/* static int usb_thread_create( int keyoff ); */
 
 
 static int access_cheak();
@@ -587,86 +577,6 @@ static int  dsplay_append_bstr( dis_contrl * dis_contrl, char *bstr )
 }
 
 
-#if 0
-
-
-/*
- * 字符 备份
- * bakorgchr 备份源字符串
- * dis_contrl 结构指针
- * setchr 设置字符
- */
-static void append_str_bak( dis_contrl * dis_contrl, char* setchr, char *bakorgchr )
-{
-	if ( !setchr )
-		return;
-
-	int length = dis_contrl->lcd_b_last_dsp.i_bdsp_length + 1;
-
-	snprintf( bakorgchr, length, "%s", dis_contrl->lcd_b_last_dsp.b_dsp );
-
-	memset( dis_contrl->lcd_b_last_dsp.b_dsp, 0, 3 );
-
-	length = strlen( setchr ) + 1;
-
-	snprintf( dis_contrl->lcd_b_last_dsp.b_dsp, length, "%s", setchr );
-}
-
-
-/*
- * 字符恢复处理
- * bakorgchr 备份源字符串
- * dis_contrl 结构指针
- *
- */
-static void append_str_rec( dis_contrl * dis_contrl, char *bakorgchr )
-{
-	if ( !bakorgchr )
-		return;
-
-	memset( dis_contrl->lcd_b_last_dsp.b_dsp, 0, 3 );
-
-	int length = strlen( bakorgchr ) + 1;
-
-	snprintf( dis_contrl->lcd_b_last_dsp.b_dsp, length, "%s", bakorgchr );
-}
-
-
-/*
- * 带负数的字符串过滤
- * src 源字符串
- * des 过滤后的字符串
- *
- * 还回过滤后的字符长度
- */
-static int string_filter_cpy( char *src, char *des )
-{
-	int i = 0, n = 0, ret = -1;
-	if ( !src )
-		return(-1);
-
-	if ( src[i] == '-' )
-		++i;
-
-	do
-	{
-		des[n] = src[i];
-		++i;
-		++n;
-	}
-	while ( src[i] != '\0' );
-
-	des[n] = '\0';
-
-	ret = n;
-
-	return(ret);
-}
-
-
-#endif
-
-
 /*
  * 循环显示处理
  */
@@ -741,7 +651,7 @@ static void dynamic_string( int dynamicflgs, int keyflage )
 static void append_str_dsplat_proc( dis_contrl * dis_contrl, int bpos, int lpos )
 {
 	char b_apend[6] = "", l_apend[6] = "";
-/*	DEBUG("bpos %d : lpos %d",bpos,lpos); */
+
 	int relength = dsplay_append_lstr( &discontrl, l_apend );
 	if ( relength > 0 )
 	{
@@ -1476,7 +1386,6 @@ static char* display_input_str( char *str, int size, int *lenth )
 			discontrl.rig_lifet_status	= LIFTRIGHT_DEF;
 			discontrl.add_sub_status	= UPDOWN_DEF;
 			l_r_rocde			= 0;
-			/* curos_dsp( LCD_CHAR_DOT ); */
 		}
 		break;
 
@@ -1487,7 +1396,7 @@ static char* display_input_str( char *str, int size, int *lenth )
 				cursor_onoff( discontrl.lcdfd, LCD_SUROS_ONOFF, 0x3 ); /* 开 */
 				discontrl.curos_stat	= CURSOR_NOUSER;
 				count			= 0;
-				/* curos_dsp( LCD_CHAR_ARR ); */
+				
 				cursor_move( discontrl.lcdfd, LCD_SUROS_MOVE, 0x10 );
 			}
 
@@ -1553,7 +1462,7 @@ static char* display_input_str( char *str, int size, int *lenth )
 			if ( (discontrl.add_sub_status == UP_ADD) )
 			{
 				pos++;
-				/* DEBUG("pos=%d  %d \n",pos,ch_count); */
+				
 				if ( ch_count <= pos || pos < 0 )
 					pos = 0;
 
@@ -1777,33 +1686,6 @@ static void usb_noly_write()
 }
 
 
-#if 0
-static int usb_thread_create( int keyoff )
-{
-	int ret = -1, result;
-	if ( discontrl.keyoff == keyoff )       /* 说明此时对usb还不存在读或者写操作 */
-	{                                       /* discontrl.keyoff = DEFAULTE; // 其值需由读或者写完后复位 */
-		result = pthread_create( &w_r_usb_t, NULL, (void *) MenuPoint[discontrl.UserChoose].Subs, NULL );
-		if ( result != 0 )              /* 线程创建失败,必然不能再继续下去自执行任务 */
-		{
-			DEBUG( "client server thread fail \n" );
-			paren_menu();
-		} else {
-			pthread_detach( w_r_usb_t );
-			DEBUG( "Read or Write operations..." );
-
-			ret = 0;
-		}
-	} else {
-		DEBUG( "Cannot read and write operations simultaneously..." );
-	}
-
-	return(ret);
-}
-
-
-#endif
-
 static void set_rtr_arr( signed char userChoose, signed char displaystart, uint8_t subscripts )
 {
 	menu_return_arr[subscripts].rtr_option		= userChoose;
@@ -1850,8 +1732,6 @@ void enter_code()
 static void ShowMenu()
 {
 	uint8_t i;
-
-	memset( discontrl.tmpbuf, 0, sizeof(char) * 40 );
 
 	discontrl.MaxItems = MenuPoint[DEFAULTE].MenuCount;     /* 获取当前菜单的条目数 */
 
@@ -2064,7 +1944,7 @@ static int change_cfg_menu( signed char keynumber )
 		}
 		ret				= 0;
 		discontrl.add_sub_status	= UP_ADD;
-		/* discontrl.lcd_itm_up_down++; */
+		
 		break;
 	case down:                              /* 下 */
 		discontrl.updownchoose++;       /* 用户字符选择 */
@@ -2074,7 +1954,7 @@ static int change_cfg_menu( signed char keynumber )
 		}
 		ret				= 0;
 		discontrl.add_sub_status	= DOWN_SUB;
-		/* discontrl.lcd_itm_up_down--; */
+		
 		break;
 
 	case lift:                              /* 左移动 */
@@ -2274,7 +2154,7 @@ static int lock_enter_input_pwd( int dsplay_status, int keynumber )
 
 	if ( discontrl.enter_status == KEY_AFFRIM_ENTER_Y )
 	{
-/*		DEBUG( "ChangeMenu lock pwd = %s", discontrl.cechebuf ); */
+
 		char tmp[16] = { 0 };
 		sprintf( tmp, discontrl.cechebuf );
 		if ( access_cheak( tmp ) == 0 )
@@ -2374,17 +2254,6 @@ static void alrm_hander( int s )
 		;
 }
 
-
-#if 1
-struct test_parm {
-	int	size;
-	int	start;
-	int	stop;
-	pid_t	pid;
-	char	msg[200];
-};
-
-#endif
 
 static void usb_wr_hander( int signum, siginfo_t *siginfo, void *not_used )
 {
@@ -2781,9 +2650,6 @@ int lcd_main( void )
 
 
 	dev_config();
-
-	discontrl.tmpbuf = malloc( sizeof(char) * TMPBUFFETTSIZE );
-	memset( discontrl.tmpbuf, 0, sizeof(char) * TMPBUFFETTSIZE );
 
 	discontrl.lcdfd = lcd_open();
 	lcd_clear( discontrl.lcdfd ); /* 并清除内存 */

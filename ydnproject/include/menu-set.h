@@ -192,7 +192,7 @@ struct MenuItem EitInsert[1];           /* EitCfg下EIT插入配置菜单 */
 struct MenuItem StartRecord[1];         /* RecordTsCfg下启动码流录制菜单 */
 struct MenuItem AdvancedCfg[4];         /* RecordTsCfg下录制参数配置菜单 */
 /* *-1.5.2- */
-struct MenuItem FileBrowse[100];        /* PlayTsCfg下文件浏览菜单 */
+struct MenuItem FileBrowse[999];        /* PlayTsCfg下文件浏览菜单 */
 struct MenuItem PlayMode[1];            /* PlayTsCfg下播放模式配置菜单 */
 
 

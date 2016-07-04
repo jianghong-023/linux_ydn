@@ -216,7 +216,7 @@ uint8_t file_size()
 	discontrl.write_size = WRITELIMIT;
 
 	init_cache();
-	int input_lenth = 9;
+	int input_lenth = 4;
 	discontrl.lcd_b_last_dsp.i_ldsp_length	= 2;
 	discontrl.lcd_b_last_dsp.desplay_b_pos	= 1;
 	discontrl.lcd_b_last_dsp.desplay_l_pos	= input_lenth + 3;
@@ -227,7 +227,7 @@ uint8_t file_size()
 	discontrl.write_size = WRITELIMIT & 0x00;
 
 	int get_value = dconfig->configParam.usb_tsfilesize;
-	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 9000, 0, INPUT_DIGIT_STATUS, input_lenth, &text_digfilesize_save );
+	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 4096, 64, INPUT_DIGIT_STATUS, input_lenth, &text_digfilesize_save );
 
 	dev_config();
 

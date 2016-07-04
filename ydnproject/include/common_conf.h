@@ -11,7 +11,7 @@ struct MenuItem {                               /* ç»“æ„ä½“åç§° */
 	struct   MenuItem	*ChildrenMenus; /* æŒ‡å‘å½“å‰èœå•çš„ä¸‹çº§èœå• */
 	struct   MenuItem	*ParentMenus;   /* æŒ‡å‘å½“å‰èœå•çš„ä¸Šçº§èœå• */
 	uint8_t			item;           /* ¼ÇÂ¼ÎÄ¼şµÄµ±Ç°Î»ÖÃ£¬ÓÃÓÚusb¶ÁĞ´Ê±£¬Ö÷ÒªÊÇÈ¡DesplayPointµÄÖµ */
-	uint8_t			filepathpos; /* ¼ÇÂ¼ÎÄ¼şÂ·¾¶Î»ÖÃ */
+	uint8_t			filepathpos;    /* ¼ÇÂ¼ÎÄ¼şÂ·¾¶Î»ÖÃ */
 	uint8_t			offon;
 } /*Null*/;
 
@@ -70,10 +70,8 @@ struct dis_contrl_t {
 	uint8_t call_loop_enter;        /* Ä£Äâenter */
 	uint8_t call_stop_enter;        /* µ±°´ÏÂesc.enter¼üÊ± */
 	uint8_t call_time_enter;        /* 1 ÓĞĞ§ £¬0 ÎŞĞ§ */
-	uint8_t	pwd_error_flag;
+	uint8_t pwd_error_flag;
 
-	/* é“¾å¼ç¼“å­˜ */
-	char *tmpbuf;
 	/* æŒ‰é”®/lcd æè¿°ç¬¦ changeflagä¸º0x01æ—¶ï¼Œè¡¨ç¤ºè¿›å…¥æ—¶æ˜¯enteré”® */
 	int	lcdfd, keyfd, changeflag;
 	int	keyoff;                 /* è®°å½•æŒ‰ä¸‹æ—¶è¯»å†™usb,ä¸ç®¡æ˜¯è¯»è¿˜æ˜¯åœ¨å†™æ—¶ */
@@ -93,7 +91,7 @@ struct dis_contrl_t {
 	uint8_t offon;
 	int	enter_status;
 	/* pidçŠ¶æ€ */
-	uint8_t pid_status;    /* 0x01 å¼€å¯,0x02å…³é—­ */
+	uint8_t pid_status; /* 0x01 å¼€å¯,0x02å…³é—­ */
 	/* é€šç”¨å‡½æ•° */
 	void	( * wd_configfile)( char *orgbuf, char *repbuf );
 	int	( * menu_cfg_fun)( char *str );
@@ -120,9 +118,12 @@ void paren_menu( void );
 
 int lcd_main( void );
 
-void user_desplay_monitor(void);
 
-void user_operation_usb(void);
+void user_desplay_monitor( void );
+
+
+void user_operation_usb( void );
+
 
 void ChangeMenu( int keySigNum );
 

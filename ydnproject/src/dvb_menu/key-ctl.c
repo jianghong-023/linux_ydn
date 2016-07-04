@@ -12,27 +12,31 @@
 union {
 	unsigned long n;
 	struct {
-		uint8_t	b_0;
-		uint8_t	b_1;
-		uint8_t	b_2;
-		uint8_t	b_3;
+		uint8_t b_0;
+		uint8_t b_1;
+		uint8_t b_2;
+		uint8_t b_3;
 	} l;
 } cv;
 
 /* lcdÐ´ÈëÊý¾Ý */
 void lcd_Write_String( int y, char *c )
 {
-	int t = 0;
-	while ( *c )
-	{
-		discontrl_t()->tmpbuf[t] = *c;
-		c++;
-		t++;
-	}
+	int lent = 0;
 
-	discontrl_t()->tmpbuf[strlen( discontrl_t()->tmpbuf ) + 1] = 0;
-	write( discontrl_t()->lcdfd, discontrl_t()->tmpbuf, strlen( discontrl_t()->tmpbuf ) );
-	memset( discontrl_t()->tmpbuf, 0, sizeof(char) * 40 );
+	lent = strlen( c );
+
+	if ( y == 0 )
+	{
+		int i;
+		for ( i = 0; i < lent; i++ )
+			key_input_char( i, c[i], ~CHANGE_G, discontrl_t()->lcdfd );
+	}else if ( y == 1 )
+	{
+		int i;
+		for ( i = 0; i < lent; i++ )
+			key_input_char( i, c[i], CHANGE_G, discontrl_t()->lcdfd );
+	}
 }
 
 
@@ -92,4 +96,5 @@ void key_input_char( char rightlift, char updown_date, uint8_t change_g, int lcd
 
 	ioctl( lcdfd, LCD_CHAR_INPUT, cv.l );
 }
+
 
