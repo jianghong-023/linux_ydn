@@ -69,6 +69,7 @@ static const struct {
 	{ "CpVideohue",	    oCpVideohue	    },
 
 	{ "AudioBitrate",   oAudioBitrate   },
+	{ "WriteRecord",    oWriteRecord    },
 
 	{ "NETWORKID",	    oNETWORKID	    },
 	{ "NetWorkName",    oNetWorkName    },
@@ -584,6 +585,10 @@ int config_read( const char *filename )
 					config.configParam.usb_tsfilesize	= atoi( safe_strdup( p1 ) );
 					ret					= 0;
 					break;
+				case oWriteRecord:
+					config.scfg_Param.stream_usb_used_count = atoi( safe_strdup( p1 ) );
+					ret					= 0;
+					break;
 				case oAd9789config: {
 					config.localstatus.cfig_ad9789_ftw_bpf	= atof( safe_strdup( p1 ) );
 					ret					= 0;
@@ -936,6 +941,7 @@ void config_init( void )
 
 	config.scfg_Param.stream_nit_lcn_mode		= LCN_MOD_VALUE;
 	config.scfg_Param.stream_nit_lcn_mode_name	= NIT_LCN_MOD;
+	config.scfg_Param.stream_usb_used_count		= 0;
 
 	config.scfg_Param.encoder_video_norm		= VIDEO_NORM;
 	config.scfg_Param.encoder_video_norm_name	= VIDEO_NORM_NAME;
@@ -1065,7 +1071,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 	int linenum = 0, opcode, useropcode, value, len;
 
-//	DEBUG( "Reading configuration file '%s' original_str=%s replace_str=%s\r\n", filename, original_str, replace_str );
+/*	DEBUG( "Reading configuration file '%s' original_str=%s replace_str=%s\r\n", filename, original_str, replace_str ); */
 
 	if ( !(fd = fopen( filename, "r+" ) ) )
 	{
@@ -1290,6 +1296,27 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 						if ( 7 <= strlen( (char *) replace_str ) )
 						{
 							snprintf( file_name, 7, "%s", replace_str );
+							sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
+						} else {
+							sprintf( file_name, "%s", replace_str );
+							sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
+						}
+
+						result = system( tmpline );
+						if ( result != -1 )
+							DEBUG( "%dline %s , %s write successfull !\r\n", linenum, p1, replace_str );
+					}
+				}
+
+				break;
+
+				case oWriteRecord: {
+					char file_name[12];
+					if ( strncmp( firset_str, "WriteRecord", sizeof(firset_str) ) == 0 )
+					{
+						if ( 4 <= strlen( (char *) replace_str ) )
+						{
+							snprintf( file_name, 4, "%s", replace_str );
 							sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
 						} else {
 							sprintf( file_name, "%s", replace_str );

@@ -44,6 +44,7 @@ typedef enum {
 
 	oAudioBitrate,
 	oProgrNmu,
+	oWriteRecord,
 
 	oEncodeRate,
 	oModulelateMode,

@@ -88,7 +88,7 @@ struct dis_contrl_t {
 
 	/* 菜单的配置项 */
 	char	**arr;
-	uint8_t offon;
+	uint8_t usb_wr_flag;
 	int	enter_status;
 	/* pid状态 */
 	uint8_t pid_status; /* 0x01 开启,0x02关闭 */

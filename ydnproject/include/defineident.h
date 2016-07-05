@@ -48,8 +48,11 @@
 
 /* usb */
 
-#define  ADD	(0)
-#define  REMOVE (1)
+#define  ADD		(0)
+#define  REMOVE		(1)
+#define  USBWRITESET	(0x00)
+#define  USBWRITESTART	(0x01)
+#define  USBWRITECTL	(0x02)
 
 
 #define FILE_DEV_CHECK		"/proc/scsi/scsi"                       /* 用来检测设备数和类型 */
@@ -159,7 +162,7 @@
 #define  USB_READ	(0x40)
 #define  USB_WRITE	(0x50)
 
-#define  NORMAL_SIG	(0x60)
+#define  NORMAL_SIG (0x60)
 
 #define CHAR_INPUT_ON	(0x26)
 #define READWRITEOFF	(1)

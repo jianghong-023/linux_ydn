@@ -28,7 +28,7 @@
 #define STOP_OP		0
 #define STAR_OP		1
 #define TMIEROUT	800000 * 9
-#define MAX_FREE	(2048)
+#define MAX_FREE	(100)
 #define MYTPF_MAX	100
 #define PATHLENGTH	150
 #define NAMESIZE	30
@@ -42,6 +42,7 @@ extern s_config		config;
 extern pthread_t	usb_sig;
 static uint8_t		* sharemem_base = NULL;
 static int8_t		stop		= 1;
+static int		r_time_out_flag = 0;
 #define CPS		(1)
 #define BURST		(50)
 #define SEG_FLAG	(0x20)
@@ -87,6 +88,9 @@ static void *read_cache( void * );
 static void inter_signal( uint8_t * );
 
 
+static int disk_check( void );
+
+
 init_bus_t init_t = {
 	.bus_t.usb_dir		= 0x01,
 	.bus_t.usb_wraddr_b3124 = 0x01,
@@ -95,6 +99,17 @@ init_bus_t init_t = {
 	.bus_t.usb_wraddr_b70	= 0x00,
 	.bus_t.usb_op		= 0x01,
 };
+
+static int r_time_out( struct timeval tpstart )
+{
+	float		timeuse;
+	int		timer;
+	struct timeval	tpend;
+	gettimeofday( &tpend, NULL );
+	timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + (tpend.tv_usec - tpstart.tv_usec);
+	timer	= timeuse /= 1000;
+	return(timer);
+}
 
 
 /*
@@ -132,30 +147,49 @@ static int management_document( char* i_path, char *file_name, uint32_t order, c
 
 /*
  * 写模式
- *
+ * 返回值 : 0  单模式 ，1 分段模式，2 循环模式,4 无条件结束,5 小空间循环
  */
-static int mod_manage( int play_mod )
+static int mod_manage( int play_mod, int *test_incom_count )
 {
-	int ret = -1;
+	int ret = -1, dick_is_full;
 
+
+	dick_is_full = disk_check();
 
 	switch ( play_mod )
 	{
 	case USB_RECORD_SIG: {
 		DEBUG( "USB_RECORD_SIG" );
-		ret = play_mod;
+		if ( dick_is_full < 0 )
+			ret = 4;
+		else{
+			ret = 0;
+			++(*test_incom_count);
+		}
 		DEBUG( "USB_RECORD_SIG" );
 	}
 	break;
 	case UAB_RECORD_SEG: {
 		DEBUG( "UAB_RECORD_SEG" );
-		ret = play_mod;
+		if ( dick_is_full < 0 )
+			ret = 4;
+
+		else{
+			ret = 1;
+			++(*test_incom_count);
+		}
 		DEBUG( "UAB_RECORD_SEG" );
 	}
 	break;
 	case USB_RECORD_LOOP: {
 		DEBUG( "USB_RECORD_LOOP" );
-		ret = play_mod;
+		if ( dick_is_full < 0 )
+		{
+			ret = 5;
+		}else{
+			ret = 2;
+			++(*test_incom_count);
+		}
 		DEBUG( "USB_RECORD_LOOP" );
 	}
 	break;
@@ -333,7 +367,13 @@ int fetch_token( usb_token *ptr, int size )
 		return(-EINVAL);
 
 	while ( mem->token <= 0 )
+	{
 		nano_sleep( 0, 10 );
+
+		if ( r_time_out_flag == 1 )
+			break;
+	}
+
 
 	n = min( mem->token, size );
 
@@ -513,7 +553,7 @@ static int disk_check( void )
 {
 	int free_size, ret = -1;
 	free_size = get_storage_dev_info( get_stata_path()->hostusbpath, FREE_CAPACITY );
-	if ( MAX_FREE > free_size )
+	if ( free_size < MAX_FREE )
 	{
 		fprintf( stderr, "%s", "USB space is too small" );
 		return(ret);
@@ -523,21 +563,35 @@ static int disk_check( void )
 }
 
 
+static void record_ts_count( int test_incom_count )
+{
+	char orig[5] = "", repl[5] = "";
+	gcvt_char( test_incom_count - 1, 1, orig );
+	gcvt_char( test_incom_count, 1, repl );
+
+	config_set_config( SYS_ETC_CONF, orig, (uint8_t *) repl, "WriteRecord" );
+}
+
+
 /*
  * 处理写入设备
  */
 static int  creat_job_thread( void *init_b )
 {
-	int		result			= -1, sfd = -1, count = 0, off = 0;
-	int		node			= 0, i_mod, disc_flag = 1;
+	int		result			= -1, sfd = -1, count = 0, re_mod = 0;
+	int		node			= 0, i_mod, off = 0;
 	char		path_name[PATHSIZE]	= "";
 	pthread_attr_t	attr;
 	size_t		wr_size			= 0;
-	int		test_incom_count	= 57;
+	int		test_incom_count	= 0, back_incom_count = 0;
 
-	init_bus_t	* init		= (init_bus_t *) init_b;
+	init_bus_t * init = (init_bus_t *) init_b;
+	config_read( get_profile()->script_configfile );
 	s_config	* dconfig	= config_t();
 	size_t		i_size		= dconfig->configParam.usb_tsfilesize;
+	int		incom_count	= dconfig->scfg_Param.stream_usb_used_count;
+	test_incom_count = incom_count;
+
 	i_mod = init->mod;
 
 	if ( creat_thread( init_b, &attr ) != 0 )
@@ -547,28 +601,35 @@ static int  creat_job_thread( void *init_b )
 	{
 next_file:
 
-		DEBUG("-----%x---%d--",mod_manage( i_mod ),off);
-		if ( disk_check() < 0 && (off == 0) )
+		re_mod = mod_manage( i_mod, &test_incom_count );
+		DEBUG( "re_mod = %d", re_mod );
+		if ( re_mod == 4 )
 		{
-				
-			if ( mod_manage( i_mod ) == USB_RECORD_LOOP )
+			wr_size = i_size + 1;
+			stop	= 0;
+			break;
+		}else if ( re_mod == 5 )
+		{
+			/*
+			 * 循环模式处理
+			 * 不论何只记录第一次满足条件的值，其它任何时候不得改变
+			 * 接着对满足back_incom_count后继的加值做重复置位操作
+			 */
+			if ( off == 0 )
 			{
-				disc_flag		= 0;
+				config_read( get_profile()->script_configfile );
+				s_config * config = config_t();
+				back_incom_count	= config->scfg_Param.stream_usb_used_count;     /* 最后一次的记录 */
+				test_incom_count	= incom_count;                                  /* 最初进来和值 */
 				off			= 1;
-				test_incom_count	= 0;    /* 循环从头开始 */
-			}else{
-				wr_size		= i_size + 1;  /* 分段退出 */
-				disc_flag	= 1;
-				s_config *dconfig = config_get_config();
-				send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
-
-				DEBUG("----------");
-				break;
 			}
-			
+
+			++test_incom_count;
+
+			if ( back_incom_count <= test_incom_count )
+				test_incom_count = back_incom_count;                                    /* 最初进来和值 */
 		}
 
-		++test_incom_count;
 
 		if ( management_document( init->path, dconfig->configParam.usb_tsfilename, test_incom_count, path_name ) < 0 )
 		{
@@ -584,20 +645,15 @@ next_file:
 				perror( "open()" );
 			}
 		}
+
+		record_ts_count( test_incom_count );
 	}
 	while ( sfd < 0 );
 
 	tmp_dsplay = rindex( path_name, '/' );
-	DEBUG( "path_name :%s", tmp_dsplay );
-	DEBUG( "wr_size :%d  i_size :%d", wr_size, i_size );
+
 	while ( wr_size <= i_size )
 	{
-		if ( disk_check() < 0 && (disc_flag != 0) )
-		{       /* not loop */
-			fprintf( stderr, "%s", "USB space is too small" );
-			break;
-		}
-
 		if ( (stop = recv_usb_notify() ) <= 0 )
 			break;
 
@@ -610,6 +666,9 @@ next_file:
 			return(-1);
 			break;
 		}
+
+		if ( r_time_out_flag == 1 )
+			break;
 
 		if ( count == 0 )
 			continue;
@@ -627,11 +686,17 @@ next_file:
 		destory_date( count, node );
 	}
 
-	
-	if ( mod_manage( i_mod ) != USB_RECORD_SIG )
-		if ( stop > 0 )
+	wr_size = 0;
+
+	if ( (re_mod == 0) || (r_time_out_flag == 1) )
+		stop = 0;
+	else if ( re_mod != 4 )
+	{
+		if ( (stop > 0) && (r_time_out_flag != 1) )
 			goto next_file;
-	
+	}
+
+
 	clean_date();
 
 	close( sfd );
@@ -684,6 +749,7 @@ static void chech_message()
 		;
 		snprintf( ch_1, 16, "%s  %.2fM", dconfig->localstatus.encoder_video_resolution, usbrbitrate );
 		lcd_Write_String( 0, ch );
+		lcd_Write_String( 1, "                " );
 		lcd_Write_String( 1, ch_1 );
 		count++;
 	}
@@ -757,9 +823,19 @@ uint8_t  send_usb_writ_message()
  */
 static void inter_signal( uint8_t *map_addr )
 {
-	while ( map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] != 1 )
-		usleep( 0 );
+	struct timeval tpstart;
+	gettimeofday( &tpstart, NULL );
 
+	while ( map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] != 1 )
+	{
+		usleep( 0 );
+		if ( r_time_out( tpstart ) >= 1000 )
+		{
+			r_time_out_flag = 1;
+			break;
+		}
+		r_time_out_flag = 0;
+	}
 
 	if ( 1 == map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] )
 	{
@@ -786,7 +862,12 @@ static void *read_cache( void *arg )
 	{
 		if ( stop <= 0 )
 			break;
+
 		inter_signal( init->mem );
+
+		if ( r_time_out_flag == 1 )
+			break;
+
 		token_hander();
 	}
 	stop = 1;
@@ -848,17 +929,7 @@ static int  usb_write_handler( char *i_path, off_t size, int play_mod )
 
 	write_stream_info();
 	comom_stream_info( write_stream_info );
-
-
-	if ( creat_job_thread( &init_t ) < 0 )
-	{
-		destory_mem( sharemem_base, MAP_SIZE + 0xFF );
-		close_mem_fd( s_fd );
-		destory_mem( init_t.mem, MAP_SIZE );
-		close_mem_fd( fd );
-
-		return(ret);
-	}
+	creat_job_thread( &init_t );
 	exit_retset_bus( &init_t, init_t.mem );
 	memset( sharemem_base, 0, MEMSIZE_2M + 0xFF );
 	destory_mem( sharemem_base, MEMSIZE_2M + 0xFF );
@@ -866,7 +937,7 @@ static int  usb_write_handler( char *i_path, off_t size, int play_mod )
 	close_mem_fd( s_fd );
 	destory_mem( init_t.mem, MAP_SIZE );
 	close_mem_fd( fd );
-
+	r_time_out_flag = 0;
 	init_bus();
 
 	DEBUG( "file szie : %lld ", (uint64_t) size );
@@ -887,17 +958,16 @@ static int32_t writ_usb( void *usb_hand )
 
 	if ( disk_check() < 0 )
 	{
-		fprintf( stderr, "%s", "USB space is too small" );
+		lcd_Write_String( 0, " USB space is - " );
+		lcd_Write_String( 1, " too small      " );
+		nano_sleep( 1, 0 );
+		paren_menu();
+
 		return(ret);
 	}
 
 	usb_operation_t *usb_action = (usb_operation_t *) usb_hand;
 
-#if 0
-	DEBUG( "size :%lld ", (int64_t) usb_action->ts_size );
-	DEBUG( "record_mod :%d ", usb_action->op_mod );
-	DEBUG( "is_start :%d ", usb_action->is_start );
-#endif
 
 	if ( usb_action->is_start == START_STOP )
 		return(ret);
@@ -912,7 +982,7 @@ static int32_t writ_usb( void *usb_hand )
 	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
 
 	loop_cl_cah();
-
+	discontrl_t()->usb_wr_flag = USBWRITESET;
 	paren_menu();
 
 	return(0);

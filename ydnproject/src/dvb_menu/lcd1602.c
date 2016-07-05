@@ -99,7 +99,6 @@ static void menu_selected_cfg( char **arr, int size, char * );
 static int check_pwrd( char *pwd );
 
 
-
 static int access_cheak();
 
 
@@ -172,10 +171,10 @@ static void cl_time();
 static int pwd_state();
 
 
-static struct timeval	tpstart;
-static pthread_t	w_r_usb_t;
-static int		sysstart = 0;
-dis_contrl		discontrl;
+static struct timeval tpstart;
+
+static int	sysstart = 0;
+dis_contrl	discontrl;
 
 
 extern s_config config;
@@ -1396,7 +1395,7 @@ static char* display_input_str( char *str, int size, int *lenth )
 				cursor_onoff( discontrl.lcdfd, LCD_SUROS_ONOFF, 0x3 ); /* 开 */
 				discontrl.curos_stat	= CURSOR_NOUSER;
 				count			= 0;
-				
+
 				cursor_move( discontrl.lcdfd, LCD_SUROS_MOVE, 0x10 );
 			}
 
@@ -1462,7 +1461,7 @@ static char* display_input_str( char *str, int size, int *lenth )
 			if ( (discontrl.add_sub_status == UP_ADD) )
 			{
 				pos++;
-				
+
 				if ( ch_count <= pos || pos < 0 )
 					pos = 0;
 
@@ -1598,8 +1597,14 @@ static void menu_selected_cfg( char **arr, int size, char *cfgmenu )
 		/* 文件预保存处理 */
 		snprintf( (char *) discontrl.cechebuf, strlen( arr[discontrl.updownchoose] ) + 1, "%s", arr[discontrl.updownchoose] );
 
+		DEBUG( "select :%s", discontrl.cechebuf );
 
-		if ( discontrl.menu_cfg_fun != &null_Subcfg )
+		if ( discontrl.usb_wr_flag == 1 )
+		{
+			if ( strncasecmp( discontrl.cechebuf, "Yes", strlen( discontrl.cechebuf ) - 1 ) == 0 )
+				send_usb_writ_message();
+			discontrl.usb_wr_flag = USBWRITECTL;
+		}else if ( discontrl.menu_cfg_fun != &null_Subcfg )
 		{
 			int res;
 			res = discontrl.menu_cfg_fun( discontrl.cechebuf );
@@ -1609,78 +1614,10 @@ static void menu_selected_cfg( char **arr, int size, char *cfgmenu )
 			char *clean_null = "                ";
 			write_char( MAXWIDE, 0, CHANGE_G, clean_null );
 			write_char( strlen( arr[discontrl.updownchoose] ), 2, CHANGE_G, discontrl.cechebuf );
-		}
-	}
-		/* paren_menu(); */
-		discontrl.changemenuflag = ~CHAR_INPUT_ON;
-		break;
-	}
-}
-
-
-/* usb读写 */
-static void usb_noly_write()
-{
-	/*
-	 * 第一次需要做清屏工作
-	 * 然后在第一行写入选择项
-	 * 若不是第一次操作，就无需做清屏操作，更无需写入选着项
-	 */
-
-	if ( discontrl.recoredFrist == DEFAULTE )
-	{
-		receive_ds_menu( 16 );
-		ctl_fun( discontrl.lcdfd, 0x00 );
-		discontrl.affirmRecode = 0; /* 进入时此值已经为1了，所以要清掉 */
-
-		/* 进入时检查usb设备 */
-
-		DEBUG( "discontrl.keyoff = %d", discontrl.keyoff );
-	}
-
-	switch ( discontrl.affirmRecode )
-	{
-	case 0: {
-		cursor_onoff( discontrl.lcdfd, LCD_SUROS_ONOFF, 0x00 ); /* off */
-		if ( get_stata_path()->is_active == DEVROMV )
-		{
-			lcd_clear( discontrl.lcdfd );                   /* 并清除内存 */
-			lcd_Write_String( 0, "USB remove...   " );
-			lcd_Write_String( 1, "                " );
-			nano_sleep( 1, 0 );
 			discontrl.changemenuflag = ~CHAR_INPUT_ON;
-
-			return;
-		} else {
-			int /* i,*/	arr_size;
-			char		*arr_cfg = "Normal USB...";
-			arr_size = strlen( arr_cfg );
-			write_char( arr_size, 2, CHANGE_G, arr_cfg );
 		}
 	}
-	break;
 
-	case 1: {
-		int result;
-		if ( discontrl.keyoff == DEFAULTE )     /* 说明此时对usb还不存在读或者写操作 */
-		{
-			discontrl.keyoff = DEFAULTE;    /* 其值需由读或者写完后复位 */
-			if ( discontrl.WR_usb != NullSubs )
-			{
-				result = pthread_create( &w_r_usb_t, NULL, (void *) discontrl.WR_usb, NULL );
-				if ( result != 0 )      /* 线程创建失败,必然不能再继续下去自执行任务 */
-				{
-					DEBUG( "client server thread fail \n" );
-					discontrl.changemenuflag = ~CHAR_INPUT_ON;
-				} else {
-					pthread_detach( w_r_usb_t );
-					DEBUG( "Read or Write operations..." );
-				}
-			}
-		} else {
-			DEBUG( "Cannot read and write operations simultaneously..." );
-		}
-	}
 	break;
 	}
 }
@@ -1902,13 +1839,10 @@ static void function_call()
 				}
 			}
 		}
-	} else if ( discontrl_t()->write_char_dig_status == MENU_STATUS )       /* menu */
+	} else if ( discontrl_t()->write_char_dig_status == MENU_STATUS ) /* menu */
 
 	{
 		menu_selected_cfg( discontrl_t()->arr, discontrl_t()->write_size, discontrl_t()->cfg_menu );
-	} else if ( discontrl_t()->write_char_dig_status == USB_STATUS )        /* usb */
-	{
-		usb_noly_write();
 	}
 }
 
@@ -1944,7 +1878,7 @@ static int change_cfg_menu( signed char keynumber )
 		}
 		ret				= 0;
 		discontrl.add_sub_status	= UP_ADD;
-		
+
 		break;
 	case down:                              /* 下 */
 		discontrl.updownchoose++;       /* 用户字符选择 */
@@ -1954,7 +1888,7 @@ static int change_cfg_menu( signed char keynumber )
 		}
 		ret				= 0;
 		discontrl.add_sub_status	= DOWN_SUB;
-		
+
 		break;
 
 	case lift:                              /* 左移动 */
@@ -2154,7 +2088,6 @@ static int lock_enter_input_pwd( int dsplay_status, int keynumber )
 
 	if ( discontrl.enter_status == KEY_AFFRIM_ENTER_Y )
 	{
-
 		char tmp[16] = { 0 };
 		sprintf( tmp, discontrl.cechebuf );
 		if ( access_cheak( tmp ) == 0 )

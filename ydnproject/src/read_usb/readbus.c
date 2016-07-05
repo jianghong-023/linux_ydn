@@ -69,7 +69,8 @@ struct filter_file_story_t {
 
 struct filter_file_story_t	story_t;
 struct param			_param;
-struct read_bus			* bus_r = NULL;
+struct read_bus			* bus_r		= NULL;
+static int			r_time_out_flag = 0;
 
 static int		itemcount = 0;
 static struct index_t	index_math[100];
@@ -115,17 +116,36 @@ static void modulator_audio_video_set( uint8_t* map_base )
 }
 
 
+static int r_time_out( struct timeval tpstart )
+{
+	float		timeuse;
+	int		timer;
+	struct timeval	tpend;
+	gettimeofday( &tpend, NULL );
+	timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + (tpend.tv_usec - tpstart.tv_usec);
+	timer	= timeuse /= 1000;
+	return(timer);
+}
+
+
 /*
  * 写中断
  */
 static void inter_signal( uint8_t *map_addr )
 {
-	while ( readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) != 1 )
-		usleep( 0 );
+	struct timeval tpstart;
+	gettimeofday( &tpstart, NULL );
 
 	while ( readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) != 1 )
+	{
 		usleep( 0 );
-
+		if ( r_time_out( tpstart ) >= 1000 )
+		{
+			r_time_out_flag = 1;
+			break;
+		}
+		r_time_out_flag = 0;
+	}
 	if ( 1 == readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) )
 	{
 		writeb( 0x00, &map_addr[BUS_OFFSET_ADDR + 0x13] );
@@ -152,7 +172,6 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 		if ( recv_usb_notify() <= 0 )
 			break;
 
-/*		DEBUG( "args...%lld", (uint64_t) cntr ); */
 		if ( cntr < 0 )
 		{
 			perror( "read error" );
@@ -160,6 +179,9 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 		}else if ( cntr > 0 )
 		{
 			inter_signal( map_addr );
+
+			if ( r_time_out_flag == 1 )
+				break;
 
 			if ( segment == 0 )
 			{
@@ -397,7 +419,6 @@ static int64_t  seach_fts( const char *path, int flag )
 			if ( get_ts_name( globres.gl_pathv[i], i_next, itemcount ) < 0 )
 				goto __exit;
 			++i_next;
-
 		}
 	}
 
@@ -598,9 +619,9 @@ uint8_t usb_ts_inf()
 		return(ret);
 	}
 
-	itemcount = 0;
-	ret	= seach_fts( get_stata_path()->hostusbpath, 0 );
-	ret	= seach_fts( get_stata_path()->hostusbpath, 1 );
+	itemcount	= 0;
+	ret		= seach_fts( get_stata_path()->hostusbpath, 0 );
+	ret		= seach_fts( get_stata_path()->hostusbpath, 1 );
 
 	return(ret);
 }
@@ -665,7 +686,6 @@ static int64_t  ts_archives( const char *path, const char* _name )
 
 	if ( glob( nextpath, 0, NULL, &globres ) == GLOB_NOMATCH )
 		fprintf( stderr, "for no found matches\n" );
-
 
 
 	for ( i = 0; i < globres.gl_pathc; i++ )
@@ -747,7 +767,6 @@ static int64_t  ts_archives( const char *path, const char* _name )
 
 			snprintf( ts_name, tmplen, "%s", tmp + 1 );
 			ret = count = i;
-
 		}
 	}
 
@@ -800,6 +819,8 @@ static int32_t segment_read_ts_strem( const char *src_name, uint8_t pos, int cou
 	readusb( ts_fd, mem, FRISTSIZE );
 	close_stream_file( ts_fd );
 
+	if ( r_time_out_flag == 1 )
+		return(ret);
 /* 第二个文件的开始...直到<count_item 结束*/
 
 	item = archives_index_path_node( src_name );
@@ -827,6 +848,8 @@ static int32_t segment_read_ts_strem( const char *src_name, uint8_t pos, int cou
 		}
 
 		ts_lenth = st.st_size;
+		if ( r_time_out_flag == 1 )
+			break;
 
 		ts_fd = open_stream_file( path );
 		if ( ts_fd < 0 )
@@ -866,6 +889,9 @@ static int32_t loop_read_ts_strem( const char *src_name, uint8_t pos, int count_
 	readusb( ts_fd, mem, FRISTSIZE );
 	close_stream_file( ts_fd );
 
+	if ( r_time_out_flag == 1 )
+		return ret;
+
 /* 第二个文件的开始...直到<count_item 结束*/
 
 	bak_item = item = archives_index_path_node( src_name );
@@ -899,6 +925,9 @@ static int32_t loop_read_ts_strem( const char *src_name, uint8_t pos, int count_
 			}
 
 			ts_lenth = st.st_size;
+
+			if ( r_time_out_flag == 1 )
+				break;
 
 			ts_fd = open_stream_file( path );
 			if ( ts_fd < 0 )
@@ -1059,7 +1088,7 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 	destory_mem( mem, MAP_SIZE );
 	close_mem_fd( s_fd );
 	close_mem_fd( fd );
-
+	r_time_out_flag = 0;
 	init_bus();
 
 	DEBUG( "file szie : %lld ", (uint64_t) size );
@@ -1125,9 +1154,9 @@ int32_t read_usb( void *usb_hand )
 	s_config *dconfig = config_get_config();
 	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
 	loop_cl_cah();
-
-	nano_sleep( 1, 0 );
 	
+	nano_sleep( 1, 0 );
+
 	paren_menu();
 
 	return(ret);

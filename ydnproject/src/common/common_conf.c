@@ -106,7 +106,7 @@ struct  MenuItem SystemCfg[4] = {                                       /* œµÕ≥≤
 };
 
 
-struct  MenuItem EncoderStatus[2] = {                                   /* ±‡¬Î∆˜◊¥Ã¨≤Àµ• */
+struct  MenuItem EncoderStatus[2] = {    //RecordTsCfg                               /* ±‡¬Î∆˜◊¥Ã¨≤Àµ• */
 	{
 		2, " Video in lock  ", &video_lock_status_Cfg, NULL, sysStatus
 	},
@@ -267,12 +267,14 @@ struct  MenuItem EitCfg[2] = {                                                  
 	{ 2, " EIT insert     ", &eit_insert_Cfg, EitInsert, StreamCfg },
 };
 /*  */
-struct  MenuItem RecordTsCfg[2] = {                                                     /* usb_recode                                       / * TS¡˜¬º÷∆≈‰÷√≤Àµ• * / */
+struct  MenuItem RecordTsCfg[2] = {                     //send_usb_writ_message                                /* usb_recode                                       / * TS¡˜¬º÷∆≈‰÷√≤Àµ• * / */
 	{
-		2, " Start record   ", &send_usb_writ_message, StartRecord, UsbDevCfg   /*, .offon = START_W_R, */
+		2, " Start record   ", &usb_rec_enable, NULL, UsbDevCfg   /*, .offon = START_W_R, */
 	},
 	{ 2, " Advanced config", &NullSubs, AdvancedCfg, UsbDevCfg },                   /* ‘§…Ë ‰»Î∏ƒ±‰π¶ƒ‹ */
 };
+
+
 
 struct  MenuItem NitCfg[7] = {                                                          /* NIT≈‰÷√≤Àµ• */
 	{ 7, " Network ID     ", &network_id,	    NetworkIdCfg,     StreamCfg },
@@ -475,9 +477,9 @@ struct MenuItem LanguageCfg[1] = {
 	},
 };
 
-
-struct MenuItem StartRecord[1] = {      /* usb_rec_enable */
-	{ 1, " Start record   ", &NullSubs, NULL, RecordTsCfg }
+struct MenuItem StartRecord[2] = {      /* usb_rec_enable */
+	{ 2, " Ready to record", &NullSubs, NULL, RecordTsCfg },
+	{ 2, " please wait... ", &NullSubs, NULL, RecordTsCfg },
 };
 
 

@@ -868,14 +868,18 @@ uint8_t usb_rec_enable()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_usb_enable );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = 0x03;
+
+	if ( discontrl.usb_wr_flag == USBWRITESET )
+		discontrl.usb_wr_flag = USBWRITESTART; /* ¿ªÆôÐ´ */
+
 	static char *Bandwidth[] = {
 		"Yes",
 		"No ",
 	};
 
 	int menu_item_lenth = sizeof(Bandwidth) / sizeof(Bandwidth[0]);
-	menu_general_enter( Bandwidth, menu_item_lenth, rec_usb_commom );
+	menu_general_enter( Bandwidth, menu_item_lenth, null_Subcfg );/* rec_usb_commom */
 
 	return(0);
 }

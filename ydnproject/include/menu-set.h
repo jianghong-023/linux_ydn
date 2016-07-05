@@ -60,7 +60,7 @@ struct  MenuItem	LCDTimeoutCfg[1];       /* SystemCfg下LCD背光保护参数配置菜单 *
 struct  MenuItem	KeyPasswordCfg[1];      /* SystemCfg下按键锁密码配置菜单 */
 struct  MenuItem	LockKeyCfg[1];          /* SystemCfg下按键锁屏使能配置菜单 */
 struct  MenuItem	ProjectTestCfg[1];      /* SystemCfg下工程测试使能配置菜单 */
-
+  
 
 /*
  * *-------------------------------
@@ -189,7 +189,7 @@ struct MenuItem EitInsert[1];           /* EitCfg下EIT插入配置菜单 */
  * *-------------------------------
  * *-1.5.1-
  */
-struct MenuItem StartRecord[1];         /* RecordTsCfg下启动码流录制菜单 */
+struct MenuItem StartRecord[2];         /* RecordTsCfg下启动码流录制菜单 */
 struct MenuItem AdvancedCfg[4];         /* RecordTsCfg下录制参数配置菜单 */
 /* *-1.5.2- */
 struct MenuItem FileBrowse[999];        /* PlayTsCfg下文件浏览菜单 */
