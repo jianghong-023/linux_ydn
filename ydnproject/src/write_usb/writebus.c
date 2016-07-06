@@ -28,7 +28,7 @@
 #define STOP_OP		0
 #define STAR_OP		1
 #define TMIEROUT	800000 * 9
-#define MAX_FREE	(100)
+#define MAX_FREE	(120)
 #define MYTPF_MAX	100
 #define PATHLENGTH	150
 #define NAMESIZE	30
@@ -733,6 +733,7 @@ static void chech_message()
 		int len = strlen( tmp_dsplay );
 		snprintf( ch_1, len + 1, "%s", tmp_dsplay + 1 );
 		lcd_Write_String( 0, ch );
+		lcd_Write_String( 1, "               " );
 		lcd_Write_String( 1, ch_1 );
 		count++;
 	}
@@ -862,6 +863,9 @@ static void *read_cache( void *arg )
 
 		inter_signal( init->mem );
 
+		if ( is_usb_online() != DEVACTT ) /*  */
+			r_time_out_flag = 1;
+
 		if ( r_time_out_flag == 1 )
 			break;
 
@@ -938,8 +942,8 @@ static int  usb_write_handler( char *i_path, off_t size, int play_mod )
 	close_mem_fd( s_fd );
 	destory_mem( init_t.mem, MAP_SIZE );
 	close_mem_fd( fd );
-	r_time_out_flag = 0;
-	init_bus();
+	r_time_out_flag			= 0;
+	discontrl_t()->usb_wr_flag	= USBWRITESET;
 
 	return(0);
 }
@@ -959,10 +963,16 @@ static int32_t writ_usb( void *usb_hand )
 	stop = 1;
 
 	if ( is_usb_online() != DEVACTT )
+	{
+		discontrl_t()->usb_wr_flag = USBWRITESET;
 		return(ret);
+	}
 
 	if ( !get_stata_path()->hostusbpath )
+	{
+		discontrl_t()->usb_wr_flag = USBWRITESET;
 		return(ret);
+	}
 
 
 	if ( disk_check() < 0 )
@@ -971,7 +981,7 @@ static int32_t writ_usb( void *usb_hand )
 		lcd_Write_String( 1, " too small      " );
 		nano_sleep( 1, 0 );
 		paren_menu();
-
+		discontrl_t()->usb_wr_flag = USBWRITESET;
 		return(ret);
 	}
 
@@ -979,7 +989,10 @@ static int32_t writ_usb( void *usb_hand )
 
 
 	if ( usb_action->is_start == START_STOP )
+	{
+		discontrl_t()->usb_wr_flag = USBWRITESET;
 		return(ret);
+	}
 
 	usb_write_handler( get_stata_path()->hostusbpath, usb_action->ts_size, usb_action->op_mod );
 
@@ -991,7 +1004,7 @@ static int32_t writ_usb( void *usb_hand )
 	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
 
 	loop_cl_cah();
-	discontrl_t()->usb_wr_flag = USBWRITESET;
+
 	usb_sop_notify();
 	current_menu();
 	return(0);

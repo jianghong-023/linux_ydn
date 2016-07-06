@@ -119,20 +119,12 @@ struct  MenuItem LockKeyCfg[1] = {
 };
 
 
-/*
- * struct  MenuItem ModulatorStatus[1] = { / * 调制器状态菜单 * /
- * {
- *      1, " Bitrate act/max    ", &NullSubs, NULL, Status
- * }
- * };
- */
-
-struct  MenuItem UsbDevStatus[3] = {    /* USB设备状态菜单 */
+struct  MenuItem UsbDevStatus[3] = {    /* USB设备状态菜单 UsbPlay*/
 	{
-		3, " TS lock        ", &NullSubs, UsbPlay, Status
+		3, " TS lock        ", &NullSubs, NULL, UsbDevCfg
 	},
-	{ 3, " Disk usage     ", &get_usb_usrinfo,   NULL, Status },
-	{ 3, " Remove device  ", &manu_do_mount_dev, NULL, Status },
+	{ 3, " Disk usage     ", &get_usb_usrinfo,   NULL, UsbDevCfg },
+	{ 3, " Remove device  ", &manu_do_mount_dev, NULL, UsbDevCfg },
 };
 
 

@@ -180,6 +180,9 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 		{
 			inter_signal( map_addr );
 
+			if ( is_usb_online() != DEVACTT )
+				r_time_out_flag = 1;
+
 			if ( r_time_out_flag == 1 )
 				break;
 
@@ -567,6 +570,7 @@ static void chech_message()
 		int	len	= strlen( name );
 		snprintf( ch_1, len + 1, "%s", name );
 		lcd_Write_String( 0, ch );
+		lcd_Write_String( 1, "               " );
 		lcd_Write_String( 1, ch_1 );
 		count++;
 	}
@@ -581,6 +585,7 @@ static void chech_message()
 
 		snprintf( ch_1, 16, "%.1f\%% %.2fM", progressbar, usbrbitrate );
 		lcd_Write_String( 0, ch );
+		lcd_Write_String( 1, "               " );
 		lcd_Write_String( 1, ch_1 );
 		count++;
 	}
@@ -716,9 +721,9 @@ static int64_t  ts_archives( const char *path, const char* _name )
 				memset( story_t.recode_t[0].name, 0, NAMESIZE );
 				int len = strlen( path );
 				snprintf( story_t.path, len + 1, "%s", path );
-				snprintf( story_t.recode_t[0].name, tmplen, "%s", tmp + 1 );
+				snprintf( story_t.recode_t[0].name, tmplen + 1, "%s", tmp + 1 );
 
-				snprintf( ts_name, tmplen, "%s", tmp + 1 );
+				snprintf( ts_name, tmplen + 1, "%s", tmp + 1 );
 				ret = 1;
 				return(ret);
 			}else
@@ -763,9 +768,9 @@ static int64_t  ts_archives( const char *path, const char* _name )
 			memset( story_t.recode_t[i].name, 0, NAMESIZE );
 			int len = strlen( path );
 			snprintf( story_t.path, len + 1, "%s", path );
-			snprintf( story_t.recode_t[i].name, tmplen, "%s", tmp + 1 );
+			snprintf( story_t.recode_t[i].name, tmplen + 1, "%s", tmp + 1 );
 
-			snprintf( ts_name, tmplen, "%s", tmp + 1 );
+			snprintf( ts_name, tmplen + 1, "%s", tmp + 1 );
 			ret = count = i;
 		}
 	}
@@ -890,7 +895,7 @@ static int32_t loop_read_ts_strem( const char *src_name, uint8_t pos, int count_
 	close_stream_file( ts_fd );
 
 	if ( r_time_out_flag == 1 )
-		return ret;
+		return(ret);
 
 /* 第二个文件的开始...直到<count_item 结束*/
 
@@ -991,7 +996,8 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 
 	system( RULER_STRING_ARG );
 /* 定位文件 */
-	snprintf( story_t.recode_t[0].name, strlen( ts_name ), "%s", ts_name );
+	memset( story_t.recode_t[0].name, 0, NAMESIZE );
+	snprintf( story_t.recode_t[0].name, strlen( ts_name ) + 1, "%s", ts_name );
 
 	read_stream_info();
 
@@ -1088,7 +1094,7 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 	destory_mem( mem, MAP_SIZE );
 	close_mem_fd( s_fd );
 	close_mem_fd( fd );
-	r_time_out_flag = 0;
+
 	init_bus();
 
 	DEBUG( "file szie : %lld ", (uint64_t) size );
@@ -1100,7 +1106,7 @@ int32_t read_usb( void *usb_hand )
 {
 	int32_t ret = -1, pos = 0, length;
 	int	item;
-
+	r_time_out_flag = 0;
 	char		tmpname[NAMESIZE]	= "";
 	char		path[PATHLENGTH]	= "";
 	struct stat	st;
@@ -1154,7 +1160,7 @@ int32_t read_usb( void *usb_hand )
 	s_config *dconfig = config_get_config();
 	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
 	loop_cl_cah();
-	
+
 	nano_sleep( 1, 0 );
 
 	paren_menu();
