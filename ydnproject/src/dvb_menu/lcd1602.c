@@ -283,6 +283,26 @@ void paren_menu( void )
 }
 
 
+/* 当前 菜单 */
+void current_menu( void )
+{
+	signed char count = discontrl.rtr_count;
+	if ( count < 0 )
+		count = 0;
+
+	esc_rtr_arr( count );
+
+	if ( MenuPoint[discontrl.DisplayStart].ChildrenMenus != NULL )
+		MenuPoint = MenuPoint[discontrl.DisplayStart].ChildrenMenus;
+
+	discontrl.changemenuflag	= DEFAULTE;
+	discontrl.rightliftmove		= DEFAULTE;
+	discontrl.updownchoose		= DEFAULTE;
+
+	ShowMenu();
+}
+
+
 /*
  * lcd 背光打开/关闭
  *
@@ -1597,12 +1617,17 @@ static void menu_selected_cfg( char **arr, int size, char *cfgmenu )
 		/* 文件预保存处理 */
 		snprintf( (char *) discontrl.cechebuf, strlen( arr[discontrl.updownchoose] ) + 1, "%s", arr[discontrl.updownchoose] );
 
-		DEBUG( "select :%s", discontrl.cechebuf );
-
-		if ( discontrl.usb_wr_flag == 1 )
+		if ( discontrl.usb_wr_flag == USBWRITESTART )
 		{
 			if ( strncasecmp( discontrl.cechebuf, "Yes", strlen( discontrl.cechebuf ) - 1 ) == 0 )
+			{
 				send_usb_writ_message();
+				char		ch[20]		= "";
+				s_config	*dconfig	= config_t();
+				snprintf( ch, 16, "DVB-T %.3fM", dconfig->localstatus.cfig_ad9789_ftw_bpf );
+				lcd_Write_String( 0, ch );
+				lcd_Write_String( 1, " Record...      " );
+			}
 			discontrl.usb_wr_flag = USBWRITECTL;
 		}else if ( discontrl.menu_cfg_fun != &null_Subcfg )
 		{
@@ -1919,6 +1944,7 @@ static int change_cfg_menu( signed char keynumber )
 		 * 第二次被按下时作为修改状态，光标程"->"状态,修改
 		 * 第三次按下保存文件
 		 */
+
 		ret = 0;
 		discontrl.affirmRecode++;
 		if ( 2 < discontrl.affirmRecode )               /* 记数清零  == 4*/
@@ -2582,7 +2608,7 @@ int lcd_main( void )
 	int flag = 0;
 
 
-	dev_config();
+	dev_config_printf();
 
 	discontrl.lcdfd = lcd_open();
 	lcd_clear( discontrl.lcdfd ); /* 并清除内存 */
@@ -2625,7 +2651,7 @@ int lcd_main( void )
 
 
 /* dev config info */
-void dev_config()
+void dev_config_printf()
 {
 	/* config_read( get_profile()->script_configfile ); */
 #if 0

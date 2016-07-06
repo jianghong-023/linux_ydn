@@ -229,7 +229,7 @@ uint8_t file_size()
 	int get_value = dconfig->configParam.usb_tsfilesize;
 	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 4096, 64, INPUT_DIGIT_STATUS, input_lenth, &text_digfilesize_save );
 
-	dev_config();
+	
 
 	return(0);
 }
@@ -262,7 +262,7 @@ uint8_t key_passwrd_cfg()
 	double date = 100000;
 	cfg_discontrl( date, DIGIT_STATUS, CURSOR_ON, 999999, 000000, INPUT_DIGIT_STATUS, 6, &passwrd_filename_save );
 
-	dev_config();
+	dev_config_printf();
 
 	return(0);
 }
@@ -1565,6 +1565,7 @@ void str_filename_save( char *orgbuf, char *repbuf )
 		DEBUG( "orgbuf =%s     repbuf =%s \n", orgbuf, repbuf );
 		config_set_config( SYS_ETC_CONF, orgbuf, (uint8_t *) repbuf, "tsfilename" );
 	}
+	config_read( get_profile()->script_configfile );
 }
 
 
@@ -1638,7 +1639,7 @@ uint8_t ts()
 	}
 
 	cfg_discontrl_c( CHAR_STATUS, CURSOR_ON, filename, 10, 10, str_filename_save, NULL );
-	dev_config();
+	
 	return(0);
 }
 
@@ -1668,7 +1669,7 @@ uint8_t network_name()
 	}
 
 	cfg_discontrl_c( CHAR_STATUS, CURSOR_ON, filename, 10, 10, str_netwrorkname_save, NULL );
-	dev_config();
+	config_read( get_profile()->script_configfile );
 	return(0);
 }
 
@@ -1708,7 +1709,7 @@ int comm_video_interface( char *buffer )
 
 			config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "videomod" );
 
-			/* dev_config(); */
+			/* dev_config_printf(); */
 			adv_defualt_set(); /* hdmi */
 		} else if ( strncmp( "YPbPr", buffer, strlen( buffer ) ) == 0 )
 		{
@@ -1717,7 +1718,7 @@ int comm_video_interface( char *buffer )
 
 			config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "videomod" );
 
-			/* dev_config(); */
+			/* dev_config_printf(); */
 			YPbPr_def();
 		} else if ( strncmp( "CVBS ", buffer, strlen( buffer ) ) == 0 )
 		{
@@ -1726,7 +1727,7 @@ int comm_video_interface( char *buffer )
 
 			config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "videomod" );
 
-			/* dev_config(); */
+			/* dev_config_printf(); */
 
 			cvbs_def();
 		}
@@ -2090,6 +2091,7 @@ void text_digfilesize_save( char *orgbuf, char *repbuf )
 		DEBUG( "orgbuf =%s     repbuf =%s \n", orgbuf, repbuf );
 		config_set_config( SYS_ETC_CONF, orgbuf, (uint8_t *) repbuf, "tsfilesize" );
 	}
+	config_read( get_profile()->script_configfile );
 }
 
 

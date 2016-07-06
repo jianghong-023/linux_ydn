@@ -116,6 +116,9 @@ typedef struct {
 void paren_menu( void );
 
 
+void current_menu( void );
+
+
 int lcd_main( void );
 
 
@@ -155,7 +158,7 @@ void null_cahebuf( void );
 void NullInput( char length );
 
 
-void dev_config();
+void dev_config_printf();
 
 
 void change_seach();

@@ -106,7 +106,7 @@ struct  MenuItem SystemCfg[4] = {                                       /* œµÕ≥≤
 };
 
 
-struct  MenuItem EncoderStatus[2] = {    //RecordTsCfg                               /* ±‡¬Î∆˜◊¥Ã¨≤Àµ• */
+struct  MenuItem EncoderStatus[2] = {                                   /* RecordTsCfg                               / * ±‡¬Î∆˜◊¥Ã¨≤Àµ• * / */
 	{
 		2, " Video in lock  ", &video_lock_status_Cfg, NULL, sysStatus
 	},
@@ -260,23 +260,22 @@ struct MenuItem EitNextCfg[4] = {
 	{ 4, " Next event name", &next_eventname_Cfg, NextEventNameCfg, EitEventCfg },
 };
 
-struct  MenuItem EitCfg[2] = {                                                          /* EIT≈‰÷√≤Àµ• */
+struct  MenuItem EitCfg[2] = {                                          /* EIT≈‰÷√≤Àµ• */
 	{
 		2, " Language code  ", &language_Cfg, LanguageCfg, StreamCfg
 	},
 	{ 2, " EIT insert     ", &eit_insert_Cfg, EitInsert, StreamCfg },
 };
 /*  */
-struct  MenuItem RecordTsCfg[2] = {                     //send_usb_writ_message                                /* usb_recode                                       / * TS¡˜¬º÷∆≈‰÷√≤Àµ• * / */
+struct  MenuItem RecordTsCfg[2] = {                                     /* send_usb_writ_message                                / * usb_recode                                       / * TS¡˜¬º÷∆≈‰÷√≤Àµ• * / * / */
 	{
-		2, " Start record   ", &usb_rec_enable, NULL, UsbDevCfg   /*, .offon = START_W_R, */
+		2, " Start record   ", &usb_rec_enable, NULL, UsbDevCfg /*, .offon = START_W_R, */
 	},
-	{ 2, " Advanced config", &NullSubs, AdvancedCfg, UsbDevCfg },                   /* ‘§…Ë ‰»Î∏ƒ±‰π¶ƒ‹ */
+	{ 2, " Advanced config", &NullSubs, AdvancedCfg, UsbDevCfg },   /* ‘§…Ë ‰»Î∏ƒ±‰π¶ƒ‹ */
 };
 
 
-
-struct  MenuItem NitCfg[7] = {                                                          /* NIT≈‰÷√≤Àµ• */
+struct  MenuItem NitCfg[7] = {                                          /* NIT≈‰÷√≤Àµ• */
 	{ 7, " Network ID     ", &network_id,	    NetworkIdCfg,     StreamCfg },
 	{ 7, " Network name   ", &network_name,	    NetworkNameCfg,   StreamCfg },
 	{ 7, " Version mode   ", &NullSubs,	    NULL,	      StreamCfg },

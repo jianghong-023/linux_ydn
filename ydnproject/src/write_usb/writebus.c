@@ -34,8 +34,8 @@
 #define NAMESIZE	30
 #define PATHSIZE	1024
 
-int	BUFFER_SIZE_1M	= sizeof(uint8_t) * 5578 * 188;
-int	BUFFER_SIZE_2M	= sizeof(uint8_t) * 5578 * 188 * 2;
+#define  BUFFER_SIZE_1M (0x100058)
+#define  BUFFER_SIZE_2M (0x2000b0)
 
 
 extern s_config		config;
@@ -444,10 +444,6 @@ static void clean_date()
 {
 	int count, node;
 
-	s_config *dconfig = config_get_config();
-	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
-	nano_sleep( 1, 0 );
-
 	count = fetch_token( token, BURST );
 	if ( count < 0 )
 	{
@@ -832,6 +828,7 @@ static void inter_signal( uint8_t *map_addr )
 		if ( r_time_out( tpstart ) >= 1000 )
 		{
 			r_time_out_flag = 1;
+
 			break;
 		}
 		r_time_out_flag = 0;
@@ -870,7 +867,11 @@ static void *read_cache( void *arg )
 
 		token_hander();
 	}
-	stop = 1;
+
+	if ( r_time_out_flag != 1 )
+		stop = 1;
+	else
+		stop = 0;
 	return(NULL);
 }
 
@@ -940,14 +941,22 @@ static int  usb_write_handler( char *i_path, off_t size, int play_mod )
 	r_time_out_flag = 0;
 	init_bus();
 
-	DEBUG( "file szie : %lld ", (uint64_t) size );
 	return(0);
+}
+
+
+static void usb_sop_notify()
+{
+	lcd_Write_String( 1, "                " );
+	lcd_Write_String( 1, " stop...        " );
+	nano_sleep( 1, 0 );
 }
 
 
 static int32_t writ_usb( void *usb_hand )
 {
 	int ret = -1;
+	stop = 1;
 
 	if ( is_usb_online() != DEVACTT )
 		return(ret);
@@ -983,8 +992,8 @@ static int32_t writ_usb( void *usb_hand )
 
 	loop_cl_cah();
 	discontrl_t()->usb_wr_flag = USBWRITESET;
-	paren_menu();
-
+	usb_sop_notify();
+	current_menu();
 	return(0);
 }
 
