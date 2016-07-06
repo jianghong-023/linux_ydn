@@ -28,7 +28,7 @@
 #define STOP_OP		0
 #define STAR_OP		1
 #define TMIEROUT	800000 * 9
-#define MAX_FREE	(120)
+#define MAX_FREE	(2560)
 #define MYTPF_MAX	100
 #define PATHLENGTH	150
 #define NAMESIZE	30
@@ -89,6 +89,9 @@ static void inter_signal( uint8_t * );
 
 
 static int disk_check( void );
+
+
+static int descriptor_generation( void *init_b, int incom_count, int * );
 
 
 init_bus_t init_t = {
@@ -465,20 +468,36 @@ static void clean_date()
  * node_count 写入的节点总数
  * node 节点的位置
  * wr_size 写入总大小(M)
+ * incom_count  记录开始录制时的参数
+ * off   循环时需要的开关
  */
-static int  wr_usb( int sfd, int node_count, int node, size_t *wr_size )
+static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *init_b, int incom_count, int *off )
 {
 	int	i_count = 0;
 	ssize_t ret	= -1;
 
+	s_config	* dconfig	= config_t();
+	size_t		i_size		= dconfig->configParam.usb_tsfilesize;
 
 	while ( i_count < node_count )
 	{
 		size_t len = BUFFER_SIZE_1M;
 
+		if ( *wr_size >= i_size )
+		{
+			close( *sfd );
+			*wr_size	= 0;
+			*sfd		= descriptor_generation( init_b, incom_count, off );
+			if ( *sfd < 0 )
+			{
+				r_time_out_flag = 1;
+				break;
+			}
+		}
+
 		while ( len > 0 )
 		{
-			ret = write( sfd, jobsqueue_date[node + i_count], len );
+			ret = write( *sfd, jobsqueue_date[node + i_count], len );
 			if ( ret < 0 )
 			{
 				if ( errno == EINTR )
@@ -490,8 +509,10 @@ static int  wr_usb( int sfd, int node_count, int node, size_t *wr_size )
 			*wr_size	+= (ret / 1024 / 1024);
 		}
 
+
 		++i_count;
 	}
+
 
 	return(ret);
 }
@@ -570,39 +591,32 @@ static void record_ts_count( int test_incom_count )
 
 
 /*
- * 处理写入设备
+ * 产生文件
+ * incom_count  记录开始录制时的参数
+ * off   循环时需要的开关
+ * 返回有效描述符
  */
-static int  creat_job_thread( void *init_b )
+static int descriptor_generation( void *init_b, int incom_count, int  *off )
 {
-	int		result			= -1, sfd = -1, count = 0, re_mod = 0;
-	int		node			= 0, i_mod, off = 0;
+	int		sfd			= -1, re_mod = 0, i_mod;
 	char		path_name[PATHSIZE]	= "";
-	pthread_attr_t	attr;
-	size_t		wr_size			= 0;
-	int		test_incom_count	= 0, back_incom_count = 0;
+	int		test_incom_count	= 0;
+	static int	back_incom_count	= 0;
 
 	init_bus_t * init = (init_bus_t *) init_b;
 	config_read( get_profile()->script_configfile );
-	s_config	* dconfig	= config_t();
-	size_t		i_size		= dconfig->configParam.usb_tsfilesize;
-	int		incom_count	= dconfig->scfg_Param.stream_usb_used_count;
-	test_incom_count = incom_count;
+	s_config * dconfig = config_t();
 
-	i_mod = init->mod;
-
-	if ( creat_thread( init_b, &attr ) != 0 )
-		return(result);
+	test_incom_count	= dconfig->scfg_Param.stream_usb_used_count;
+	i_mod			= init->mod;
 
 	do
 	{
-next_file:
-
 		re_mod = mod_manage( i_mod, &test_incom_count );
 		DEBUG( "re_mod = %d", re_mod );
 		if ( re_mod == 4 )
 		{
-			wr_size = i_size + 1;
-			stop	= 0;
+			stop = 0;
 			break;
 		}else if ( re_mod == 5 )
 		{
@@ -611,25 +625,24 @@ next_file:
 			 * 不论何只记录第一次满足条件的值，其它任何时候不得改变
 			 * 接着对满足back_incom_count后继的加值做重复置位操作
 			 */
-			if ( off == 0 )
+			if ( *off == 0 )
 			{
-				config_read( get_profile()->script_configfile );
-				s_config * config = config_t();
-				back_incom_count	= config->scfg_Param.stream_usb_used_count;     /* 最后一次的记录 */
+				back_incom_count	= dconfig->scfg_Param.stream_usb_used_count;    /* 最后一次的记录 */
 				test_incom_count	= incom_count;                                  /* 最初进来和值 */
-				off			= 1;
+				DEBUG( "test_incom_count:%d max :%d", test_incom_count, back_incom_count );
+				*off = 1;
 			}
 
 			++test_incom_count;
 
 			if ( back_incom_count <= test_incom_count )
-				test_incom_count = back_incom_count;                                    /* 最初进来和值 */
+				test_incom_count = back_incom_count; /* 最初进来和值 */
 		}
 
 
 		if ( management_document( init->path, dconfig->configParam.usb_tsfilename, test_incom_count, path_name ) < 0 )
 		{
-			return(result);
+			return(sfd);
 			break;
 		}
 
@@ -643,12 +656,37 @@ next_file:
 		}
 
 		record_ts_count( test_incom_count );
+		tmp_dsplay = rindex( path_name, '/' );
 	}
 	while ( sfd < 0 );
 
-	tmp_dsplay = rindex( path_name, '/' );
+	return(sfd);
+}
 
-	while ( wr_size <= i_size )
+
+/*
+ * 处理写入设备
+ */
+static int  creat_job_thread( void *init_b )
+{
+	int	result	= -1, sfd = -1, count = 0;
+	int	node	= 0, off = 0;
+
+	pthread_attr_t	attr;
+	size_t		wr_size = 0;
+	config_read( get_profile()->script_configfile );
+	s_config	* dconfig	= config_t();
+	int		incom_count	= dconfig->scfg_Param.stream_usb_used_count;
+
+	if ( creat_thread( init_b, &attr ) != 0 )
+		return(result);
+
+	sfd = descriptor_generation( init_b, incom_count, &off );
+	if ( sfd < 0 )
+		return(result);
+
+
+	while ( 1 )
 	{
 		if ( (stop = recv_usb_notify() ) <= 0 )
 			break;
@@ -673,23 +711,13 @@ next_file:
 			continue;
 
 
-		if ( (result = wr_usb( sfd, count, node, &wr_size ) ) < 0 )
+		if ( (result = wr_usb( &sfd, count, node, &wr_size, init_b, incom_count, &off ) ) < 0 )
 		{
 			destory_date( count, node );
 			break;
 		}
 
 		destory_date( count, node );
-	}
-
-	wr_size = 0;
-
-	if ( (re_mod == 0) || (r_time_out_flag == 1) )
-		stop = 0;
-	else if ( re_mod != 4 )
-	{
-		if ( (stop > 0) && (r_time_out_flag != 1) )
-			goto next_file;
 	}
 
 
@@ -699,7 +727,7 @@ next_file:
 
 	_destroy( token );
 
-	desory_thread( init, &attr );
+	desory_thread( init_b, &attr );
 
 	return(result);
 }

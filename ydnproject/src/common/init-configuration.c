@@ -342,7 +342,7 @@ int set_nit_table_parm()
 		return(-1);
 	}
 	free( cfg_eit_t );
-	DEBUG( "struct res=%d %d", res, sizeof(usr_cfg_eit_t) );
+//	DEBUG( "struct res=%d %d", res, sizeof(usr_cfg_eit_t) );
 	close( fd );
 
 	return(0);
