@@ -31,6 +31,8 @@ static pthread_t p_lcd, p_dsplay, p_usb, p_mem;
 
 pthread_t action_usbop, usb_sig;
 
+
+	
 static void init_mod_code()
 {
 	s_config *dconfig = config_get_config();

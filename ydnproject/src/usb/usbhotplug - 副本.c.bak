@@ -12,19 +12,6 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <sys/un.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <linux/types.h>
-#include <linux/netlink.h>
-#include <errno.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
 
 #include <usbhotplug.h>
 #include <debug.h>
@@ -62,24 +49,9 @@ static bool		insert			= FALSE;
 static bool		find_attached		= FALSE;
 static bool		find_new		= FALSE;
 static int		is_manual_umount	= 1;
-#define UEVENT_BUFFER_SIZE 2048
 
 static STATA_PATH *stata_path;
 
-USB_PATH_T  usb_info;
-
-typedef struct info_struct_usb_t{
-	char buf[UEVENT_BUFFER_SIZE];
-}info_struct_usb;
-
-
-typedef struct usb_no_stat_t{
-	char status[8];
-	int8_t count;
-	info_struct_usb info_struct_arr[20];
-}usb_no_and_stat_t ;
-
-usb_no_and_stat_t usb_dev_info;
 
 /* 它需要和分区检查共享一个变量，来作为一个小小的延时
  * 困操作系统的反应不是很快，所以不能做一次判断，为了不浪费
@@ -374,10 +346,13 @@ static int find_device()
 							INIT_DEV( new_dev, dev_num, seek );
 							ADD_DEV( new_dev );
 							dev_num++;
+							
 						}
 					}
 				}
+				
 			}
+			
 		}
 	} else {
 		DEBUG( FILE_DEV_CHECK );
@@ -561,6 +536,8 @@ int do_umount( SCSI_USB_DEV *dev )      /* ok */
 }
 
 
+
+
 /*
  * 功  能：检查设备是否挂载上,如果设备没有挂载
  *                则自行挂载设备;
@@ -575,6 +552,7 @@ static int process_dev( SCSI_USB_DEV* dev )
 		if ( check_mount( dev ) == KK_FS_FAIL ) /* 检测设备是否mount上 */
 		{
 			do_mount( dev );
+			
 		} else {
 			if ( insert == FALSE )
 			{
@@ -592,48 +570,6 @@ static int process_dev( SCSI_USB_DEV* dev )
 }
 
 
-
-
-static int install_hotplug_sock(void)
-{
-	const int	buffersize = 1024;
-	int		ret;
-
-	struct sockaddr_nl snl;
-	bzero( &snl, sizeof(struct sockaddr_nl) );
-	snl.nl_family	= AF_NETLINK;
-	snl.nl_pid	= getpid();
-	snl.nl_groups	= 1;
-
-	int sock = socket( PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT );
-	if ( sock == -1 )
-	{
-		perror( "socket" );
-		return(-1);
-	}
-	setsockopt( sock, SOL_SOCKET, SO_RCVBUF, &buffersize, sizeof(buffersize) );
-
-	ret = bind( sock, (struct sockaddr *) &snl, sizeof(struct sockaddr_nl) );
-	if ( ret < 0 )
-	{
-		perror( "bind" );
-		close( sock );
-		return(-1);
-	}
-
-	return(sock);
-}
-
-
-static void info_fill(char *status,char *dev_no)
-{
-
-	printf("				%s\n", status);  
-	printf("				%s\n", dev_no);
-	
-}
-
-
 /*
  * 功  能：查找设备，对找到后有设备做相应的处理
  * 参  数：无
@@ -642,32 +578,36 @@ static void info_fill(char *status,char *dev_no)
  */
 void thread_for_usb()
 {
-
-	int hotplug_sock;
+	DEBUG( "USB enter...\r\n" );
 	SCSI_USB_DEV *cur_dev = NULL;
 	mkdir( USB_DISK_MP, 0777 );
+	mkdir( USB_CDROM_MP, 0777 );
 
-	hotplug_sock = install_hotplug_sock();
+	back_first_dev = malloc( sizeof(SCSI_USB_DEV) );
+
+	stata_path = malloc( sizeof(STATA_PATH) );
+
+	if ( (back_first_dev == NULL) && (stata_path == NULL) )
+	{
+		perror( "thread_for_usb malloc failed ...\r\n" );
+		exit( 1 );
+	}
+
+	memset( back_first_dev, 0, sizeof(SCSI_USB_DEV) );
+	memset( stata_path, 0, sizeof(STATA_PATH) );
+
 
 	while ( 1 )
 	{
-		char	*strtok_tmp_ptr = NULL;
-		char    *status, *dev_no;
-		char	dev_ord[8] = "";
-		char buf[UEVENT_BUFFER_SIZE * 2] = {0};  
-		recv(hotplug_sock, &buf, sizeof(buf), 0);
-		dev_no = rindex(buf, '/');
-		status = strtok_r(buf, "@",&strtok_tmp_ptr);
-		snprintf(dev_ord,strlen(dev_no),"%s",dev_no+1);
-
-		if ( strncasecmp(status, "add", strlen( status )  ) == 0 )
-			usb_info.is_active = DEVACTT;
-		else if ( strncasecmp(status, "remove", strlen( status )  ) == 0 )
-			usb_info.is_active = DEVROMV;
-	
-		info_fill(status,dev_ord);
-		
-	
+		find_device();                  /* 查找设备 初始化设备列表 */
+		cur_dev = f_first_dev;
+		while ( cur_dev )
+		{
+			process_dev( cur_dev ); /* 对每个设备进行处理 */
+			
+			cur_dev = cur_dev->next_dev;
+		}
+		usleep( 500000 );
 	}
 }
 

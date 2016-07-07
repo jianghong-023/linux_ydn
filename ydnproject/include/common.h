@@ -138,6 +138,7 @@ typedef struct _cfg_param_ {
 	int32_t  stream_usb_used_count;  
 	uint8_t stream_usb_mod;
 	uint8_t stream_usb_record_mod;
+	char  stream_usb_record_auto[8];
 	uint8_t system_lck_st;
 	uint8_t system_pwd_count;
 

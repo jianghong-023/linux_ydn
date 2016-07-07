@@ -43,6 +43,7 @@ extern struct cache_t	*cache_pr;
 extern struct  MenuItem * MenuPoint;
 extern uint8_t		t_date[16];
 extern struct cache_t	*cachep;
+extern int		progr_bar;
 
 
 extern void gpiocfg( struct h64_gpio_et_cfg_t *pcfg );
@@ -54,7 +55,7 @@ extern void gpio_mask( uint8_t setval );
 menu_return_arr_t menu_return_arr[8];
 
 static time_t	lasttime;
-static int	start_machine;
+static int	start_machine, progr_bar_flag = 0;
 
 
 uint8_t scan_key_resvale( uint8_t choose );
@@ -211,7 +212,6 @@ void  init_lcddefault_donfig()
 	discontrl.MaxItems		= DEFAULTE;
 	discontrl.Option		= DEFAULTE;
 	discontrl.keyValue		= DEFAULTKEY;
-	discontrl.recordKyV		= DEFAULTE;
 	discontrl.Modulator		= DEFAULTE;
 	discontrl.recoredFrist		= DEFAULTE;
 	discontrl.write_size		= DEFAULTE;
@@ -219,6 +219,7 @@ void  init_lcddefault_donfig()
 	discontrl.baktimeuse		= DEFAULTE;
 	discontrl.lcdfd			= DEFAULTE;
 	discontrl.keyfd			= DEFAULTE;
+	discontrl.record_auto_flag = USB_AUTO_HAND;
 	discontrl.keyoff		= DEFAULTE;
 	discontrl.changeflag		= DEFAULTE;
 	discontrl.changemenuflag	= DEFAULTE;
@@ -259,6 +260,14 @@ void all_config_s()
 	sys_ect_conf();
 }
 
+
+/* usb 设置为自动的自启功能*/
+static void usb_auto_function(void )
+{
+	//if ( strncasecmp( config_get_config()->scfg_Param.stream_usb_record_auto, "USBUATO", 
+	//	strlen(config_get_config()->scfg_Param.stream_usb_record_auto ) - 1 ) == 0 )
+			discontrl_t()->record_auto_flag = USB_AUTO_HAND;
+}
 
 /* 时间戳 */
 void res_time()
@@ -1369,6 +1378,17 @@ static char * display_input( double cfg_data, char * org_str, int *lenth )
 }
 
 
+static void auto_and_man_send_message( void )
+{
+	send_usb_writ_message();
+	char		ch[20]		= "";
+	s_config	*dconfig	= config_t();
+	snprintf( ch, 16, "DVB-T %.3fM", dconfig->localstatus.cfig_ad9789_ftw_bpf );
+	lcd_Write_String( 0, ch );
+	lcd_Write_String( 1, " Record...      " );
+}
+
+
 /* 文件及字符串显示处理，用于处理文件名称及其它字符串处理 */
 static char* display_input_str( char *str, int size, int *lenth )
 {
@@ -1620,14 +1640,8 @@ static void menu_selected_cfg( char **arr, int size, char *cfgmenu )
 		if ( discontrl.usb_wr_flag == USBWRITESTART )
 		{
 			if ( strncasecmp( discontrl.cechebuf, "Yes", strlen( discontrl.cechebuf ) - 1 ) == 0 )
-			{
-				send_usb_writ_message();
-				char		ch[20]		= "";
-				s_config	*dconfig	= config_t();
-				snprintf( ch, 16, "DVB-T %.3fM", dconfig->localstatus.cfig_ad9789_ftw_bpf );
-				lcd_Write_String( 0, ch );
-				lcd_Write_String( 1, " Record...      " );
-			}
+				auto_and_man_send_message();
+
 			discontrl.usb_wr_flag = USBWRITECTL;
 		}else if ( discontrl.menu_cfg_fun != &null_Subcfg )
 		{
@@ -1761,9 +1775,6 @@ static void ShowMenu()
 			}
 		}
 	}
-
-	if ( sysstart == 0 )
-		sysstart = 1;
 }
 
 
@@ -2247,6 +2258,9 @@ void ChangeMenu( int keySigNum )
 	static int	lock_count	= 0;
 	s_config	*dconfig	= config_t();
 
+	if ( !progr_bar_flag )
+		return;
+
 /* 清理定时器 */
 	cl_time();
 	last_time();
@@ -2560,12 +2574,17 @@ void user_desplay_monitor( void )
 		exit( 1 );
 	}
 
+
 	if ( !start_machine )
 	{
 		while ( sysstart == 0 )
 			nano_sleep( 0, 100 );
 
 		sysstart = 2;
+
+		/* 100% */
+		while ( !progr_bar_flag )
+			nano_sleep( 0, 100 );
 
 		m_backlighting( LCD_LIGHT_ON );
 		stop_alarm();
@@ -2603,6 +2622,14 @@ void user_operation_usb( void )
 }
 
 
+static void sys_start_prompt( void )
+{
+	m_backlighting( LCD_LIGHT_ON );
+	lcd_Write_String( 0, " Start up      " );
+	lcd_Write_String( 1, " Please wait..." );
+}
+
+
 int lcd_main( void )
 {
 	int flag = 0;
@@ -2618,7 +2645,15 @@ int lcd_main( void )
 	flag = fcntl( discontrl.keyfd, F_GETFL );
 	fcntl( discontrl.keyfd, F_SETFL, flag | FASYNC );
 
-	ShowMenu();
+	sys_start_prompt();
+
+	while ( progr_bar != 0x40 )
+		nano_sleep( 0, 100 );
+
+	progr_bar_flag = 1;
+
+	if ( sysstart == 0 )
+		sysstart = 1;
 
 	cursor_onoff( discontrl.lcdfd, LCD_SUROS_ONOFF, 0x00 );
 
@@ -2644,6 +2679,16 @@ int lcd_main( void )
 		}
 
 		nano_sleep( 1, 0 );
+
+		// 自动 处理usb 写
+		
+		if(discontrl.record_auto_flag == USB_AUTO_HAND){
+				//auto_and_man_send_message();
+				DEBUG("---------frist");
+				discontrl.record_auto_flag = USB_OFF_HAND ; // 移出usb时再次有效
+		}
+		
+		
 	}
 
 	return(1);

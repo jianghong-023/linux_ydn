@@ -44,7 +44,7 @@ struct dis_contrl_t {
 	int8_t	Option;                 /* ä¿å­˜ç”¨æˆ·çš„èœå•ç¼–å· */
 	int8_t	escOption;              /* ½øÍË·ÖÖ§×ßÏò enert = 0x01,esc= 0x00 */
 	int8_t	keyValue;
-	int8_t	recordKyV;
+	int8_t	record_auto_flag;      /* ×Ô¶¯´¦Àí±êÖ¾ */
 	int8_t	Modulator;
 	int8_t	recoredFrist;
 	int8_t	write_size;             /* å­—ç¬¦ä¸²é•¿åº¦ */

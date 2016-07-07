@@ -27,6 +27,7 @@ static int adf4350_configuration( void );
 
 static int ad9789_configuration( void );
 
+int progr_bar = 0;
 
 /* Baseband Digital Upconverter */
 static double ftw_clac( double mhz )
@@ -308,6 +309,7 @@ int peripheral_dev_config( struct dvb_peripheral *devconfig )
 			usleep( 4000 );
 			/* init */
 			init_bus();
+			progr_bar = 0x40;
 		}
 	}
 

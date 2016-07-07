@@ -66,6 +66,14 @@ struct dev_stata_path {
 	SCSI_USB_DEV	doumunt;
 };
 
+typedef struct dev_usb_path USB_PATH_T;
+struct dev_usb_path {
+	char		hostusbpath[100];                                       /* 设备挂在路径存储 */
+	char		diskpath[50];                                           /* usb 系统路径 */
+	int		is_active;                                              /* 是否移除设备 */
+	pthread_mutex_t usblock;
+
+};
 
 int do_umount( SCSI_USB_DEV *dev );
 

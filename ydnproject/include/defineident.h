@@ -352,6 +352,8 @@
 #define USB_STATUS	0x04
 #define VIDEO_STATUS	0x05
 #define PWRD_STATUS	0x06
+#define USB_AUTO_HAND	(0x10)
+#define USB_OFF_HAND	(0x20)
 
 #define USB_SIG			"SINGALMENT"
 #define USB_SIG_LOOP		"SINGALLOOP"
