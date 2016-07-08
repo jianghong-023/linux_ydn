@@ -364,17 +364,19 @@ int fetch_token( usb_token *ptr, int size )
 {
 	int n;
 
-	usb_token *mem = ptr;
-
+	usb_token	*mem = ptr;
+	struct timeval	tpstart;
 	if ( size <= 0 )
 		return(-EINVAL);
-
+	gettimeofday( &tpstart, NULL );
 	while ( mem->token <= 0 )
 	{
 		nano_sleep( 0, 10 );
 
-		if ( r_time_out_flag == 1 )
+		if ( r_time_out( tpstart ) >= 1000 )
+		{
 			break;
+		}
 	}
 
 
@@ -568,8 +570,24 @@ static void desory_thread( void *init_b, pthread_attr_t *attr )
  */
 static int disk_check( void )
 {
-	int free_size, ret = -1;
-	free_size = get_storage_dev_info( get_stata_path()->hostusbpath, FREE_CAPACITY );
+	int	free_size, ret = -1, i;
+	char	path[100] = "";
+
+	for ( i = 0; i < get_stata_path()->part_num; i++ )
+	{
+		if ( get_stata_path()->mount_path[i] != NULL )
+		{
+			snprintf( path, strlen( get_stata_path()->mount_path[i] ) + 1, "%s",
+				  get_stata_path()->mount_path[i] );
+			ret = 0;
+			break;
+		}
+	}
+
+	if ( ret < 0 )
+		return(ret);
+
+	free_size = get_storage_dev_info( path, FREE_CAPACITY );
 	if ( free_size < MAX_FREE )
 	{
 		fprintf( stderr, "%s", "USB space is too small" );
@@ -987,7 +1005,8 @@ static void usb_sop_notify()
 
 static int32_t writ_usb( void *usb_hand )
 {
-	int ret = -1;
+	int	ret		= -1, i;
+	char	path[100]	= "";
 	stop = 1;
 
 	if ( is_usb_online() != DEVACTT )
@@ -996,7 +1015,23 @@ static int32_t writ_usb( void *usb_hand )
 		return(ret);
 	}
 
-	if ( !get_stata_path()->hostusbpath )
+	for ( i = 0; i < get_stata_path()->part_num; i++ )
+	{
+		if ( get_stata_path()->mount_path[i] != NULL )
+		{
+			snprintf( path, strlen( get_stata_path()->mount_path[i] ) + 1, "%s",
+				  get_stata_path()->mount_path[i] );
+			ret = 0;
+			break;
+		}
+	}
+	if ( ret < 0 )
+	{
+		DEBUG( "path error" );
+		return(ret);
+	}
+
+	if ( path == NULL )
 	{
 		discontrl_t()->usb_wr_flag = USBWRITESET;
 		return(ret);
@@ -1022,7 +1057,8 @@ static int32_t writ_usb( void *usb_hand )
 		return(ret);
 	}
 
-	usb_write_handler( get_stata_path()->hostusbpath, usb_action->ts_size, usb_action->op_mod );
+
+	usb_write_handler( path, usb_action->ts_size, usb_action->op_mod );
 
 
 	stop_alarm();
@@ -1034,7 +1070,12 @@ static int32_t writ_usb( void *usb_hand )
 	loop_cl_cah();
 
 	usb_sop_notify();
-	current_menu();
+	if ( discontrl_t()->record_auto_flag == USB_AUTO_HAND )
+	{
+		discontrl_t()->record_auto_flag = DEFAULTE;
+		paren_menu();
+	}else
+		current_menu();
 	return(0);
 }
 

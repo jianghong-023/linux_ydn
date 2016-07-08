@@ -212,6 +212,7 @@ void sys_ect_conf( void )
 		fprintf( file, "ServiceName TV-Provider\n\n" );
 		fprintf( file, "# USB configuration\n\n" );
 		fprintf( file, "PlayModle SINGALMENT\n\n" );
+		fprintf( file, "AutoModle Denable\n\n" );
 		fprintf( file, "WriteRecord 0\n\n" );
 		fprintf( file, "RecordModle RECORDSIG\n\n" );
 		fprintf( file, "tsfilename default\n\n" );

@@ -23,6 +23,7 @@ int is_usb_online( void )
 	return(retoline);
 }
 
+
 /*
  * 返回值; 1读状态,0 停止
  */
@@ -38,6 +39,7 @@ static int32_t is_usb_status( int32_t mod )
 	return(retmod);
 }
 
+
 /*
  * 等待USB消息通知
  */
@@ -50,6 +52,7 @@ uint32_t recv_usb_notify( void )
 
 	return(retstat);
 }
+
 
 /*
  * usb 检测是否插入
@@ -64,7 +67,7 @@ int usb_probe( void )
 	{
 		if ( get_stata_path()->is_active != DEVROMV )
 		{
-			if ( get_stata_path()->hostusbpath != NULL )
+			if ( get_stata_path()->mount_path != NULL )
 			{
 				lcd_clear( discontrl_t()->lcdfd ); /* 并清除内存 */
 				lcd_Write_String( 0, "Connect USB...  " );

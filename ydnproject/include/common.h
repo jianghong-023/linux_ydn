@@ -60,11 +60,10 @@ typedef struct _bus_init_ {
 
 	char		usb_tsfilename[16];
 	uint32_t	usb_tsfilesize;
-
 } bus_init;
 
 typedef struct _cfg_param_ {
-	uint8_t cfg_len;                  /* for check struct length */
+	uint8_t cfg_len;           /* for check struct length */
 	/* ºÏ≤‚±Í÷æ */
 	int8_t encoder_video_interface;
 
@@ -106,7 +105,6 @@ typedef struct _cfg_param_ {
 	uint8_t encoder_eit_next_starttime[7];
 	uint8_t encoder_eit_next_duration[7];
 	uint8_t encoder_eit_next_eventname[17];
-	
 
 
 	/* modulator/ */
@@ -135,12 +133,12 @@ typedef struct _cfg_param_ {
 	uint8_t		stream_eit_insert[8];
 	uint8_t		stream_lck_state[8];
 	uint8_t		stream_usb_enable[8];
-	int32_t  stream_usb_used_count;  
-	uint8_t stream_usb_mod;
-	uint8_t stream_usb_record_mod;
-	char  stream_usb_record_auto[8];
-	uint8_t system_lck_st;
-	uint8_t system_pwd_count;
+	int32_t		stream_usb_used_count;
+	uint8_t		stream_usb_mod;
+	uint8_t		stream_usb_record_mod;
+	char		stream_usb_record_auto[8];
+	uint8_t		system_lck_st;
+	uint8_t		system_pwd_count;
 
 	/* system */
 	uint8_t system_lcd_time_out;
@@ -183,10 +181,12 @@ typedef struct _local_status_ {
 	char	encoder_video_shrot_resolution[16];
 	uint8_t encoder_video_ident;
 /* modulator */
-//	uint8_t modulator_bitrate_act[5];
-//	uint8_t modulator_bitrate_max[5];
+/*
+ * uint8_t modulator_bitrate_act[5];
+ * uint8_t modulator_bitrate_max[5];
+ */
 /* usb device */
-//	uint8_t usb_ts_play_lock;
+/*	uint8_t usb_ts_play_lock; */
 /* system */
 	uint8_t system_adv7441a_status;
 	uint8_t system_mb86h46_status;

@@ -48,6 +48,7 @@ static const struct {
 	{ "LcdTime",	    oLcdTime	    },
 	{ "PlayModle",	    oPlayMode	    },
 	{ "RecordModle",    oRecordModle    },
+	{ "AutoModle",    	oAutoModle    },
 	{ "PMTPID",	    oPMTPID	    },
 	{ "PRCPID",	    oPRCPID	    },
 	{ "VideoPID",	    oVideoPID	    },
@@ -639,6 +640,12 @@ int config_read( const char *filename )
 					ret = 0;
 					break;          /* oProgramName */
 
+				case oAutoModle:   /* oProgramOutputEnable */
+					memset( (char *) &config.scfg_Param.stream_usb_record_auto, 0, 8 );
+					strncpy( (char *) &config.scfg_Param.stream_usb_record_auto, p1, strlen( p1 ) + 1 );
+					ret = 0;
+					break;
+
 /*				case oLockPwdStu:      / * oProgramOutputEnable * / */
 /*					memset( (char *) &config.scfg_Param.stream_lck_state, 0, 8 ); */
 /*					strncpy( (char *) &config.scfg_Param.stream_lck_state, p1, strlen( p1 ) + 1 ); */
@@ -1003,6 +1010,9 @@ void config_init( void )
 	lenght = strlen( EIT_DESENABLE ) + 1;
 	memset( (char *) config.scfg_Param.stream_eit_insert, 0, 8 );
 	snprintf( (char *) config.scfg_Param.stream_eit_insert, lenght, "%s", EIT_DESENABLE );
+
+	memset( (char *) config.scfg_Param.stream_usb_record_auto, 0, 8 );
+	snprintf( (char *) config.scfg_Param.stream_usb_record_auto, lenght, "%s", EIT_DESENABLE );
 
 	memset( (char *) config.scfg_Param.stream_lck_state, 0, 8 );
 	snprintf( (char *) config.scfg_Param.stream_lck_state, lenght, "%s", DESENABLE );
@@ -1509,6 +1519,20 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				case oEITISERTENABLE: { /* oProgramOutputEnable */
 					char file_name[12];
 					if ( strncmp( firset_str, "EITISERTENABLE", sizeof(firset_str) ) == 0 )
+					{
+						sprintf( file_name, "%s", replace_str );
+						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
+
+						result = system( tmpline );
+						if ( result != -1 )
+							DEBUG( "%dline %s , %s write successfull !\r\n", linenum, p1, replace_str );
+					}
+				}
+				break;
+
+				case oAutoModle: { 
+					char file_name[12];
+					if ( strncmp( firset_str, "AutoModle", sizeof(firset_str) ) == 0 )
 					{
 						sprintf( file_name, "%s", replace_str );
 						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );

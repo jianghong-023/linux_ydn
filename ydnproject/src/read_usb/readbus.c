@@ -200,7 +200,7 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 		}
 	}
 	ts_add_toal += cntr;
-
+	memset( stor_addr, 0, MEMSIZE_2M + 0xf );
 	free( stor_addr );
 	stor_addr = NULL;
 }
@@ -616,17 +616,32 @@ uint8_t read_stream_info( void )
 /* USB 设备信息 */
 uint8_t usb_ts_inf()
 {
-	int ret = -1;
-
+	int	ret		= -1, i;
+	char	path[100]	= "";
 	if ( usb_probe() < 0 )
 	{
 		paren_menu();
 		return(ret);
 	}
 
-	itemcount	= 0;
-	ret		= seach_fts( get_stata_path()->hostusbpath, 0 );
-	ret		= seach_fts( get_stata_path()->hostusbpath, 1 );
+	itemcount = 0;
+
+	for ( i = 0; i < get_stata_path()->part_num; i++ )
+	{
+		if ( get_stata_path()->mount_path[i] != NULL )
+		{
+			snprintf( path, strlen( get_stata_path()->mount_path[i] ) + 1, "%s",
+				  get_stata_path()->mount_path[i] );
+			ret = 0;
+			break;
+		}
+	}
+
+	if ( ret < 0 )
+		return(ret);
+
+	ret	= seach_fts( path, 0 );
+	ret	= seach_fts( path, 1 );
 
 	return(ret);
 }
@@ -954,6 +969,14 @@ static int32_t loop_read_ts_strem( const char *src_name, uint8_t pos, int count_
 }
 
 
+static void usb_sop_notify()
+{
+	lcd_Write_String( 1, "                " );
+	lcd_Write_String( 1, " stop...        " );
+	nano_sleep( 1, 0 );
+}
+
+
 /*
  * usb单文件读,分段读，循环读
  * path_name    路径+xxx.ts
@@ -1161,7 +1184,7 @@ int32_t read_usb( void *usb_hand )
 	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
 	loop_cl_cah();
 
-	nano_sleep( 1, 0 );
+	usb_sop_notify();
 
 	paren_menu();
 

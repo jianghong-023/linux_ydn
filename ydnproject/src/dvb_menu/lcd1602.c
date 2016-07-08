@@ -219,7 +219,7 @@ void  init_lcddefault_donfig()
 	discontrl.baktimeuse		= DEFAULTE;
 	discontrl.lcdfd			= DEFAULTE;
 	discontrl.keyfd			= DEFAULTE;
-	discontrl.record_auto_flag = USB_AUTO_HAND;
+	discontrl.record_auto_flag	= DEFAULTE;
 	discontrl.keyoff		= DEFAULTE;
 	discontrl.changeflag		= DEFAULTE;
 	discontrl.changemenuflag	= DEFAULTE;
@@ -260,14 +260,6 @@ void all_config_s()
 	sys_ect_conf();
 }
 
-
-/* usb 设置为自动的自启功能*/
-static void usb_auto_function(void )
-{
-	//if ( strncasecmp( config_get_config()->scfg_Param.stream_usb_record_auto, "USBUATO", 
-	//	strlen(config_get_config()->scfg_Param.stream_usb_record_auto ) - 1 ) == 0 )
-			discontrl_t()->record_auto_flag = USB_AUTO_HAND;
-}
 
 /* 时间戳 */
 void res_time()
@@ -2680,15 +2672,14 @@ int lcd_main( void )
 
 		nano_sleep( 1, 0 );
 
-		// 自动 处理usb 写
-		
-		if(discontrl.record_auto_flag == USB_AUTO_HAND){
-				//auto_and_man_send_message();
-				DEBUG("---------frist");
-				discontrl.record_auto_flag = USB_OFF_HAND ; // 移出usb时再次有效
+		/* 自动 处理usb 写 */
+
+		if ( discontrl.record_auto_flag == USB_AUTO_HAND )
+		{
+			auto_and_man_send_message();
+			start_machine			= 2;            /* 自动录制时，打开esc键 */
+			discontrl.record_auto_flag	= USB_OFF_HAND; /* 移出usb时再次有效 */
 		}
-		
-		
 	}
 
 	return(1);

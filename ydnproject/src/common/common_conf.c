@@ -282,10 +282,10 @@ struct MenuItem LcnMode[1] = {
 };
 /* usb≈‰÷√ */
 struct MenuItem AdvancedCfg[4] = {
-	{ 4, " File name      ", &ts,		   NULL,       RecordTsCfg },
-	{ 4, " Automatic recor", &NullSubs,	   NULL,       RecordTsCfg },
-	{ 4, " File Size      ", &file_size,	   NULL,       RecordTsCfg },
-	{ 4, " File save Mode ", &record_save_mod, recird_mod, RecordTsCfg }
+	{ 4, " File name      ", &ts,		    NULL,	RecordTsCfg },
+	{ 4, " Automatic recor", &eauto_wr_usb_Cfg, NULL,	RecordTsCfg },
+	{ 4, " File Size      ", &file_size,	    NULL,	RecordTsCfg },
+	{ 4, " File save Mode ", &record_save_mod,  recird_mod, RecordTsCfg }
 };
 
 struct  MenuItem recird_mod[1] = {

@@ -51,6 +51,9 @@ static void systemserial();
 static void systemVersion();
 
 
+static int eauto_record_commom( char *buffer );
+
+
 void text_videocpbright_save( char *, char * );
 
 
@@ -229,7 +232,6 @@ uint8_t file_size()
 	int get_value = dconfig->configParam.usb_tsfilesize;
 	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 4096, 64, INPUT_DIGIT_STATUS, input_lenth, &text_digfilesize_save );
 
-	
 
 	return(0);
 }
@@ -857,6 +859,25 @@ uint8_t eit_insert_Cfg()
 
 	int menu_item_lenth = sizeof(Bandwidth) / sizeof(Bandwidth[0]);
 	menu_general_enter( Bandwidth, menu_item_lenth, eit_insert_commom );
+
+	return(0);
+}
+
+
+uint8_t eauto_wr_usb_Cfg()
+{
+	s_config *dconfig = config_t();
+	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_usb_record_auto );
+	init_cache();
+	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
+	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	static char *Bandwidth[] = {
+		"Yes",
+		"No ",
+	};
+
+	int menu_item_lenth = sizeof(Bandwidth) / sizeof(Bandwidth[0]);
+	menu_general_enter( Bandwidth, menu_item_lenth, eauto_record_commom );
 
 	return(0);
 }
@@ -1639,7 +1660,7 @@ uint8_t ts()
 	}
 
 	cfg_discontrl_c( CHAR_STATUS, CURSOR_ON, filename, 10, 10, str_filename_save, NULL );
-	
+
 	return(0);
 }
 
@@ -1913,9 +1934,17 @@ void get_cfg_menu_item( char *cfg_name )
 
 s_config *config_t()
 {
-	/* config_read( get_profile()->script_configfile ); */
 	s_config *dconfig = config_get_config(); /*  */
 	return(dconfig);
+}
+
+
+void auto_usb_test( void )
+{
+	s_config *dconfig = config_t();
+	if ( strncmp( dconfig->scfg_Param.stream_usb_record_auto, EIT_ENABLE,
+		      sizeof(dconfig->scfg_Param.stream_usb_record_auto) ) == 0 )
+		discontrl.record_auto_flag = USB_AUTO_HAND;
 }
 
 
@@ -3034,6 +3063,33 @@ int eit_insert_commom( char *buffer )
 		sprintf( tmp_buf, "%s", dconfig->scfg_Param.stream_eit_insert );
 
 		config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "EITISERTENABLE" );
+	}
+	config_read( get_profile()->script_configfile );
+	return(0);
+}
+
+
+static int eauto_record_commom( char *buffer )
+{
+	char	tmp_buf[18];
+	char	*orgbuf;
+
+	if ( buffer == NULL )
+		return(-1);
+	else {
+		s_config *dconfig = config_t(); /*  */
+
+		if ( strncmp( "Yes", buffer, strlen( buffer ) ) == 0 )
+		{
+			orgbuf = EIT_ENABLE;
+		} else if ( strncmp( "No ", buffer, strlen( buffer ) ) == 0 )
+		{
+			orgbuf = EIT_DESENABLE;
+		}
+
+		sprintf( tmp_buf, "%s", dconfig->scfg_Param.stream_usb_record_auto );
+
+		config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "AutoModle" );
 	}
 	config_read( get_profile()->script_configfile );
 	return(0);

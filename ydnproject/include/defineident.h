@@ -61,7 +61,7 @@
 #define FILE_DEV_PART_TEMPL	"/dev/scsi/host%d/bus0/target0/lun0/"   /* 具体的设备 */
 #define USB_CDROM_MP		"/tmp/cdrom"
 #define USB_DISK_MP		"/tmp/usbdisk"
-#define MAX_NAME_LEN		(64)
+#define MAX_NAME_LEN		(100)
 #define MAX_PART_NUM		(6)                                     /* 最多运行6个分区 */
 #define KK_FS_OK		(1)
 #define KK_FS_FAIL		(0)

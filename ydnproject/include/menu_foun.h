@@ -83,6 +83,9 @@ uint8_t guardIntv_dalay_cfg( void );
 uint8_t RF_frequency_status( void );
 
 
+uint8_t eauto_wr_usb_Cfg(void);
+
+
 uint8_t sys_serial();
 
 
@@ -99,6 +102,9 @@ int comm_constell( char *buffer );
 
 
 int comm_video_interface( char *buffer );
+
+
+void auto_usb_test(void );
 
 
 int eit_insert_commom( char *buffer );

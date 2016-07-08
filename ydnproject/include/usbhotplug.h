@@ -45,40 +45,18 @@
 
 #include "defineident.h"
 
-typedef struct s_scsi_usb_dev {
-	int			type;                                           /*1 cdrom 2 disk */
-	int			index;                                          /*like host0 host1*/
-	char			file_statu[MAX_NAME_LEN];                       /*like "/proc/scsi/usb-storage-%d/%d"*/
-	char			devfile_parts[MAX_PART_NUM][MAX_NAME_LEN];      /*存储每个分区的设备文件*/
-	char			mount_path[MAX_PART_NUM][MAX_NAME_LEN];         /*与上面对应的mount点*/
-	int			part_num;                                       /* 4分区数 */
-	struct s_scsi_usb_dev	*next_dev;                                      /* 4指向下一个设备 */
-	char			hoststr[200];                                   /* 备份当前信息 */
-} SCSI_USB_DEV;
+typedef struct usb_no_stat_t {
+	int	is_active;
+	int	flag_off;
+	int32_t part_num;
+	char	devfile_parts[MAX_PART_NUM][MAX_NAME_LEN];
+	char	mount_path[MAX_PART_NUM][MAX_NAME_LEN];
+}usb_no_and_stat_t;
+
+int dev_umount( void *dev );
 
 
-typedef struct dev_stata_path STATA_PATH;
-struct dev_stata_path {
-	char		hostusbpath[100];                                       /* 设备挂在路径存储 */
-	char		diskpath[50];                                           /* usb 系统路径 */
-	int		is_active;                                              /* 是否移除设备 */
-	pthread_mutex_t usblock;
-	SCSI_USB_DEV	doumunt;
-};
-
-typedef struct dev_usb_path USB_PATH_T;
-struct dev_usb_path {
-	char		hostusbpath[100];                                       /* 设备挂在路径存储 */
-	char		diskpath[50];                                           /* usb 系统路径 */
-	int		is_active;                                              /* 是否移除设备 */
-	pthread_mutex_t usblock;
-
-};
-
-int do_umount( SCSI_USB_DEV *dev );
-
-
-STATA_PATH *get_stata_path();
+usb_no_and_stat_t *get_stata_path();
 
 
 void thread_for_usb( void );

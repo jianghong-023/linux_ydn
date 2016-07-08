@@ -56,6 +56,7 @@ typedef enum {
 	oRFLevel,
 	oLcdTime,
 	oPlayMode,
+	oAutoModle,
 	oRecordModle,
 	oPMTPID,
 	oPRCPID,
