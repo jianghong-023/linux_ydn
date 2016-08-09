@@ -1782,13 +1782,13 @@ static void video_lock_status( int flag )
 			char	*arr_cfg	= "lock    ";
 			int	arr_size	= strlen( arr_cfg );
 
-			write_char( 16, 2, CHANGE_G, "                " );
+			write_char( 16, 1, CHANGE_G, "                " );
 			write_char( arr_size, 2, CHANGE_G, arr_cfg );
 		} else if ( VIDEO_INPUT_UNLOCK == dconfig->localstatus.encoder_video_input_lock )
 		{
 			char	*arr_cfg	= "Not lock";
 			int	arr_size	= strlen( arr_cfg );
-			write_char( 16, 2, CHANGE_G, "                " );
+			write_char( 16, 1, CHANGE_G, "                " );
 			write_char( arr_size, 2, CHANGE_G, arr_cfg );
 		}
 	}
@@ -1803,7 +1803,7 @@ static void video_lock_status( int flag )
 				write_char( 16, 1, ~CHANGE_G, "Video resolution" );
 				ctl_fun( discontrl.lcdfd, 0x00 );
 			}
-			write_char( 16, 2, CHANGE_G, "                " );
+			write_char( 16, 1, CHANGE_G, "                " );
 			write_char( arr_size, 2, CHANGE_G, dconfig->localstatus.encoder_video_resolution );
 		} else if ( VIDEO_INPUT_UNLOCK == dconfig->localstatus.encoder_video_input_lock )
 		{
@@ -1815,7 +1815,7 @@ static void video_lock_status( int flag )
 				ctl_fun( discontrl.lcdfd, 0x00 );
 			}
 
-			write_char( 16, 2, CHANGE_G, "                " );
+			write_char( 16, 1, CHANGE_G, "                " );
 			write_char( arr_size, 2, CHANGE_G, dconfig->localstatus.encoder_video_resolution );
 		}
 	}
@@ -2194,7 +2194,7 @@ void gener_table()
 	uint8_t network_name[16]	= { 0 };                                                                /* = "network-01"; */
 
 	snprintf( (char *) network_name, network_name_length + 1, (char *) dconfig->scfg_Param.stream_nit_network_name );
-	/* DEBUG("strlen = %d   %s",network_name_length,network_name); */
+	
 	int _nitversion = atoi( (const char *) &dconfig->scfg_Param.stream_nit_version_number );
 	if ( _nitversion < 0 )
 		_nitversion = NIT_VERSION;

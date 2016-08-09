@@ -32,7 +32,6 @@ static pthread_t p_lcd, p_dsplay, p_usb, p_mem;
 pthread_t action_usbop, usb_sig;
 
 
-	
 static void init_mod_code()
 {
 	s_config *dconfig = config_get_config();
@@ -86,7 +85,7 @@ static void mem_manage()
 		{
 			mem_look_clear();
 		}
-		nano_sleep(2, 0);
+		nano_sleep( 2, 0 );
 	}
 }
 
@@ -261,7 +260,7 @@ static void main_loop( void )
 		time_handler( 0 );
 	}
 	pthread_detach( action_usbop );
-	
+
 	sigset_t set;
 	sigemptyset( &set );
 	sigaddset( &set, SIGUSR1 );
@@ -326,7 +325,7 @@ static void main_loop( void )
 			{
 				b_val = r_vic;
 
-				usercode_mod( dconfig->scfg_Param.encoder_video_interface, 0 );/* 0 没用此位 */
+				usercode_mod( dconfig->scfg_Param.encoder_video_interface, 0, r_vic );/* 0 没用此位 */
 
 				change_seach();
 			}
@@ -373,22 +372,22 @@ static void main_loop( void )
 				{
 				case YPbPr1080Isign60Hz:
 					DEBUG( " pare YPbPr mod %d ", optcode );
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					result = 0;
 					break;
 				case YPbPr1080Isign50Hz:
 					DEBUG( " pare YPbPr mod %d ", optcode );
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					result = 0;
 					break;
 				case YPbPr720Psign50Hz:
 					DEBUG( " pare YPbPr mod %d ", optcode );
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					result = 0;
 					break;
 				case YPbPr720Psign60Hz:
 					DEBUG( " pare YPbPr mod %d ", optcode );
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					result = 0;
 					break;
 				default:
@@ -432,42 +431,42 @@ static void main_loop( void )
 				switch ( optcode )      /* 智能识别其模式 */
 				{
 				case NTSC_60_ROW:
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					DEBUG( "NTSC_60_ROW" );
 					result = 0;
 					break;
 				case NTSC_60_NOTROW:
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					DEBUG( "NTSC_60_NOTROW" );
 					result = 0;
 					break;
 				case NTSC_50_NOTROW:
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					DEBUG( "NTSC_50_NOTROW" );
 					result = 0;
 					break;
 				case NTSC_50_ROW:
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					DEBUG( "NTSC_50_ROW" );
 					result = 0;
 					break;
 
 				case PAL_60_ROW:
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					DEBUG( "PAL_60_ROW" );
 					result = 0;
 					break;
 				case PAL_60_NOTROW:
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					DEBUG( "PAL_60_NOTROW" );
 					result = 0;
 					break;
 				case PAL_50_NOTROW:
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					DEBUG( "PAL_50_NOTROW" );
 					break;
 				case PAL_50_ROW:
-					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode );
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, optcode, 0 );
 					DEBUG( "PAL_50_ROW" );
 					result = 0;
 					break;

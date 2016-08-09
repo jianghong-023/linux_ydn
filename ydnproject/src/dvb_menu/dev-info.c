@@ -392,7 +392,6 @@ struct dvb_peripheral ypbpr_input_60_3Hz_mod[2] = {
 
 struct dvb_peripheral cvbs_input_50Hz_mod[2] = {
 	{
-		/* 花屏？ */
 		.codeid			= v720_or_1440x576i_50Hz,
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
@@ -405,6 +404,7 @@ struct dvb_peripheral cvbs_input_50Hz_mod[2] = {
 		.pixefreq		= &CVBS_576ix50_mod,
 		.modopcodeset		= &v57650i_mod,
 	},
+#if 0
 	{
 		.codeid			= v720_or_1440x288p_50Hz,
 		.video_hz		= v50Hz,
@@ -418,11 +418,11 @@ struct dvb_peripheral cvbs_input_50Hz_mod[2] = {
 		.modopcodeset		= NULL,
 		.pixefreq		= NULL,
 	},
+#endif
 };
 
 struct dvb_peripheral cvbs_input_60_3Hz_mod[2] = {
 	{
-		/* 20160128 jh 蓝屏？ */
 		.codeid			= v720_or_1440x480i_59d94_or_60Hz,
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
@@ -435,6 +435,7 @@ struct dvb_peripheral cvbs_input_60_3Hz_mod[2] = {
 		.pixefreq		= &CVBS_480ix60_mod,
 		.modopcodeset		= &v48060i_mod,
 	},
+#if 0
 	{
 		.codeid			= v720_or_1440x240p_59d94_or_60Hz,
 		.video_hz		= v60Hz,
@@ -448,6 +449,7 @@ struct dvb_peripheral cvbs_input_60_3Hz_mod[2] = {
 		.pixefreq		= NULL,
 		.modopcodeset		= NULL,
 	},
+#endif
 };
 
 
@@ -456,20 +458,6 @@ struct dvb_peripheral cvbs_input_60_3Hz_mod[2] = {
  * 50hZ (17~31,37~39)
  */
 struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
-	{
-		.codeid			= v720x576p_50Hz,
-		.video_hz		= v50Hz,
-		.i2c_0addr		= CY22393ADDR,
-		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
-		.i2c_0ordernumber	= I2C_NR_0,
-		.i2c_1ordernumber	= I2C_NR_1,
-		.open_uartdev		= &h46_open,
-		.clockset		= NULL, /* &refclk_74_25MHz, */
-		.pixefreq		= NULL, /* &HDMI_COMP_1080ix50_mod, */
-		.modopcodeset		= NULL, /* &v108050i_mod, */
-	},
-#if 1
 	{
 		/* ok */
 		.codeid			= v1280x720p_50Hz,
@@ -511,6 +499,35 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.pixefreq		= &HDMI_COMP_576ix50_mod,
 		.modopcodeset		= &v57650i_mod,
 	},
+	{
+		/* ok */
+		.codeid			= v1920x1080p_50Hz,
+		.video_hz		= v50Hz,
+		.i2c_0addr		= CY22393ADDR,
+		.open_clockdev		= &cy22393_open,
+		.open_freqdev		= &adv7842_open,
+		.i2c_0ordernumber	= I2C_NR_0,
+		.i2c_1ordernumber	= I2C_NR_1,
+		.open_uartdev		= &h46_open,
+		.clockset		= &refclk_148_5MHz,
+		.pixefreq		= &HDMI_COMP_1080px50_mod,
+		.modopcodeset		= &v108050p_mod,
+	},
+#if 0
+	{
+		.codeid			= v720x576p_50Hz,
+		.video_hz		= v50Hz,
+		.i2c_0addr		= CY22393ADDR,
+		.open_clockdev		= &cy22393_open,
+		.open_freqdev		= &adv7842_open,
+		.i2c_0ordernumber	= I2C_NR_0,
+		.i2c_1ordernumber	= I2C_NR_1,
+		.open_uartdev		= &h46_open,
+		.clockset		= NULL, /* &refclk_74_25MHz, */
+		.pixefreq		= NULL, /* &HDMI_COMP_1080ix50_mod, */
+		.modopcodeset		= NULL, /* &v108050i_mod, */
+	},
+
 	{
 		.codeid			= v720_or_1440x288p_50Hz,
 		.video_hz		= v50Hz,
@@ -564,20 +581,6 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.pixefreq		= NULL,
 	},
 	{
-		/* ok */
-		.codeid			= v1920x1080p_50Hz,
-		.video_hz		= v50Hz,
-		.i2c_0addr		= CY22393ADDR,
-		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
-		.i2c_0ordernumber	= I2C_NR_0,
-		.i2c_1ordernumber	= I2C_NR_1,
-		.open_uartdev		= &h46_open,
-		.clockset		= &refclk_148_5MHz,
-		.pixefreq		= &HDMI_COMP_1080px50_mod,
-		.modopcodeset		= &v108050p_mod,
-	},
-	{
 		.codeid			= v2880x576p_50Hz,
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
@@ -603,6 +606,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.modopcodeset		= NULL,
 		.pixefreq		= NULL,
 	},
+
 #endif
 };
 
@@ -759,19 +763,6 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 /* 60Hz3 (1~16,35,36) */
 struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 	{
-		.codeid			= v640x480p_59d94_or_60Hz,
-		.video_hz		= v60Hz,
-		.i2c_0addr		= CY22393ADDR,
-		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
-		.i2c_0ordernumber	= I2C_NR_0,
-		.i2c_1ordernumber	= I2C_NR_1,
-		.open_uartdev		= &h46_open,
-		.clockset		= NULL, /* &refclk_74_25MHz, */
-		.pixefreq		= NULL, /* &HDMI_COMP_1080ix50_mod, */
-		.modopcodeset		= NULL, /* &v108050i_mod, */
-	},
-	{
 		.codeid			= v720x480p_59d94_or_60Hz,
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
@@ -811,6 +802,33 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.clockset		= &refclk_74_25MHz,
 		.pixefreq		= &HDMI_COMP_1080ix60_mod,
 		.modopcodeset		= &v108060i_mod,
+	},
+	{
+		.codeid			= v1920x1080p_59d94_or_60Hz,
+		.video_hz		= v60Hz,
+		.i2c_0addr		= CY22393ADDR,
+		.open_clockdev		= &cy22393_open,
+		.open_freqdev		= &adv7842_open,
+		.i2c_0ordernumber	= I2C_NR_0,
+		.i2c_1ordernumber	= I2C_NR_1,
+		.open_uartdev		= &h46_open,
+		.clockset		= &refclk_148_5MHz,
+		.pixefreq		= &HDMI_COMP_1080px60_mod,
+		.modopcodeset		= &v108060p_mod,
+	},
+#if 0
+	{
+		.codeid			= v640x480p_59d94_or_60Hz,
+		.video_hz		= v60Hz,
+		.i2c_0addr		= CY22393ADDR,
+		.open_clockdev		= &cy22393_open,
+		.open_freqdev		= &adv7842_open,
+		.i2c_0ordernumber	= I2C_NR_0,
+		.i2c_1ordernumber	= I2C_NR_1,
+		.open_uartdev		= &h46_open,
+		.clockset		= NULL, /* &refclk_74_25MHz, */
+		.pixefreq		= NULL, /* &HDMI_COMP_1080ix50_mod, */
+		.modopcodeset		= NULL, /* &v108050i_mod, */
 	},
 	{
 		/* 20160128 jh ,蓝屏 9999 */
@@ -878,19 +896,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.pixefreq		= NULL,
 		.modopcodeset		= NULL,
 	},
-	{
-		.codeid			= v1920x1080p_59d94_or_60Hz,
-		.video_hz		= v60Hz,
-		.i2c_0addr		= CY22393ADDR,
-		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
-		.i2c_0ordernumber	= I2C_NR_0,
-		.i2c_1ordernumber	= I2C_NR_1,
-		.open_uartdev		= &h46_open,
-		.clockset		= &refclk_148_5MHz,
-		.pixefreq		= &HDMI_COMP_1080px60_mod,
-		.modopcodeset		= &v108060p_mod,
-	},
+
 	{
 		.codeid			= v2880x480p_59d94_or_60Hz,
 		.video_hz		= v60Hz,
@@ -904,6 +910,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.pixefreq		= NULL,
 		.modopcodeset		= NULL,
 	},
+#endif
 };
 
 /* 100 Hz (40~45) */
@@ -1364,6 +1371,23 @@ int hdmi_detection( int opcode, int r_ratio )
 		break;
 #endif
 	case v60Hz:
+		if ( r_ratio == v1280x720p_59d94_or_60Hz )
+		{
+			r_ratio = v1280x720p_59d94_or_60Hz;
+			sprintf( config.localstatus.encoder_video_resolution, "1280x720 60p" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "720p" );
+			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
+		}
+
+
+		if ( r_ratio == v1920x1080i_59d94_or_60Hz )
+		{
+			r_ratio = v1920x1080i_59d94_or_60Hz;
+			sprintf( config.localstatus.encoder_video_resolution, "1920x1080 60i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "1080i" );
+			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
+		}
+
 		/* 10,11 */
 		if ( (r_ratio == v2880x480i_59d94_or_60Hz) || (r_ratio == v2880x480i_59d94_or_60Hz11) )
 		{
@@ -1521,12 +1545,6 @@ int hdmi_detection( int opcode, int r_ratio )
 	break;
 	}
 
-
-/*
- * DEBUG("encoder_video_input_lock = 0x%02x     ",config.localstatus.encoder_video_input_lock);
- * DEBUG("%d     r_ratio=%d",opcode,r_ratio);
- */
-
 	return(rest);
 }
 
@@ -1654,6 +1672,7 @@ static void hdmi_config( int opcode, int r_ratio )
 		{
 			r_ratio = v1440x480p_59d94_or_60Hz;
 		}
+
 
 		for ( i = 0; i < sizeof(hdmi_input_60_3Hz_mod) / sizeof(hdmi_input_60_3Hz_mod[0]); i++ )
 		{
@@ -1888,16 +1907,16 @@ void lcd_bkl_offon( uint8_t on_off )
  *  以此来自动确定在什么频率下，运行的辨率是多少，而
  *  自动设置运行。
  */
-void usercode_mod( int modcod, int ypbpr_cvbs )
+void usercode_mod( int modcod, int ypbpr_cvbs, int r_ratio )
 {
-	int opcode, r_ratio, i;
+	int opcode, i;
 
 	if ( modcod == -1 )
 		return;
 
-	opcode = freq_parse_token( r_ratio = read_vic() );
+	opcode = freq_parse_token( r_ratio );
 	/* opcode = v50Hz; //测试用。指定一个时钟频率 */
-	DEBUG( "........%d..%d..modcod=%d....", opcode, r_ratio, modcod );
+	DEBUG( "........opcode=%d..r_ratio=%d..modcod=%d....", opcode, r_ratio, modcod );
 
 
 	/*
@@ -2542,23 +2561,6 @@ int key_open()
 	}
 
 	return(keyfd);
-}
-
-
-/* static void gpio_configuar(void); */
-
-/* 读写反馈信息提示 */
-void rep_note( char *str )
-{
-	lcd_Write_String( 0, str );
-	lcd_Write_String( 1, "                " );
-}
-
-
-uint8_t Video_in_lock( void )
-{
-	DEBUG( "^^^^^-^^^^^\n" );
-	return(1);
 }
 
 

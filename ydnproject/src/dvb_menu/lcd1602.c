@@ -2227,6 +2227,18 @@ static void usb_wr_hander( int signum, siginfo_t *siginfo, void *not_used )
 }
 
 
+static int start_time_out( struct timeval tpstart )
+{
+	float		timeuse;
+	int		timer;
+	struct timeval	tpend;
+	gettimeofday( &tpend, NULL );
+	timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + (tpend.tv_usec - tpstart.tv_usec);
+	timer	= timeuse /= 1000;
+	return(timer);
+}
+
+
 static void lock_enter_input_prompt( int dsplay_status )
 {
 	lcd_clear( discontrl.lcdfd );
@@ -2240,6 +2252,23 @@ static void lock_enter_input_prompt( int dsplay_status )
 	snprintf( (char *) t_date, 17, " Enter password " );
 
 	change_stats( LOCKKEY_WOWN_S, 0, CURSOR_ON, CHAR_STATUS, 0 );
+}
+
+
+static void sys_start_timer( void )
+{
+	struct timeval tpstart;
+	gettimeofday( &tpstart, NULL );
+
+	while ( progr_bar != 0x40 )
+	{
+		usleep( 0 );
+		if ( start_time_out( tpstart ) >= 4000 )
+		{
+			progr_bar = 0x40;
+			break;
+		}
+	}
 }
 
 
@@ -2639,8 +2668,8 @@ int lcd_main( void )
 
 	sys_start_prompt();
 
-	while ( progr_bar != 0x40 )
-		nano_sleep( 0, 100 );
+	/* 检查是否启动完成，是否超时 */
+	sys_start_timer();
 
 	progr_bar_flag = 1;
 
@@ -2676,6 +2705,7 @@ int lcd_main( void )
 
 		if ( discontrl.record_auto_flag == USB_AUTO_HAND )
 		{
+			nano_sleep( 1, 0 );
 			auto_and_man_send_message();
 			start_machine			= 2;            /* 自动录制时，打开esc键 */
 			discontrl.record_auto_flag	= USB_OFF_HAND; /* 移出usb时再次有效 */

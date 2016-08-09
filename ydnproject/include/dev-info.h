@@ -218,12 +218,6 @@ int key_open( void );
 int lcd_open( void );
 
 
-void rep_note( char *str );
-
-
-uint8_t Video_in_lock( void );
-
-
 /* 7842 默认设置 */
 void default_7842();
 
@@ -234,7 +228,7 @@ void cvbs_def();
 void YPbPr_def();
 
 
-void usercode_mod( int modcod, int ypbpr_cvbs );
+void usercode_mod( int modcod, int ypbpr_cvbs, int);
 
 
 void adv_defualt_set();

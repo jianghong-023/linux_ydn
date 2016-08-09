@@ -37,7 +37,7 @@
 #define UEVENT_BUFFER_SIZE 2048
 
 
-usb_no_and_stat_t usb_dev_info;
+static usb_no_and_stat_t usb_dev_info;
 
 
 usb_no_and_stat_t *get_stata_path()
@@ -95,7 +95,9 @@ static int identify_act( char *status )
 	return(ret);
 }
 
-
+/*
+ * 移出设备
+ */
 int dev_umount( void  *usb_dev_info )      /* ok */
 {
 	usb_no_and_stat_t *usb_dev = (usb_no_and_stat_t *) usb_dev_info;
@@ -206,7 +208,10 @@ static void dev_mount( usb_no_and_stat_t  *usb_dev )
 	}
 }
 
-
+/*
+ * 设备挂载与移出
+ *
+ */
 static void dev_info_hand( char * status, usb_no_and_stat_t  *usb_dev )
 {
 	int ret_status = identify_act( status );
@@ -230,10 +235,10 @@ static void dev_info_hand( char * status, usb_no_and_stat_t  *usb_dev )
 /*
  * 设备搜索
  * devfile_parts  返回设备路径
- *
+ * n_part  0不支持分区，1 支持分区
  * 返回设备号
  */
-static int seach_dev( char *dev_no, usb_no_and_stat_t  *usb_dev )
+static int seach_dev( char *dev_no, usb_no_and_stat_t  *usb_dev, int n_part )
 {
 	int parts_num = -1, length, i;
 	length = strlen( dev_no );
@@ -252,10 +257,15 @@ static int seach_dev( char *dev_no, usb_no_and_stat_t  *usb_dev )
 
 					if ( dev_no[i] >= '1' && dev_no[i] < '9' )
 					{
-						usb_dev->part_num	= 1;
-						parts_num		= dev_no[i] - 48;
-						sprintf( usb_dev->devfile_parts[parts_num - 1], "/dev/%s", dev_no );
-
+						parts_num = dev_no[i] - 48;
+						if ( n_part == 1 )
+						{
+							usb_dev->part_num += 1;
+							sprintf( usb_dev->devfile_parts[parts_num - 1], "/dev/%s", dev_no );
+						}else{
+							usb_dev->part_num = 1;
+							sprintf( usb_dev->devfile_parts[parts_num - 1], "/dev/%s", dev_no );
+						}
 						break;
 					}else
 						break;
@@ -301,7 +311,7 @@ void thread_for_usb()
 		int ret = identify_act( status );
 		if ( ret == DEVACTT )
 		{
-			part_num = seach_dev( dev_ord, info_usb );
+			part_num = seach_dev( dev_ord, info_usb, 0 );
 			if ( part_num > 0 )
 				dev_info_hand( status, info_usb );
 		}else
