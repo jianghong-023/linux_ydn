@@ -9,7 +9,7 @@
 #include <gen_alltable.h>
 #include <common_conf.h>
 #include <key-ctl.h>
-
+#include <common_interface.h>
 #include <readbus.h>
 #include <writebus.h>
 #include <debug.h>
@@ -891,7 +891,13 @@ uint8_t usb_rec_enable()
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
 	discontrl.write_char_dig_status = 0x03;
 
-	if ( discontrl.usb_wr_flag == USBWRITESET )
+	if ( usb_probe() < 0 )
+	{
+		paren_menu();
+		return(-1);
+	}
+
+	if ( discontrl.usb_wr_flag == USBWRITESET || discontrl.usb_wr_flag == USBWRITECTL )
 		discontrl.usb_wr_flag = USBWRITESTART; /* ¿ªÆôÐ´ */
 
 	static char *Bandwidth[] = {
@@ -956,7 +962,7 @@ void runtime( int flag )
 }
 
 
-static int open_mem_fd()
+static int open_fd()
 {
 	int mfd;
 
@@ -971,7 +977,7 @@ static int open_mem_fd()
 }
 
 
-static void  close_mem_fd( int fd )
+static void  close_fd( int fd )
 {
 	close( fd );
 }
@@ -1015,6 +1021,7 @@ static void usb_bitrate( float *usbbitrate, uint8_t*mapbase )
 	bytecnt_1	= ( (byterate1_1 << 10) & 0x3fc00) + ( (byterate1_2 << 2) & 0x3fc) + ( (byterate1_3 >> 6) & 0x03);
 	delat_pcr_1	= ( (byterate1_3 & 0x3f) << 8) + (byterate1_4 & 0xff);
 	*usbbitrate	= divide( bytecnt_1 * 9 * 8 * 4, delat_pcr_1 );
+	
 }
 
 
@@ -1043,7 +1050,7 @@ static void mod_bitraet()
 	char	ch[20]	= "";
 	char	ch1[20] = "";
 	float	actbitrate;
-	int	fd = open_mem_fd();
+	int	fd = open_fd();
 	if ( fd < 0 )
 		return;
 
@@ -1051,14 +1058,14 @@ static void mod_bitraet()
 
 	if ( mapbase == MAP_FAILED )
 	{
-		close_mem_fd( fd );
+		close_fd( fd );
 
 		return;
 	}
 
 	atc_bitrate( &actbitrate, mapbase );
 	bitratr_destory( mapbase, (size_t) MAPBITRATE_SIZE );
-	close_mem_fd( fd );
+	close_fd( fd );
 	float maxbitrate = 9.36;
 	sprintf( ch, "Bitrate(Act/Max)" );
 	sprintf( ch1, " %.3fM/%.3fM", actbitrate / 100, maxbitrate );
@@ -1077,7 +1084,7 @@ void lock_dspbitraet( int flag )
 	video_status_lock();
 
 	float	actbitrate;
-	int	fd = open_mem_fd();
+	int	fd = open_fd();
 	if ( fd < 0 )
 		return;
 
@@ -1085,7 +1092,7 @@ void lock_dspbitraet( int flag )
 
 	if ( mapbase == MAP_FAILED )
 	{
-		close_mem_fd( fd );
+		close_fd( fd );
 
 		return;
 	}
@@ -1093,8 +1100,9 @@ void lock_dspbitraet( int flag )
 	atc_bitrate( &actbitrate, mapbase );
 
 	bitratr_destory( mapbase, (size_t) MAPBITRATE_SIZE );
-	close_mem_fd( fd );
-
+	close_fd( fd );
+	lcd_Write_String( 0, "                " );
+	lcd_Write_String( 1,  "                "  );
 
 	snprintf( ch, 16, "DVB-T %.3fM", dconfig->localstatus.cfig_ad9789_ftw_bpf );
 	snprintf( ch1, 16, "%s %.2fMbps", dconfig->localstatus.encoder_video_shrot_resolution, actbitrate / 100 );
@@ -1106,7 +1114,7 @@ void lock_dspbitraet( int flag )
 void usb_read_bitrate( float *usbrbitrate )
 {
 	float	usbbitrate;
-	int	fd = open_mem_fd();
+	int	fd = open_fd();
 	if ( fd < 0 )
 		return;
 
@@ -1114,7 +1122,7 @@ void usb_read_bitrate( float *usbrbitrate )
 
 	if ( mapbase == MAP_FAILED )
 	{
-		close_mem_fd( fd );
+		close_fd( fd );
 
 		return;
 	}
@@ -1122,9 +1130,10 @@ void usb_read_bitrate( float *usbrbitrate )
 	usb_bitrate( &usbbitrate, mapbase );
 
 	bitratr_destory( mapbase, (size_t) USBBITRATE_SIZE );
-	close_mem_fd( fd );
+	close_fd( fd );
 
 	*usbrbitrate = usbbitrate / 100;
+	
 }
 
 
@@ -1181,21 +1190,6 @@ uint8_t run_time()
 #endif
 
 
-/*
- * void int glob_count(int count)
- * {
- * return	g_signal_t.count = count;
- * }
- */
-
-
-/*
- * int test_glob_count()
- * {
- * DEBUG("count %d",g_signal_t.count);
- * return g_signal_t.count;
- * }
- */
 
 uint8_t run_time()
 {
@@ -2194,7 +2188,7 @@ void gener_table()
 	uint8_t network_name[16]	= { 0 };                                                                /* = "network-01"; */
 
 	snprintf( (char *) network_name, network_name_length + 1, (char *) dconfig->scfg_Param.stream_nit_network_name );
-	
+
 	int _nitversion = atoi( (const char *) &dconfig->scfg_Param.stream_nit_version_number );
 	if ( _nitversion < 0 )
 		_nitversion = NIT_VERSION;

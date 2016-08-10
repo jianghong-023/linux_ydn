@@ -209,7 +209,7 @@ struct  MenuItem	OnidCfg[1] = {
 };
 
 struct MenuItem StandardCfg[1] = {
-	{ 10, " Video Norm     ", &NullSubs, NULL, VideoCfg },
+	{ 1, " Video Norm     ", &NullSubs, NULL, VideoCfg },
 };
 
 struct MenuItem HueCfg[1] = {
@@ -442,7 +442,7 @@ struct  MenuItem RFOutCfg[1] = {        /* 调制器射频电平配置菜单 */
 
 
 struct MenuItem PrivateDataCfg[1] = {
-	{ 7, " Private data   ", &NullSubs, NULL, NitCfg },
+	{ 1, " Private data   ", &NullSubs, NULL, NitCfg },
 };
 
 struct MenuItem VersionNumberCfg[1] = {

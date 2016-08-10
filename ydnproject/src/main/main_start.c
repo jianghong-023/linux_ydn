@@ -362,7 +362,7 @@ static void main_loop( void )
 
 			optcode = pare_YPbPr_HDMI();
 			if ( optcode == -1 )
-				DEBUG( "pare YPbPr error" );
+				;//DEBUG( "pare YPbPr error" );
 
 			else if ( bakcode != optcode )
 			{
@@ -421,7 +421,7 @@ static void main_loop( void )
 
 			optcode = pare_cvbs();
 			if ( optcode == -1 )
-				DEBUG( "pare_cvbs error" );
+				;//DEBUG( "pare_cvbs error" );
 
 
 			else if ( bakcodecvbs != optcode )
@@ -485,6 +485,9 @@ static void main_loop( void )
 
 int main( int argc, char **argv )
 {
+	char			*strdt = SYS_SET_TIME;
+	set_system_time( strdt );
+	
 	all_config_s();
 
 	init_lcddefault_donfig();

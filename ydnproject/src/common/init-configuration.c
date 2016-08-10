@@ -48,7 +48,7 @@ static const struct {
 	{ "LcdTime",	    oLcdTime	    },
 	{ "PlayModle",	    oPlayMode	    },
 	{ "RecordModle",    oRecordModle    },
-	{ "AutoModle",    	oAutoModle    },
+	{ "AutoModle",	    oAutoModle	    },
 	{ "PMTPID",	    oPMTPID	    },
 	{ "PRCPID",	    oPRCPID	    },
 	{ "VideoPID",	    oVideoPID	    },
@@ -343,7 +343,7 @@ int set_nit_table_parm()
 		return(-1);
 	}
 	free( cfg_eit_t );
-//	DEBUG( "struct res=%d %d", res, sizeof(usr_cfg_eit_t) );
+/*	DEBUG( "struct res=%d %d", res, sizeof(usr_cfg_eit_t) ); */
 	close( fd );
 
 	return(0);
@@ -640,7 +640,7 @@ int config_read( const char *filename )
 					ret = 0;
 					break;          /* oProgramName */
 
-				case oAutoModle:   /* oProgramOutputEnable */
+				case oAutoModle:        /* oProgramOutputEnable */
 					memset( (char *) &config.scfg_Param.stream_usb_record_auto, 0, 8 );
 					strncpy( (char *) &config.scfg_Param.stream_usb_record_auto, p1, strlen( p1 ) + 1 );
 					ret = 0;
@@ -1530,7 +1530,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				}
 				break;
 
-				case oAutoModle: { 
+				case oAutoModle: {
 					char file_name[12];
 					if ( strncmp( firset_str, "AutoModle", sizeof(firset_str) ) == 0 )
 					{
@@ -2027,44 +2027,41 @@ void video_status_lock()
 		int optcode;
 
 		optcode = pare_YPbPr_HDMI();
-		if ( optcode == -1 )
+
+		switch ( optcode )
 		{
-			DEBUG( "pare_YPbPr_HDMI error" );
-		} else {
-			switch ( optcode )
-			{
-			case YPbPr1080Isign60Hz: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1920x1080 60i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "1080i" );
-			}
-			break;
-			case YPbPr1080Isign50Hz: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1920x1080 50i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "1080i" );
-			}
-			break;
-			case YPbPr720Psign50Hz: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1280x720 50i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "720i" );
-			}
-			break;
-			case YPbPr720Psign60Hz: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1280x720 60i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "720i" );
-			}
-			break;
-			default:
-				DEBUG( "Not find user code..." );
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_UNLOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "unknown" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "unknown" );
-				break;
-			}
+		case YPbPr1080Isign60Hz: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1920x1080 60i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "1080i" );
 		}
+		break;
+		case YPbPr1080Isign50Hz: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1920x1080 50i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "1080i" );
+		}
+		break;
+		case YPbPr720Psign50Hz: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1280x720 50i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "720i" );
+		}
+		break;
+		case YPbPr720Psign60Hz: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1280x720 60i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "720i" );
+		}
+		break;
+		default:
+			DEBUG( "Not find user code..." );
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_UNLOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "unknown" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "unknown" );
+			break;
+		}
+
 		DEBUG( "encoder_video_input_lock = 0x%02x", config.localstatus.encoder_video_input_lock );
 		DEBUG( "%s  %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
 	} else if ( (M_CVBS == config.scfg_Param.encoder_video_interface) )
@@ -2072,71 +2069,67 @@ void video_status_lock()
 		int optcode;
 
 		optcode = pare_cvbs();
-		if ( optcode == -1 )
-			DEBUG( "pare_cvbs error" );
 
-		else {
-			switch ( optcode )
-			{
-			case NTSC_60_ROW: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1440x480 60i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
-			}
-			break;
-			case NTSC_60_NOTROW: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1440x480 60i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
-			}
-			break;
-			case NTSC_50_NOTROW: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1440x576 50i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
-			}
-			break;
-			case NTSC_50_ROW: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1440x576 50i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
-			}
-			break;
+		switch ( optcode )
+		{
+		case NTSC_60_ROW: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1440x480 60i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
+		}
+		break;
+		case NTSC_60_NOTROW: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1440x480 60i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
+		}
+		break;
+		case NTSC_50_NOTROW: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1440x576 50i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
+		}
+		break;
+		case NTSC_50_ROW: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1440x576 50i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
+		}
+		break;
 
-			case PAL_60_ROW: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1440x480 60i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
-			}
-			break;
-			case PAL_60_NOTROW: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1440x480 60i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
-			}
-			break;
-			case PAL_50_NOTROW: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1440x576 50i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
-			}
-			break;
-			case PAL_50_ROW: {
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "1440x576 50i" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
-			}
-			break;
-			default:
+		case PAL_60_ROW: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1440x480 60i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
+		}
+		break;
+		case PAL_60_NOTROW: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1440x480 60i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
+		}
+		break;
+		case PAL_50_NOTROW: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1440x576 50i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
+		}
+		break;
+		case PAL_50_ROW: {
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_LOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "1440x576 50i" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
+		}
+		break;
+		default:
 
-			{
-				config.localstatus.encoder_video_input_lock = VIDEO_INPUT_UNLOCK;
-				sprintf( config.localstatus.encoder_video_resolution, "unknown" );
-				sprintf( config.localstatus.encoder_video_shrot_resolution, "unknown" );
-				DEBUG( "Not find user code..." );
-			}
-			break;
-			}
+		{
+			config.localstatus.encoder_video_input_lock = VIDEO_INPUT_UNLOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "unknown" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "unknown" );
+			DEBUG( "Not find user code..." );
+		}
+		break;
 		}
 	}
 }

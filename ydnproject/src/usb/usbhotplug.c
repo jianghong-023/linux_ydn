@@ -95,6 +95,7 @@ static int identify_act( char *status )
 	return(ret);
 }
 
+
 /*
  * 移出设备
  */
@@ -169,8 +170,15 @@ static void dev_mount( usb_no_and_stat_t  *usb_dev )
 	}
 
 	if ( p_dir == opendir( USB_DISK_MP ) )
-		mkdir( USB_DISK_MP, (0777) );
+	{
+		ret = mkdir( USB_DISK_MP, (0777) );
+	}
 	closedir( p_dir );
+	if ( ret == -1 )
+	{
+		memset( usb_dev->mount_path[i], 0, 100 );
+		return;
+	}
 
 	if ( usb_dev->part_num > 1 )
 	{
@@ -180,8 +188,13 @@ static void dev_mount( usb_no_and_stat_t  *usb_dev )
 	{
 		sprintf( tmpdir, USB_DISK_MP "/disk%d", index );
 		if ( p_dir == opendir( tmpdir ) )
-			mkdir( tmpdir, (0777) );
+			ret = mkdir( tmpdir, (0777) );
 		closedir( p_dir );
+
+		memset( usb_dev->mount_path[i], 0, 100 );
+
+		if ( ret == -1 )
+			return;
 
 		sprintf( usb_dev->mount_path[i], USB_DISK_MP "/disk%d/part%d", index, i );
 		mode_t mask = umask( 0777 );
@@ -192,15 +205,23 @@ static void dev_mount( usb_no_and_stat_t  *usb_dev )
 			if ( ret == -1 )
 			{
 				perror( "mkdir" );
+				memset( usb_dev->mount_path[i], 0, 100 );
 				continue;
 			}
 		}
 		closedir( p_dir );
 		++index;
 
+		if ( ret == -1 )
+			return;
+
 		ret = mount( usb_dev->devfile_parts[i], usb_dev->mount_path[i], "vfat", 0, "codepage=437,iocharset=iso8859-1" );
 		if ( ret == -1 )
+		{
 			perror( "mount()" );
+			memset( usb_dev->mount_path[i], 0, 100 );
+			return;
+		}
 
 		usb_dev->is_active = DEVACTT;
 
@@ -208,13 +229,13 @@ static void dev_mount( usb_no_and_stat_t  *usb_dev )
 	}
 }
 
+
 /*
  * 设备挂载与移出
  *
  */
-static void dev_info_hand( char * status, usb_no_and_stat_t  *usb_dev )
+static void dev_info_hand( int ret_status, usb_no_and_stat_t  *usb_dev )
 {
-	int ret_status = identify_act( status );
 	switch ( ret_status )
 	{
 	case DEVACTT: {
@@ -306,6 +327,11 @@ void thread_for_usb()
 
 		dev_no	= rindex( buf, '/' );
 		status	= strtok_r( buf, "@", &strtok_tmp_ptr );
+
+		if ( (!dev_no) || (!status) )
+			continue;
+
+		DEBUG( "dev_no = %s  status= %s", dev_no, status );
 		snprintf( dev_ord, strlen( dev_no ), "%s", dev_no + 1 );
 
 		int ret = identify_act( status );
@@ -313,9 +339,9 @@ void thread_for_usb()
 		{
 			part_num = seach_dev( dev_ord, info_usb, 0 );
 			if ( part_num > 0 )
-				dev_info_hand( status, info_usb );
-		}else
-			dev_info_hand( status, info_usb );
+				dev_info_hand( ret, info_usb );
+		}else if ( ret == DEVROMV )
+			dev_info_hand( ret, info_usb );
 	}
 }
 

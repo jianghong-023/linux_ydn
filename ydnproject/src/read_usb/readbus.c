@@ -85,7 +85,7 @@ static int			play_count		= 0;
 static struct read_bus init_bus_r = {
 	.bus_inttt.reset		= 0x01,
 	.bus_inttt.rest_usb_op		= 0x01,
-	.bus_inttt.usb_dir		= 0x01, /* 改0时为读 */
+	.bus_inttt.usb_dir			= 0x01, /* 改0时为读 */
 	.bus_inttt.usb_rdaddr_b3124	= 0x01, /* 地址读时为0x6400000 */
 	.bus_inttt.usb_rdaddr_b2316	= 0x40,
 	.bus_inttt.usb_rdaddr_b158	= 0x00,
@@ -579,7 +579,7 @@ static void chech_message()
 	{
 		float usbrbitrate;
 
-		double progressbar = ts_add_toal / ts_lenth * 100;;
+		double progressbar = ts_add_toal / ts_lenth * 100;
 
 		usb_read_bitrate( &usbrbitrate );
 
@@ -1067,7 +1067,7 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 	}
 	break;
 	case USB_SEGMENT: {
-		DEBUG( "=================" );
+		
 		if ( ts_archives( path, ts_name ) != -1 )
 		{
 			int node;
@@ -1079,12 +1079,12 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 			ts_lenth	= 1;
 			ts_add_toal	= 0;
 			play_count	= 0;
-			DEBUG( "=================" );
+			
 		}
 	}
 	break;
 	case USB_LOOP: {
-		DEBUG( "=================" );
+		
 		if ( ts_archives( path, ts_name ) != -1 )
 		{
 			int node;
@@ -1097,7 +1097,7 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 			ts_lenth	= 1;
 			ts_add_toal	= 0;
 			play_count	= 0;
-			DEBUG( "=================" );
+			
 		}
 	}
 	break;

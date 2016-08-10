@@ -28,7 +28,7 @@
 #define STOP_OP		0
 #define STAR_OP		1
 #define TMIEROUT	800000 * 9
-#define MAX_FREE	(2560)
+#define MAX_FREE	(100)
 #define MYTPF_MAX	100
 #define PATHLENGTH	150
 #define NAMESIZE	30
@@ -43,6 +43,7 @@ extern pthread_t	usb_sig;
 static uint8_t		* sharemem_base = NULL;
 static int8_t		stop		= 1;
 static int		r_time_out_flag = 0;
+static double		ts_lenth	= 0.0, ts_add_toal = 0.0;
 #define CPS		(1)
 #define BURST		(50)
 #define SEG_FLAG	(0x20)
@@ -489,6 +490,7 @@ static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *i
 		{
 			close( *sfd );
 			*wr_size	= 0;
+			ts_add_toal	= 0;
 			*sfd		= descriptor_generation( init_b, incom_count, off );
 			if ( *sfd < 0 )
 			{
@@ -509,6 +511,7 @@ static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *i
 			}
 			len		-= ret;
 			*wr_size	+= (ret / 1024 / 1024);
+			ts_add_toal++;
 		}
 
 
@@ -588,13 +591,16 @@ static int disk_check( void )
 		return(ret);
 
 	free_size = get_storage_dev_info( path, FREE_CAPACITY );
+	if ( free_size < 0 )
+		return(ret = -1);
+
 	if ( free_size < MAX_FREE )
 	{
 		fprintf( stderr, "%s", "USB space is too small" );
-		return(ret);
+		ret = -1;
 	}
 
-	return(0);
+	return(ret);
 }
 
 
@@ -693,8 +699,10 @@ static int  creat_job_thread( void *init_b )
 	pthread_attr_t	attr;
 	size_t		wr_size = 0;
 	config_read( get_profile()->script_configfile );
-	s_config	* dconfig	= config_t();
-	int		incom_count	= dconfig->scfg_Param.stream_usb_used_count;
+	s_config * dconfig = config_t();
+	ts_lenth	= dconfig->configParam.usb_tsfilesize;
+	ts_add_toal	= 0.0;
+	int incom_count = dconfig->scfg_Param.stream_usb_used_count;
 
 	if ( creat_thread( init_b, &attr ) != 0 )
 		return(result);
@@ -742,7 +750,6 @@ static int  creat_job_thread( void *init_b )
 	clean_date();
 
 	close( sfd );
-
 	_destroy( token );
 
 	desory_thread( init_b, &attr );
@@ -779,7 +786,7 @@ static void chech_message()
 		int len = strlen( tmp_dsplay );
 		snprintf( ch_1, len + 1, "%s", tmp_dsplay + 1 );
 		lcd_Write_String( 0, ch );
-		lcd_Write_String( 1, "               " );
+		lcd_Write_String( 1, "                " );
 		lcd_Write_String( 1, ch_1 );
 		count++;
 	}
@@ -788,11 +795,14 @@ static void chech_message()
 	{
 		float usbrbitrate;
 
+		double progressbar = ts_add_toal / ts_lenth * 100;
+
 		usb_read_bitrate( &usbrbitrate );
-		;
-		snprintf( ch_1, 16, "%s  %.2fM", dconfig->localstatus.encoder_video_resolution, usbrbitrate );
+
+
+		snprintf( ch_1, 16, "%.1f\%% %.2fM", progressbar, usbrbitrate );
 		lcd_Write_String( 0, ch );
-		lcd_Write_String( 1, "                " );
+		lcd_Write_String( 1, "               " );
 		lcd_Write_String( 1, ch_1 );
 		count++;
 	}
@@ -1012,7 +1022,7 @@ static int32_t writ_usb( void *usb_hand )
 	if ( is_usb_online() != DEVACTT )
 	{
 		discontrl_t()->usb_wr_flag = USBWRITESET;
-		return(ret);
+		goto goback;
 	}
 
 	for ( i = 0; i < get_stata_path()->part_num; i++ )
@@ -1028,13 +1038,15 @@ static int32_t writ_usb( void *usb_hand )
 	if ( ret < 0 )
 	{
 		DEBUG( "path error" );
-		return(ret);
+		ret = -1;
+		goto goback;
 	}
 
 	if ( path == NULL )
 	{
-		discontrl_t()->usb_wr_flag = USBWRITESET;
-		return(ret);
+		discontrl_t()->usb_wr_flag	= USBWRITESET;
+		ret				= -1;
+		goto goback;
 	}
 
 
@@ -1043,9 +1055,9 @@ static int32_t writ_usb( void *usb_hand )
 		lcd_Write_String( 0, " USB space is - " );
 		lcd_Write_String( 1, " too small      " );
 		nano_sleep( 1, 0 );
-		paren_menu();
-		discontrl_t()->usb_wr_flag = USBWRITESET;
-		return(ret);
+		discontrl_t()->usb_wr_flag	= USBWRITESET;
+		ret				= -1;
+		goto goback;;
 	}
 
 	usb_operation_t *usb_action = (usb_operation_t *) usb_hand;
@@ -1053,14 +1065,15 @@ static int32_t writ_usb( void *usb_hand )
 
 	if ( usb_action->is_start == START_STOP )
 	{
-		discontrl_t()->usb_wr_flag = USBWRITESET;
-		return(ret);
+		discontrl_t()->usb_wr_flag	= USBWRITESET;
+		ret				= -1;
+		goto goback;
 	}
 
 
 	usb_write_handler( path, usb_action->ts_size, usb_action->op_mod );
 
-
+goback:
 	stop_alarm();
 	signal_close();
 
@@ -1076,7 +1089,7 @@ static int32_t writ_usb( void *usb_hand )
 		paren_menu();
 	}else
 		current_menu();
-	return(0);
+	return(ret);
 }
 
 

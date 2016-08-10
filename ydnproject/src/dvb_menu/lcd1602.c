@@ -67,6 +67,9 @@ static void sighandler_str( int sgn );
 static void monitor_opt( int coder, int flags );
 
 
+static void sys_start_prompt( void );
+
+
 static void set_rtr_arr( signed char userChoose, signed char displaystart, uint8_t subscripts );
 
 
@@ -1614,8 +1617,8 @@ static void menu_selected_cfg( char **arr, int size, char *cfgmenu )
 		if ( discontrl.updownchoose >= size ) /* 不能超过本数据大小 */
 			discontrl.updownchoose = 0;
 		/* 光标状态 */
-
 		curos_dsp( LCD_CHAR_ARR );
+
 		/* 接受配置数据 */
 		int /*i,*/	arr_size;
 		char		*arr_cfg = arr[discontrl.updownchoose];
@@ -1633,7 +1636,6 @@ static void menu_selected_cfg( char **arr, int size, char *cfgmenu )
 		{
 			if ( strncasecmp( discontrl.cechebuf, "Yes", strlen( discontrl.cechebuf ) - 1 ) == 0 )
 				auto_and_man_send_message();
-
 			discontrl.usb_wr_flag = USBWRITECTL;
 		}else if ( discontrl.menu_cfg_fun != &null_Subcfg )
 		{
@@ -2196,7 +2198,7 @@ void stop_alarm( void )
  */
 void start_alarm( void )
 {
-	if ( setitimer( ITIMER_REAL, set_alrm( 1, 0, 1, 0 ), NULL ) < 0 )
+	if ( setitimer( ITIMER_REAL, set_alrm( 0, 100000, 1, 0 ), NULL ) < 0 )
 	{
 		fprintf( stderr, "%s: %d: %s\n", __FUNCTION__, __LINE__, strerror( errno ) );
 		exit( 1 );
@@ -2258,17 +2260,43 @@ static void lock_enter_input_prompt( int dsplay_status )
 static void sys_start_timer( void )
 {
 	struct timeval tpstart;
+
+	sys_start_prompt();
+
 	gettimeofday( &tpstart, NULL );
 
 	while ( progr_bar != 0x40 )
 	{
-		usleep( 0 );
 		if ( start_time_out( tpstart ) >= 4000 )
 		{
 			progr_bar = 0x40;
 			break;
 		}
 	}
+
+	progr_bar_flag = 1;
+
+	if ( sysstart == 0 )
+		sysstart = 1;
+}
+
+
+static void stream_info( void )
+{
+	stop_alarm();
+	start_alarm();
+	set_state_desplay( MONITOER_TRUE, NORMAL_DESPLAY_START, NORMAL_DESPLAY_FLAG );
+	function_inter( lock_dspbitraet );
+}
+
+
+static void close_info( void )
+{
+	set_state_desplay( MONITOER_TRUE, NORMAL_DESPLAY_STOP, NORMAL_DESPLAY_FLAG );
+	function_inter( lock_dspbitraet );
+	reset_desplay();
+	stop_alarm();
+	signal_close();
 }
 
 
@@ -2304,6 +2332,7 @@ void ChangeMenu( int keySigNum )
 	{
 		if ( keynumber != lock )
 		{
+			stream_info();
 			return;
 		}
 	}
@@ -2435,20 +2464,13 @@ __agin:
 			if ( lock_count > 1 )
 			{
 				lock_count = 0;
-				set_state_desplay( MONITOER_TRUE, NORMAL_DESPLAY_STOP, NORMAL_DESPLAY_FLAG );
-				function_inter( lock_dspbitraet );
-				reset_desplay();
-				stop_alarm();
-				signal_close();
+				close_info();
 				paren_menu();
 				lockcount = 0;
 			}
 			if ( lock_count == 1 )
 			{
-				stop_alarm();
-				start_alarm();
-				set_state_desplay( MONITOER_TRUE, NORMAL_DESPLAY_START, NORMAL_DESPLAY_FLAG );
-				function_inter( lock_dspbitraet );
+				stream_info();
 				start_machine = 2;
 				return;
 				break;
@@ -2457,8 +2479,11 @@ __agin:
 		}
 
 		if ( lockcount == 1 )
+		{
+			stream_info();
 			if ( keynumber != lock )
 				return;
+		}
 	}
 
 
@@ -2579,10 +2604,8 @@ static void  monitor_opt( int coder, int flags )
  */
 void user_desplay_monitor( void )
 {
-	char			*strdt = SYS_SET_TIME;
-	struct sigaction	sig;
+	struct sigaction sig;
 
-	set_system_time( strdt );
 
 	function_inter( null_handler );
 	sig.sa_handler = alrm_hander;
@@ -2651,12 +2674,15 @@ static void sys_start_prompt( void )
 }
 
 
+/* #define debug_call */
 int lcd_main( void )
 {
 	int flag = 0;
 
-
+/* debug */
+#if debug_call
 	dev_config_printf();
+#endif
 
 	discontrl.lcdfd = lcd_open();
 	lcd_clear( discontrl.lcdfd ); /* 并清除内存 */
@@ -2666,15 +2692,9 @@ int lcd_main( void )
 	flag = fcntl( discontrl.keyfd, F_GETFL );
 	fcntl( discontrl.keyfd, F_SETFL, flag | FASYNC );
 
-	sys_start_prompt();
 
 	/* 检查是否启动完成，是否超时 */
 	sys_start_timer();
-
-	progr_bar_flag = 1;
-
-	if ( sysstart == 0 )
-		sysstart = 1;
 
 	cursor_onoff( discontrl.lcdfd, LCD_SUROS_ONOFF, 0x00 );
 

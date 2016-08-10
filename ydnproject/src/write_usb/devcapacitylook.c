@@ -19,6 +19,9 @@ int get_storage_dev_info(char * mount_point,int option)
 	uint64_t tota_bytes  = 0;
 	int end_space	= 0;
 
+	if(!mount_point)
+		return -2;
+	
 	if (ERR == statfs(mount_point, &stat_fs)) {
 		perror("get_storage_dev_info()\n");
 		return -1;
