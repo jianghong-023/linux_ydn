@@ -576,6 +576,9 @@ static int disk_check( void )
 	int	free_size, ret = -1, i;
 	char	path[100] = "";
 
+	if ( !get_stata_path() )
+		return(ret);
+
 	for ( i = 0; i < get_stata_path()->part_num; i++ )
 	{
 		if ( get_stata_path()->mount_path[i] != NULL )
@@ -587,8 +590,9 @@ static int disk_check( void )
 		}
 	}
 
-	if ( ret < 0 )
+	if ( ret < 0 || path==NULL )
 		return(ret);
+
 
 	free_size = get_storage_dev_info( path, FREE_CAPACITY );
 	if ( free_size < 0 )
@@ -1062,6 +1066,8 @@ static int32_t writ_usb( void *usb_hand )
 
 	usb_operation_t *usb_action = (usb_operation_t *) usb_hand;
 
+	if(!usb_action)
+		goto goback;
 
 	if ( usb_action->is_start == START_STOP )
 	{

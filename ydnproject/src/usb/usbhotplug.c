@@ -103,9 +103,13 @@ int dev_umount( void  *usb_dev_info )      /* ok */
 {
 	usb_no_and_stat_t *usb_dev = (usb_no_and_stat_t *) usb_dev_info;
 
+
 	int i = 0, ret = -1;
 
 	int index = 0;
+
+	if ( !usb_dev )
+		return(ret);
 
 	if ( usb_dev->flag_off == 0 )
 	{
@@ -130,7 +134,7 @@ int dev_umount( void  *usb_dev_info )      /* ok */
 
 	for (; i < usb_dev->part_num; i++ )
 	{
-		if ( !usb_dev->mount_path[i] )
+		if ( !usb_dev->mount_path || !usb_dev->mount_path[i] )
 		{
 			DEBUG( "directory does not exist" );
 			break;
