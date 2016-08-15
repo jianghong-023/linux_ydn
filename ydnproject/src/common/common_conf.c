@@ -38,9 +38,13 @@ struct MenuItem MainMenu[6] = {                                                 
 struct MenuItem sysStatus[4] = {
 	{ 4, " Encoder Stat   ", &NullSubs,	  EncoderStatus, MainMenu },
 	{ 4, " Modulator Stat ", &mbitrate,	  NULL,		 MainMenu },
-	{ 4, " Alarm stat     ", &NullSubs,	  Status,	 MainMenu },    /* ok */
-	{ 4, " System Stat    ", &systemstat_cfg, NULL,		 MainMenu },    /* ok */
+	{ 4, " Alarm stat     ", &systemstat_cfg,	  NULL,	 MainMenu },    /* ok */
+	{ 4, " System Stat    ", &NullSubs, Status,		 MainMenu },    /* ok */
 };
+
+//struct  MenuItem	ModulatorStatus[1] ={
+//	{ 1, " Modulator Stat ", &NullSubs,	  NULL,		 sysStatus },
+//};
 
 struct  MenuItem *MenuPoint = MainMenu;
 

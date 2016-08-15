@@ -395,6 +395,7 @@ void get_state_desplay( int *monitor_flag, int *coder, int *flags );
 
 void set_state_desplay( int monitor_flag, int coder, int flags );
 
+void set_status_ret( int flags );
 
 void function_inter( loopdsplay desplay );
 

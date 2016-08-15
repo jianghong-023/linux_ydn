@@ -35,7 +35,7 @@ extern int socket_event( void );
 extern void listen_info( void );
 
 
-#define MAX_NAME		16
+#define MAX_NAME		17
 #define TS_FILE_NAME_LENGTH	(30)
 #define TS_FILE_PATH_LENGTH	(150)
 
@@ -58,7 +58,7 @@ typedef struct _bus_init_ {
 	uint8_t write_bus_reset;
 	uint8_t write_bus_reset_2;
 
-	char		usb_tsfilename[16];
+	char		usb_tsfilename[17];
 	uint32_t	usb_tsfilesize;
 } bus_init;
 
@@ -87,8 +87,8 @@ typedef struct _cfg_param_ {
 
 	uint8_t		encoder_audio_format;
 	uint8_t		encoder_program_output[8];
-	uint8_t		encoder_program_name[16];
-	uint8_t		encoder_service_name[16];
+	uint8_t		encoder_program_name[17];
+	uint8_t		encoder_service_name[17];
 	uint8_t		encoder_program_number[6];
 	uint8_t		encoder_pmt_pid[5];
 	uint8_t		encoder_pcr_pid[5];
@@ -122,7 +122,7 @@ typedef struct _cfg_param_ {
 	uint32_t	stream_tsid;
 	uint32_t	stream_onid;
 	uint8_t		stream_nit_network_id[5];
-	uint8_t		stream_nit_network_name[16];
+	uint8_t		stream_nit_network_name[17];
 	uint8_t		stream_nit_version_mode;
 	uint8_t		stream_nit_version_number[2];
 	uint8_t		stream_nit_lcn_mode;
@@ -152,6 +152,7 @@ typedef struct _cfg_param_ {
 	uint8_t system_version_hw[4];
 	uint8_t system_root_pwd[7];
 	uint8_t system_def_root_pwd[7];
+	uint32_t system_restart_flag;
 
 	int	encoder_video_ratemode_fre;
 	int	encoder_video_bitrate;
@@ -177,8 +178,8 @@ typedef struct _cfg_param_ {
 typedef struct _local_status_ {
 /* encoder */
 	uint8_t encoder_video_input_lock; /* 0x01 */
-	char	encoder_video_resolution[16];
-	char	encoder_video_shrot_resolution[16];
+	char	encoder_video_resolution[17];
+	char	encoder_video_shrot_resolution[17];
 	uint8_t encoder_video_ident;
 /* modulator */
 /*
@@ -240,6 +241,7 @@ typedef struct _dsplay_signal_set_ {
 	uint32_t	user_opt_coder;
 	uint32_t	user_dsplay_flag;
 	uint32_t	auto_monitor_flag;
+	uint32_t	status_ret;
 }DSPLAY_SIGNAL_SET_T;
 
 

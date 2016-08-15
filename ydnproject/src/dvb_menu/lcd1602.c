@@ -44,6 +44,7 @@ extern struct  MenuItem * MenuPoint;
 extern uint8_t		t_date[16];
 extern struct cache_t	*cachep;
 extern int		progr_bar;
+extern DSPLAY_SIGNAL_SET_T* get_DSPLAY_SIGNAL_SET_T();
 
 
 extern void gpiocfg( struct h64_gpio_et_cfg_t *pcfg );
@@ -1384,6 +1385,29 @@ static void auto_and_man_send_message( void )
 }
 
 
+char * string_cheack( char * opstr, char *str, int size )
+{
+	int i;
+
+	if ( size != 16 )
+	{
+		snprintf( opstr, size + 1, "%s", str );
+		i = size;
+
+		for (; i < 16; i++ )
+			opstr[i] = ' ';
+		DEBUG( "%s  %d", opstr, i );
+	} else {
+		if ( size > 16 )
+			size = 16;
+
+		snprintf( opstr, size + 1, "%s", str );
+	}
+
+	return(opstr);
+}
+
+
 /* 文件及字符串显示处理，用于处理文件名称及其它字符串处理 */
 static char* display_input_str( char *str, int size, int *lenth )
 {
@@ -1392,7 +1416,7 @@ static char* display_input_str( char *str, int size, int *lenth )
 	 * 然后在第一行写入选择项
 	 * 若不是第一次操作，就无需做清屏操作，更无需写入选着项
 	 */
-	static char	*bak_str, str_[16];
+	static char	*bak_str, str_[17];
 	static int	count		= 0, bakcount;/* bakcount 是要记录自加之前的数据，之后数据会造成数据位的加1或者减1 */
 	static int	pos		= 0, ch_count = 0;
 	char		*re_orfbuf	= NULL;
@@ -1400,7 +1424,9 @@ static char* display_input_str( char *str, int size, int *lenth )
 
 	if ( discontrl.recoredFrist == DEFAULTE )
 	{
-		ch_count		= receive_ds_str( str_, str, size );
+		char tmpbuf[17] = "";
+		string_cheack( tmpbuf, str, size );
+		ch_count		= receive_ds_str( str_, tmpbuf, size );
 		bak_str			= strdup( str );
 		discontrl.affirmRecode	= 0; /* 进入时此值已经为1了，所以要清掉 */
 	}
@@ -1649,6 +1675,21 @@ static void menu_selected_cfg( char **arr, int size, char *cfgmenu )
 			write_char( strlen( arr[discontrl.updownchoose] ), 2, CHANGE_G, discontrl.cechebuf );
 			discontrl.changemenuflag = ~CHAR_INPUT_ON;
 		}
+
+		s_config *dconfig = config_t();
+		if ( dconfig->scfg_Param.system_restart_flag == SYS_RESTART )
+		{
+			lcd_Write_String( 0, "The system is b-" );
+			lcd_Write_String( 1, "eing restarted.." );
+			nano_sleep( 1, 0 );
+			cursor_onoff( discontrl.lcdfd, LCD_SUROS_ONOFF, 0x00 );
+			stop_alarm();
+			lcd_clear( discontrl.lcdfd );
+			lcd_bkl_offon( LCD_LIGHT_OF );
+
+			while ( 1 )
+				;
+		}
 	}
 
 	break;
@@ -1864,7 +1905,7 @@ static void function_call()
 				int ret = system_script_config( &discontrl, org_str, 3 );
 				if ( !ret )
 				{
-					DEBUG( "%s %d\n", org_str, lenth );
+					/* DEBUG( "%s %d\n", org_str, lenth ); */
 					free( org_str );
 				}
 			}
@@ -2310,6 +2351,7 @@ void ChangeMenu( int keySigNum )
 	if ( !progr_bar_flag )
 		return;
 
+
 /* 清理定时器 */
 	cl_time();
 	last_time();
@@ -2347,6 +2389,7 @@ void ChangeMenu( int keySigNum )
 	{
 	case USB_WRITE:
 	case USB_READ: {
+		DEBUG("%0x ",keynumber);
 		if ( keynumber != esc )
 		{
 			stop_alarm();
@@ -2364,10 +2407,28 @@ void ChangeMenu( int keySigNum )
 
 	case NORMAL_SIG: {
 		if ( keynumber != enter )
-			return;
+		{
+				return;
+		}
 	}
 	break;
 	}
+
+	extern int time_cheack_flag;
+//	DEBUG("%0x ",keynumber);
+//	if ( get_DSPLAY_SIGNAL_SET_T()->status_ret== MONITOER_TRUE )
+//	{
+//		get_DSPLAY_SIGNAL_SET_T()->status_ret = MONITOER_FALSE;
+		
+//		if ( keynumber == esc )
+//		{
+//			DEBUG("%0x ",keynumber);
+//			time_cheack_flag = 1;
+//			stop_alarm();
+//			signal_close();
+//			keynumber = enter;
+//		}else return;
+//	}
 
 /* 密码检测 */
 	lck_stut();
@@ -2482,7 +2543,9 @@ __agin:
 		{
 			stream_info();
 			if ( keynumber != lock )
+			{
 				return;
+			}
 		}
 	}
 

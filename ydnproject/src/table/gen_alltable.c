@@ -278,6 +278,7 @@ void set_pat_table( uint16_t program_number, uint16_t pmt_pid, uint8_t pat_versi
 	usr_pat_t = calloc( 1, sizeof(usr_cfg_pat_t) );
 	if ( !usr_pat_t )
 		return;
+	DEBUG("PMT PID:%d",pmt_pid);
 	usr_pat_t->max_num_program	= MAX_NUM_PROGRAM;
 	usr_pat_t->pat_current_next	= PAT_CURRENT_NEXT;
 	usr_pat_t->pat_pid		= pmt_pid;
@@ -460,7 +461,7 @@ void set_pmt_table( uint16_t audio_pid, uint16_t video_pid,
 	usr_pmt_t = calloc( 1, sizeof(usr_cfg_pmt_t) );
 	if ( !usr_pmt_t )
 		return;
-
+DEBUG("PMT PID:%d",pmt_pid);
 	usr_pmt_t->audio_pid[0]		= audio_pid;
 	usr_pmt_t->audio_pid[1]		= audio_pid;
 	usr_pmt_t->pcr_pid		= pcr_pid;

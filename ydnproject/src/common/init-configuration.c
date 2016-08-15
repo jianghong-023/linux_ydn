@@ -168,7 +168,7 @@ cgf_stor_data stor_data[] = {
 	{ "320_kbps",	       0x140	       },
 	{ "384_kbps",	       0x180	       },
 
-	{ "MPEG-2",	       0x00	       },
+	{ "MPEG-2",	       		0x00	       },
 	{ "MPEG-2-AAC",	       0x01	       },
 	{ "MPEG-4-AAC",	       0x02	       },
 
@@ -573,7 +573,7 @@ int config_read( const char *filename )
 				break;
 
 				case oTsFileName:
-					memset( config.configParam.usb_tsfilename, 0, 16 );
+					memset( config.configParam.usb_tsfilename, 0, 17 );
 					strncpy( config.configParam.usb_tsfilename, p1, strlen( p1 ) );
 					ret = 0;
 					break;

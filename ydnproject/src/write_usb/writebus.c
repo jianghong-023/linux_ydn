@@ -374,7 +374,7 @@ int fetch_token( usb_token *ptr, int size )
 	{
 		nano_sleep( 0, 10 );
 
-		if ( r_time_out( tpstart ) >= 1000 )
+		if ( r_time_out( tpstart ) >= 2000 )
 		{
 			break;
 		}
@@ -590,7 +590,7 @@ static int disk_check( void )
 		}
 	}
 
-	if ( ret < 0 || path==NULL )
+	if ( ret < 0 || path == NULL )
 		return(ret);
 
 
@@ -886,7 +886,7 @@ static void inter_signal( uint8_t *map_addr )
 	while ( map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] != 1 )
 	{
 		usleep( 0 );
-		if ( r_time_out( tpstart ) >= 1000 )
+		if ( r_time_out( tpstart ) >= 2000 )
 		{
 			r_time_out_flag = 1;
 
@@ -1066,7 +1066,7 @@ static int32_t writ_usb( void *usb_hand )
 
 	usb_operation_t *usb_action = (usb_operation_t *) usb_hand;
 
-	if(!usb_action)
+	if ( !usb_action )
 		goto goback;
 
 	if ( usb_action->is_start == START_STOP )

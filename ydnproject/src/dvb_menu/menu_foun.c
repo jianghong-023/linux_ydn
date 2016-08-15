@@ -31,6 +31,8 @@ static loopdsplay desplay_hand;
 
 static usb_handler usb_wrhandler;
 
+int time_cheack_flag = 0;
+
 static _stream_info wr_stream_info;
 
 extern uint8_t write_bus( void );
@@ -128,7 +130,13 @@ static DSPLAY_SIGNAL_SET_T signal_init_t =
 	.user_opt_coder		= NONE,
 	.user_dsplay_flag	= NONE,
 	.auto_monitor_flag	= MONITOER_FALSE,
+	.status_ret = MONITOER_FALSE,
 };
+
+DSPLAY_SIGNAL_SET_T* get_DSPLAY_SIGNAL_SET_T( void )
+{
+	return(&signal_init_t);
+}
 
 
 void function_inter( loopdsplay desplay )
@@ -153,6 +161,11 @@ void set_state_desplay( int monitor_flag, int coder, int flags )
 	signal_init_t.auto_monitor_flag = monitor_flag;
 	signal_init_t.user_opt_coder	= coder;
 	signal_init_t.user_dsplay_flag	= flags;
+}
+
+void set_status_ret( int flags )
+{
+	signal_init_t.status_ret= flags;
 }
 
 
@@ -701,7 +714,7 @@ uint8_t video_bitrate()
 
 
 	int get_value = dconfig->scfg_Param.encoder_video_bitrate;
-	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 9000, 0, INPUT_DIGIT_STATUS, input_lenth, &text_videotare_save );
+	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 20000, 0, INPUT_DIGIT_STATUS, input_lenth, &text_videotare_save );
 
 	return(0);
 }
@@ -787,28 +800,14 @@ uint8_t nit_version_numb()  /* PrivateData */
 uint8_t PrivateData()  /*  */
 {
 	init_cache();
-	char		filename[16];
+	char		filename[17];
 	s_config	*dconfig = config_t();
-	memset( filename, 0, 16 );
+	memset( filename, 0, 17 );
 
 	int write_size = strlen( (char *) dconfig->scfg_Param.stream_nit_private_data );
 
-	int i;
-	if ( write_size != 8 )
-	{
-		snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.stream_nit_private_data );
-		i = write_size;
 
-		for (; i < 8; i++ )
-			filename[i] = '0';
-		DEBUG( "%d  %d", write_size, i );
-	} else {
-		if ( write_size > 8 )
-			write_size = 8;
-
-		snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.stream_nit_private_data );
-	}
-
+	snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.stream_nit_private_data );
 	cfg_discontrl_c( CHAR_STATUS, CURSOR_ON, filename, 8, 8, text_PrivateData_save, NULL );
 
 
@@ -819,9 +818,9 @@ uint8_t PrivateData()  /*  */
 uint8_t language_Cfg()  /*  */
 {
 	init_cache();
-	char		filename[16];
+	char		filename[17];
 	s_config	*dconfig = config_t();
-	memset( filename, 0, 16 );
+	memset( filename, 0, 17 );
 
 
 	if ( dconfig->scfg_Param.encoder_eit_now_eventname == NULL )
@@ -953,12 +952,6 @@ void runtime( int flag )
 		key_input_char( 1 + i, ch[i], CHANGE_G, discontrl.lcdfd );
 
 	b_day = day;
-
-
-/*
- * if(flag == SYS_RUN_TIME_STOP)
- *              reset_desplay();
- */
 }
 
 
@@ -1021,7 +1014,6 @@ static void usb_bitrate( float *usbbitrate, uint8_t*mapbase )
 	bytecnt_1	= ( (byterate1_1 << 10) & 0x3fc00) + ( (byterate1_2 << 2) & 0x3fc) + ( (byterate1_3 >> 6) & 0x03);
 	delat_pcr_1	= ( (byterate1_3 & 0x3f) << 8) + (byterate1_4 & 0xff);
 	*usbbitrate	= divide( bytecnt_1 * 9 * 8 * 4, delat_pcr_1 );
-	
 }
 
 
@@ -1102,7 +1094,7 @@ void lock_dspbitraet( int flag )
 	bitratr_destory( mapbase, (size_t) MAPBITRATE_SIZE );
 	close_fd( fd );
 	lcd_Write_String( 0, "                " );
-	lcd_Write_String( 1,  "                "  );
+	lcd_Write_String( 1, "                " );
 
 	snprintf( ch, 16, "DVB-T %.3fM", dconfig->localstatus.cfig_ad9789_ftw_bpf );
 	snprintf( ch1, 16, "%s %.2fMbps", dconfig->localstatus.encoder_video_shrot_resolution, actbitrate / 100 );
@@ -1133,7 +1125,6 @@ void usb_read_bitrate( float *usbrbitrate )
 	close_fd( fd );
 
 	*usbrbitrate = usbbitrate / 100;
-	
 }
 
 
@@ -1190,7 +1181,6 @@ uint8_t run_time()
 #endif
 
 
-
 uint8_t run_time()
 {
 	static int count = 0;
@@ -1217,6 +1207,13 @@ uint8_t mbitrate()
 {
 	static int count = 0;
 	signal_open( NORMAL_SIG );
+
+	if ( time_cheack_flag )
+	{
+		count			= 0;
+		time_cheack_flag	= 0;
+	}
+
 	if ( !count )
 	{
 		start_alarm();
@@ -1371,30 +1368,13 @@ uint8_t next_eventname_Cfg() /*  */
 uint8_t program_name()
 {
 	init_cache();
-	char		filename[16];
+	char		filename[17];
 	s_config	*dconfig = config_t();
-	memset( filename, ' ', 16 );
+	memset( filename, ' ', 17 );
 
 	int write_size = strlen( (char *) dconfig->scfg_Param.encoder_program_name );
 
-	int i;
-
-
-	if ( write_size != 15 )
-	{
-		snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.encoder_program_name );
-		i = write_size;
-
-		for (; i < 15; i++ )
-			filename[i] = ' ';
-		DEBUG( "%d  %d", write_size, i );
-	} else {
-		if ( write_size > 15 )
-			write_size = 15;
-
-		snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.encoder_program_name );
-	}
-
+	snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.encoder_program_name );
 	cfg_discontrl_c( CHAR_STATUS, CURSOR_ON, filename, 16, write_size, text_Programname_save, NULL );
 
 
@@ -1405,28 +1385,13 @@ uint8_t program_name()
 uint8_t Service_name()
 {
 	init_cache();
-	char		filename[16];
+	char		filename[17];
 	s_config	*dconfig = config_t();
-	memset( filename, 0, 16 );
+	memset( filename, 0, 17 );
 
 	int write_size = strlen( (char *) dconfig->scfg_Param.encoder_service_name );
 
-	int i;
-
-	if ( write_size != 16 )
-	{
-		snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.encoder_service_name );
-		i = write_size - 1;
-
-		for (; i < 15; i++ )
-			filename[i] = ' ';
-		DEBUG( "%d  %d", write_size, i );
-	} else {
-		if ( write_size > 15 )
-			write_size = 15;
-
-		snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.encoder_service_name );
-	}
+	snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.encoder_service_name );
 
 	cfg_discontrl_c( CHAR_STATUS, CURSOR_ON, filename, 16, write_size, text_servername_save, NULL );
 
@@ -1544,6 +1509,12 @@ uint8_t systemstat_cfg()
 	static int count = 0;
 	signal_open( NORMAL_SIG );
 
+	if ( time_cheack_flag )
+	{
+		count			= 0;
+		time_cheack_flag	= 0;
+	}
+
 	if ( !count )
 	{
 		start_alarm();
@@ -1632,28 +1603,14 @@ void passwrd_filename_save( char *orgbuf, char *repbuf )
 uint8_t ts()
 {
 	init_cache();
-	char		filename[16];
+	char		filename[17];
 	s_config	*dconfig = config_t();
-	memset( filename, 0, 16 );
+	memset( filename, 0, 17 );
 
-	int	write_size = strlen( dconfig->configParam.usb_tsfilename );
-	int	i;
-	if ( write_size != 10 )
-	{
-		snprintf( filename, write_size + 1, "%s", dconfig->configParam.usb_tsfilename );
-		i = write_size;
+	int write_size = strlen( dconfig->configParam.usb_tsfilename );
 
-		for (; i < 10; i++ )
-			filename[i] = ' ';
-		DEBUG( "%d  %d", write_size, i );
-	} else {
-		if ( write_size > 10 )
-			write_size = 10;
-
-		snprintf( filename, write_size + 1, "%s", dconfig->configParam.usb_tsfilename );
-	}
-
-	cfg_discontrl_c( CHAR_STATUS, CURSOR_ON, filename, 10, 10, str_filename_save, NULL );
+	snprintf( filename, write_size + 1, "%s", dconfig->configParam.usb_tsfilename );
+	cfg_discontrl_c( CHAR_STATUS, CURSOR_ON, filename, 10, write_size, str_filename_save, NULL );
 
 	return(0);
 }
@@ -1666,23 +1623,9 @@ uint8_t network_name()
 	s_config	*dconfig = config_t();
 	memset( filename, 0, 16 );
 
-	int	write_size = strlen( (char *) dconfig->scfg_Param.stream_nit_network_name );
-	int	i;
-	if ( write_size != 10 )
-	{
-		snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.stream_nit_network_name );
-		i = write_size;
+	int write_size = strlen( (char *) dconfig->scfg_Param.stream_nit_network_name );
 
-		for (; i < 10; i++ )
-			filename[i] = ' ';
-		DEBUG( "%d  %d", write_size, i );
-	} else {
-		if ( write_size > 10 )
-			write_size = 10;
-
-		snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.stream_nit_network_name );
-	}
-
+	snprintf( filename, write_size + 1, "%s", dconfig->scfg_Param.stream_nit_network_name );
 	cfg_discontrl_c( CHAR_STATUS, CURSOR_ON, filename, 10, 10, str_netwrorkname_save, NULL );
 	config_read( get_profile()->script_configfile );
 	return(0);
@@ -1845,17 +1788,25 @@ uint8_t  video_lock_status_Cfg()
 	dconfig->localstatus.encoder_video_ident = ENCODE_IDENT_LOCK;
 	signal_open( NORMAL_SIG );
 
+	if ( time_cheack_flag )
+	{
+		count			= 0;
+		time_cheack_flag	= 0;
+	}
+
 
 	if ( !count )
 	{
 		start_alarm();
 		set_state_desplay( MONITOER_TRUE, SYS_RUN_TIME_START, SYS_RUN_TIME_FLAG );
 		function_inter( video_lock_status );
+		set_status_ret( MONITOER_TRUE );
 
 		count = 1;
 	}else{
 		stop_alarm();
 		signal_close();
+		set_status_ret( MONITOER_FALSE);
 		count = 0;
 	}
 
@@ -1878,6 +1829,11 @@ uint8_t  video_resolution()
 	s_config *dconfig = config_get_config(); /*  */
 	dconfig->localstatus.encoder_video_ident = ENCODE_IDENT_RES;
 
+	if ( time_cheack_flag )
+	{
+		count			= 0;
+		time_cheack_flag	= 0;
+	}
 
 	if ( !count )
 	{
@@ -2931,7 +2887,7 @@ uint8_t  RF_frequency_status()
 	snprintf( discontrl.lcd_b_last_dsp.l_dsp, input_lenth, "%s", "MHZ" );
 #if 1
 
-	cfg_discontrl( dconfig->localstatus.cfig_ad9789_ftw_bpf, DIGIT_STATUS, CURSOR_ON, 900.000, 000.000, INPUT_FLOAT_STATUS, input_lenth, &fre_dig_save );
+	cfg_discontrl( dconfig->localstatus.cfig_ad9789_ftw_bpf, DIGIT_STATUS, CURSOR_ON, 960.000, 30.000, INPUT_FLOAT_STATUS, input_lenth, &fre_dig_save );
 #else
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
 	discontrl.write_char_dig_status = 0x02; /* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? */
@@ -3415,7 +3371,12 @@ int comm_nitlcn_mod( char *buffer )
 
 int comm_factory_set( char *buffer )
 {
+	s_config *dconfig = config_t();
+	dconfig->scfg_Param.system_restart_flag = SYS_RESTART;
+
+
 	system_reset_conf();
+
 	system( RES_ETC_CONF );
 	return(0);
 }
@@ -3629,9 +3590,9 @@ void get_system_time( int *day, int *hours, int *min, int *sec )
 uint8_t start_year() /*  */
 {
 	init_cache();
-	char		filename[16];
+	char		filename[17];
 	s_config	*dconfig = config_t();
-	memset( filename, 0, 16 );
+	memset( filename, 0, 17 );
 
 	int write_size = strlen( (char *) dconfig->scfg_Param.encoder_eit_now_startyear );
 
@@ -3652,10 +3613,10 @@ uint8_t start_year() /*  */
 uint8_t start_time() /*  */
 {
 	init_cache();
-	char		filename[16];
-	char		timebuf[16];
+	char		filename[17];
+	char		timebuf[17];
 	s_config	*dconfig = config_t();
-	memset( filename, 0, 16 );
+	memset( filename, 0, 17 );
 
 	if ( !dconfig->scfg_Param.encoder_eit_now_starttime )
 		return(-1);

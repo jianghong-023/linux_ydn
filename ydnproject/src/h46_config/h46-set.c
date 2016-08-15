@@ -29,7 +29,7 @@ static int vn_calc( double v_bitrate, double framerate )
 	int	v0	= 19 * 8 * (framerate);
 	int	v1	= v_bitrate * 1000 + v0;
 	int	v2	= 183 * 8 * (framerate);
-	int	v3	= (v1 + v2) * 188 / 184;
+	int	v3	= (v1 + v2) * (188 / 184);
 	res = ( (int) (v3 + 0.5) );
 
 	DEBUG( "v0=%d \n", v0 );
