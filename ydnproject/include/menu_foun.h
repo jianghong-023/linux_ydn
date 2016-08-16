@@ -110,6 +110,10 @@ void auto_usb_test(void );
 int eit_insert_commom( char *buffer );
 
 
+int nit_insert_commom( char *buffer );
+
+
+
 int comm_Bandwidth( char* buffer );
 
 
@@ -204,6 +208,9 @@ uint8_t language_Cfg();
 
 
 uint8_t eit_insert_Cfg();
+
+uint8_t nit_insert_Cfg();
+
 
 
 uint8_t start_eventname_Cfg();

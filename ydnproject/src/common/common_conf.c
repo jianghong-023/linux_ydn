@@ -38,13 +38,10 @@ struct MenuItem MainMenu[6] = {                                                 
 struct MenuItem sysStatus[4] = {
 	{ 4, " Encoder Stat   ", &NullSubs,	  EncoderStatus, MainMenu },
 	{ 4, " Modulator Stat ", &mbitrate,	  NULL,		 MainMenu },
-	{ 4, " Alarm stat     ", &systemstat_cfg,	  NULL,	 MainMenu },    /* ok */
-	{ 4, " System Stat    ", &NullSubs, Status,		 MainMenu },    /* ok */
+	{ 4, " Alarm stat     ", &systemstat_cfg, NULL,		 MainMenu },    /* ok */
+	{ 4, " System Stat    ", &NullSubs,	  Status,	 MainMenu },    /* ok */
 };
 
-//struct  MenuItem	ModulatorStatus[1] ={
-//	{ 1, " Modulator Stat ", &NullSubs,	  NULL,		 sysStatus },
-//};
 
 struct  MenuItem *MenuPoint = MainMenu;
 
@@ -278,8 +275,13 @@ struct  MenuItem NitCfg[7] = {                                          /* NIT≈‰
 	{ 7, " Version number ", &nit_version_numb, VersionNumberCfg, StreamCfg },
 	{ 7, " LCN mode       ", &nit_lcn_mod_cfg,  LcnMode,	      StreamCfg },
 	{ 7, " Private data   ", &PrivateData,	    PrivateDataCfg,   StreamCfg },
-	{ 7, " NIT insert     ", &NullSubs,	    NULL,	      StreamCfg },
+	{ 7, " NIT insert     ", &nit_insert_Cfg,   NULL,	      StreamCfg },
 };
+
+struct MenuItem NitInsert[1] = {
+	{ 1, " NIT insert     ", &NullSubs, NULL, NitCfg },
+};
+
 
 struct MenuItem LcnMode[1] = {
 	{ 1, " LCN mode       ", &NullSubs, NULL, NitCfg },

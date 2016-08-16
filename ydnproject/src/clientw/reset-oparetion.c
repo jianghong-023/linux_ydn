@@ -122,6 +122,7 @@ void fpga_w_addr( bus_init *bus_inttt, uint8_t* map_base )
 	writeb( bus_inttt->usb_rdaddr_b70, &map_base[(BUS_OFFSET_ADDR + 0x11) / sizeof(uint8_t)] );
 }
 
+
 void fpga_r_addr( bus_init *bus_inttt, uint8_t* map_base )
 {
 	writeb( bus_inttt->usb_rdaddr_b3124, &map_base[(BUS_OFFSET_ADDR + 0x0a) / sizeof(uint8_t)] );
@@ -187,8 +188,14 @@ void init_bus( void )
 	usleep( 1000 );
 
 	filter_ts_pmt( bus_addr->map_base, pmt_pid_a[0], pmt_pid_a[1] );
-	eit_insert_table( bus_addr->map_base, 0x01 );
-	nit_insert_table( bus_addr->map_base, 0x01 );
+
+	if ( strncmp( (char *) dconfig->scfg_Param.stream_eit_insert, EIT_ENABLE,
+		      sizeof( (char *) dconfig->scfg_Param.stream_eit_insert) ) == 0 )
+		eit_insert_table( bus_addr->map_base, 0x01 );
+
+	if ( strncmp( (char *) dconfig->scfg_Param.stream_nit_insert, NIT_ENABLE,
+		      sizeof( (char *) dconfig->scfg_Param.stream_nit_insert) ) == 0 )
+		nit_insert_table( bus_addr->map_base, 0x01 );
 	/* ¹Ø±Õusb²Ù×÷ */
 	writeb( 0x00, &bus_addr->map_base[(BUS_INIT_BASE + 0x07) / sizeof(uint8_t)] );
 	modulator_set( bus_addr->map_base, dconfig );
@@ -199,8 +206,6 @@ void init_bus( void )
 	reset_dvb_t( dconfig->configParam.reset & 0x00, bus_addr->map_base );           /* dvb_t ¸´Î» */
 	usleep( 5000 );
 	free_bus_addr( bus_addr, fd_mmap );
-
-	
 }
 
 

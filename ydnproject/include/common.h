@@ -128,7 +128,7 @@ typedef struct _cfg_param_ {
 	uint8_t		stream_nit_lcn_mode;
 	uint16_t	stream_nit_programifo_lcn;
 	uint8_t		stream_nit_private_data[9];
-	uint8_t		stream_nit_insert;
+	uint8_t		stream_nit_insert[8];
 	uint8_t		stream_eit_language_code[3];
 	uint8_t		stream_eit_insert[8];
 	uint8_t		stream_lck_state[8];
@@ -241,7 +241,6 @@ typedef struct _dsplay_signal_set_ {
 	uint32_t	user_opt_coder;
 	uint32_t	user_dsplay_flag;
 	uint32_t	auto_monitor_flag;
-	uint32_t	status_ret;
 }DSPLAY_SIGNAL_SET_T;
 
 

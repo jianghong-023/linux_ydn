@@ -265,7 +265,7 @@ struct dvb_peripheral * peripheral_config();
 struct h64_gpio_et_cfg_t * h64gpio_et_cfg();
 
 
-int hdmi_detection( int opcode, int r_ratio );
+int hdmi_detection( int r_ratio );
 
 
 sorcefreq freq_parse_token( int resolution_ratio );

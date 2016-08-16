@@ -2389,7 +2389,6 @@ void ChangeMenu( int keySigNum )
 	{
 	case USB_WRITE:
 	case USB_READ: {
-		DEBUG("%0x ",keynumber);
 		if ( keynumber != esc )
 		{
 			stop_alarm();
@@ -2405,30 +2404,20 @@ void ChangeMenu( int keySigNum )
 	}
 	break;
 
-	case NORMAL_SIG: {
+	case NORMAL_SIG: {/* ×´Ì¬Àà */
 		if ( keynumber != enter )
 		{
-				return;
+#if 1
+
+			if ( keynumber == esc )
+				keynumber = enter;
+			else
+#endif
+			{ return; }
 		}
 	}
 	break;
 	}
-
-	extern int time_cheack_flag;
-//	DEBUG("%0x ",keynumber);
-//	if ( get_DSPLAY_SIGNAL_SET_T()->status_ret== MONITOER_TRUE )
-//	{
-//		get_DSPLAY_SIGNAL_SET_T()->status_ret = MONITOER_FALSE;
-		
-//		if ( keynumber == esc )
-//		{
-//			DEBUG("%0x ",keynumber);
-//			time_cheack_flag = 1;
-//			stop_alarm();
-//			signal_close();
-//			keynumber = enter;
-//		}else return;
-//	}
 
 /* ÃÜÂë¼ì²â */
 	lck_stut();
@@ -2528,6 +2517,7 @@ __agin:
 				close_info();
 				paren_menu();
 				lockcount = 0;
+				
 			}
 			if ( lock_count == 1 )
 			{
@@ -2878,6 +2868,7 @@ void dev_config_printf()
 	DEBUG( "stream_nit_private_data  =%s", dconfig->scfg_Param.stream_nit_private_data );
 
 	DEBUG( "stream_eit_insert  =%s", dconfig->scfg_Param.stream_eit_insert );
+	DEBUG( "stream_nit_insert  =%s", dconfig->scfg_Param.stream_nit_insert );
 #endif
 }
 

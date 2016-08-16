@@ -158,12 +158,12 @@ static const struct {
 	{ v720_or_1440x480i_119d88_or_120Hz,   v119_88Hz },
 	{ v720_or_1440x480i_119d88_or_120Hz51, v119_88Hz },
 	/* 120 Hz3 (46~51) */
-	{ v1920x1080i_119d88_or_120Hz,	       v119_88Hz },
-	{ v1280x720p_119d88_or_120Hz,	       v119_88Hz },
-	{ v720x480p_119d88_or_120Hz,	       v119_88Hz },
-	{ v720x480p_119d88_or_120Hz49,	       v119_88Hz },
-	{ v720_or_1440x480i_119d88_or_120Hz,   v119_88Hz },
-	{ v720_or_1440x480i_119d88_or_120Hz51, v119_88Hz },
+	{ v1920x1080i_119d88_or_120Hz,	       v120Hz },
+	{ v1280x720p_119d88_or_120Hz,	       v120Hz },
+	{ v720x480p_119d88_or_120Hz,	       v120Hz },
+	{ v720x480p_119d88_or_120Hz49,	       v120Hz },
+	{ v720_or_1440x480i_119d88_or_120Hz,   v120Hz },
+	{ v720_or_1440x480i_119d88_or_120Hz51, v120Hz },
 	/* 200 Hz (52~55) */
 	{ v720x576p_200Hz,		       v200Hz },
 	{ v720x576p_200Hz53,		       v200Hz },
@@ -175,10 +175,10 @@ static const struct {
 	{ v720_1440x480i_239d76_or_240Hz,      v239Hz },
 	{ v720_1440x480i_239d76_or_240Hz59,    v239Hz },
 	/* 240 Hz3(56~59) */
-	{ v720x480p_239d76_or_240Hz,	       v239Hz },
-	{ v720x480p_239d76_or_240Hz57,	       v239Hz },
-	{ v720_1440x480i_239d76_or_240Hz,      v239Hz },
-	{ v720_1440x480i_239d76_or_240Hz59,    v239Hz },
+	{ v720x480p_239d76_or_240Hz,	       v240Hz },
+	{ v720x480p_239d76_or_240Hz57,	       v240Hz },
+	{ v720_1440x480i_239d76_or_240Hz,      v240Hz },
+	{ v720_1440x480i_239d76_or_240Hz59,    v240Hz },
 
 
 	/*
@@ -190,6 +190,118 @@ static const struct {
 	{ v1920x1080p_29d98_or_30Hz,	       vlowfieldrate },
 };
 
+
+static const struct {
+	int	codeid;
+	char	long_video_resolution[25];
+	char	short_video_resolution[17];
+} auto_resolution[] = {
+	{ v720x576p_50Hz,		       "720x576 50p",	    "576p"  },
+	{ v720x576p_50Hz18,		       "720x576 50p",	    "576p"  },
+	{ v1280x720p_50Hz,		       "1280x720 50p",	    "720p"  },
+	{ v1920x1080i_50Hz,		       "1920x1080 50i",	    "1080i" },
+	{ v720_or_1440x576i_50Hz,	       "720x576 50i",	    "576i"  },
+	{ v720_or_1440x576i_50Hz22,	       "720x576 50i",	    "576i"  },
+	{ v720_or_1440x288p_50Hz,	       "720x288 50p",	    "288p"  },
+	{ v720_or_1440x288p_50Hz24,	       "720x288 50p",	    "288p"  },
+	{ v2880x576i_50Hz,		       "2880x576 50i",	    "576i"  },
+	{ v2880x576i_50Hz26,		       "2880x576 50i",	    "576i"  },
+	{ v2880x288p_50Hz,		       "2880x288 50p",	    "288p"  },
+	{ v2880x288p_50Hz28,		       "2880x288 50p",	    "288p"  },
+	{ v1440x576p_50Hz,		       "1440x576 50p",	    "576p"  },
+	{ v1440x576p_50Hz30,		       "1440x576 50p",	    "576p"  },
+	{ v1920x1080p_50Hz,		       "1440x576 50p",	    "576p"  },
+	{ v2880x576p_50Hz,		       "2880x576 50p",	    "576p"  },
+	{ v2880x576p_50Hz38,		       "2880x576 50p",	    "576p"  },
+	{ v1920x1080i_or_1250_50Hz,	       "1920x1080 50i",	    "1080i" },
+	/* 59.94Hz (1~16,35,36) */
+#if 0
+	{ v640x480p_59d94_or_60Hz,	       ,		    "", ""  },
+	{ v720x480p_59d94_or_60Hz,	       ,		    "", ""  },
+	{ v720x480p_59d94_or_60Hz3,	       ,		    "", ""  },
+	{ v2880x240p_59d94_or_60Hz13,	       ,		    "", ""  },
+	{ v1280x720p_59d94_or_60Hz,	       ,		    "", ""  },
+	{ v1440x480p_59d94_or_60Hz15,	       ,		    "", ""  },
+	{ v1920x1080i_59d94_or_60Hz,	       ,		    "", ""  },
+	{ v720_or_1440x480i_59d94_or_60Hz,     ,		    "", ""  },
+	{ v720_or_1440x480i_59d94_or_60Hz7,    ,		    "", ""  },
+	{ v720_or_1440x240p_59d94_or_60Hz,     ,		    "", ""  },
+	{ v720_or_1440x240p_59d94_or_60Hz9,    ,		    "", ""  },
+	{ v2880x480i_59d94_or_60Hz,	       ,		    "", ""  },
+	{ v2880x480i_59d94_or_60Hz11,	       ,		    "", ""  },
+	{ v2880x240p_59d94_or_60Hz,	       ,		    "", ""  },
+	{ v1440x480p_59d94_or_60Hz,	       ,		    "", ""  },
+	{ v1920x1080p_59d94_or_60Hz,	       ,		    "", ""  },
+	{ v2880x480p_59d94_or_60Hz,	       ,		    "", ""  },
+	{ v2880x480p_59d94_or_60Hz36,	       ,		    "", ""  },
+#endif
+	/* 60Hz3 (1~16,35,36) */
+	{ v640x480p_59d94_or_60Hz,	       "640x480 60p",	    "480p"  },
+	{ v720x480p_59d94_or_60Hz,	       "720x480 60p",	    "480p"  },
+	{ v720x480p_59d94_or_60Hz3,	       "720x480 60p",	    "480p"  },
+	{ v2880x240p_59d94_or_60Hz13,	       "2880x240 60p",	    "240p"  },
+	{ v1280x720p_59d94_or_60Hz,	       "1280x720 60p",	    "720p"  },
+	{ v1440x480p_59d94_or_60Hz15,	       "1440x480 60p",	    "480p"  },
+	{ v1920x1080i_59d94_or_60Hz,	       "1920x1080 60p",	    "1080p" },
+	{ v720_or_1440x480i_59d94_or_60Hz,     "720x480 60i",	    "480i"  },
+	{ v720_or_1440x480i_59d94_or_60Hz7,    "720x480 60i",	    "480i"  },
+	{ v720_or_1440x240p_59d94_or_60Hz,     "720x240 60p",	    "240p"  },
+	{ v720_or_1440x240p_59d94_or_60Hz9,    "720x240 60p",	    "240p"  },
+	{ v2880x480i_59d94_or_60Hz,	       "2880x480 60i",	    "480i"  },
+	{ v2880x480i_59d94_or_60Hz11,	       "2880x480 60i",	    "480i"  },
+	{ v2880x240p_59d94_or_60Hz,	       "2880x240 60p",	    "240p"  },
+	{ v1440x480p_59d94_or_60Hz,	       "1440x480 60p",	    "480p"  },
+	{ v1920x1080p_59d94_or_60Hz,	       "1920x1080 60p",	    "1080p" },
+	{ v2880x480p_59d94_or_60Hz,	       "2880x480 60p",	    "480p"  },
+	{ v2880x480p_59d94_or_60Hz36,	       "2880x480 60p",	    "480p"  },
+	/* 100 Hz (40~45) */
+	{ v1920x1080i_100Hz,		       "1920x1080 100i",    "1080i" },
+	{ v1280x720p_100Hz,		       "1280x720 100p",	    "720p"  },
+	{ v720x576p_100Hz,		       "720x576 100p",	    "576p"  },
+	{ v720x576p_100Hz43,		       "720x576 100p",	    "576p"  },
+	{ v720_or_1440x576i_100Hz,	       "720x576 100i",	    "576i"  },
+	{ v720_or_1440x576i_100Hz45,	       "720x576 100i",	    "576i"  },
+#if 0
+	/* 119.88 Hz (46~51) */
+	{ v1920x1080i_119d88_or_120Hz,	       "1920x1080 119.88i", "1080i" },
+	{ v1280x720p_119d88_or_120Hz,	       "1280x720 119.88p",  "720p"  },
+	{ v720x480p_119d88_or_120Hz,	       "720x480 119.88p",   "480p"  },
+	{ v720x480p_119d88_or_120Hz49,	       "720x480 119.88p",   "480p"  },
+	{ v720_or_1440x480i_119d88_or_120Hz,   "720x480 119.88i",   "480i"  },
+	{ v720_or_1440x480i_119d88_or_120Hz51, "720x480 119.88i",   "480i"  },
+#endif
+	/* 120 Hz3 (46~51) */
+	{ v1920x1080i_119d88_or_120Hz,	       "1920x1080 120i",    "1080i" },
+	{ v1280x720p_119d88_or_120Hz,	       "1280x720 120p",	    "720p"  },
+	{ v720x480p_119d88_or_120Hz,	       "720x480 120p",	    "480p"  },
+	{ v720x480p_119d88_or_120Hz49,	       "720x480 120p",	    "480p"  },
+	{ v720_or_1440x480i_119d88_or_120Hz,   "720x480 120i",	    "480i"  },
+	{ v720_or_1440x480i_119d88_or_120Hz51, "720x480 120i",	    "480i"  },
+	/* 200 Hz (52~55) */
+	{ v720x576p_200Hz,		       "720x576 200p",	    "576p"  },
+	{ v720x576p_200Hz53,		       "720x576 200p",	    "576p"  },
+	{ v720_or_1440x576i_200Hz,	       "720x576 200i",	    "576i"  },
+	{ v720_or_1440x576i_200Hz55,	       "720x576 200i",	    "576i"  },
+	/* 239 Hz (56~59) */
+	{ v720x480p_239d76_or_240Hz,	       "720x480 239p",	    "480p"  },
+	{ v720x480p_239d76_or_240Hz57,	       "720x480 239p",	    "480p"  },
+	{ v720_1440x480i_239d76_or_240Hz,      "720x480 239i",	    "480i"  },
+	{ v720_1440x480i_239d76_or_240Hz59,    "720x480 239i",	    "480i"  },
+	/* 240 Hz3(56~59) */
+	{ v720x480p_239d76_or_240Hz,	       "720x480 240p",	    "480p"  },
+	{ v720x480p_239d76_or_240Hz57,	       "720x480 240p",	    "480p"  },
+	{ v720_1440x480i_239d76_or_240Hz,      "720x480 240i",	    "480i"  },
+	{ v720_1440x480i_239d76_or_240Hz59,    "720x480 240i",	    "480i"  },
+
+
+	/*
+	 * Low Field Rate (32~34)
+	 * 24Hz,25Hz,30Hz
+	 */
+	{ v1920x1080p_23d98_or_24Hz,	       "1920x1080 24p",	    "1080p" },
+	{ v1920x1080p_25Hz,		       "1920x1080 25p",	    "1080p" },
+	{ v1920x1080p_29d98_or_30Hz,	       "1920x1080 30p",	    "1080p" },
+};
 
 struct dvb_peripheral * peripheral_config()
 {
@@ -1260,291 +1372,43 @@ int read_vic()
 
 /* HDMI detection */
 
-int hdmi_detection( int opcode, int r_ratio )
+int hdmi_detection(  int r_ratio )
 {
-	int rest = -1;
-	/* s_config *config = config_get_config(); */
+	int rest = -1, item, i;
+
+	static int bak_r_opcode = 0;
+
+	if(bak_r_opcode == r_ratio)
+	{
+		return(r_ratio);
+	}else if(bak_r_opcode != r_ratio)
+		bak_r_opcode = r_ratio;
+	
 	memset( config.localstatus.encoder_video_resolution, ' ', 16 );
 	memset( config.localstatus.encoder_video_shrot_resolution, ' ', 16 );
-	switch ( opcode )
+
+	item = sizeof(auto_resolution) / sizeof(auto_resolution[0]);
+
+	for ( i = 0; i < item; i++ )
 	{
-	/*
-	 * 自动匹配时一定会有重叠
-	 * 选项，这个需要后期进行细化
-	 * 目前还不知道项目最终所需要配置
-	 * 所以眼前只能大略通过
-	 */
-
-	case v50Hz:
-		/* 17,18 */
-		if ( (r_ratio == v720x576p_50Hz) || (r_ratio == v720x576p_50Hz18) )
+		if ( auto_resolution[i].codeid == r_ratio )
 		{
-			r_ratio = v720x576p_50Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "720x576 50p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "576p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
+			snprintf( config.localstatus.encoder_video_resolution, strlen( auto_resolution[i].long_video_resolution ) + 1,
+				  "%s ", auto_resolution[i].long_video_resolution );
+			snprintf( config.localstatus.encoder_video_shrot_resolution, strlen( auto_resolution[i].short_video_resolution ) + 1
+				  , "%s", auto_resolution[i].short_video_resolution );
+			rest = r_ratio;
+			DEBUG( "%s   %s  %x ", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution ,r_ratio);
+
+			break;
+		}else{
+			rest = VIDEO_INPUT_UNLOCK;
+			sprintf( config.localstatus.encoder_video_resolution, "unknown" );
+			sprintf( config.localstatus.encoder_video_shrot_resolution, "unknown" );
 		}
-
-		if ( r_ratio == v1280x720p_50Hz )
-		{
-			r_ratio = v1280x720p_50Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1280x720p 50i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "720p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-		if ( r_ratio == v1920x1080i_50Hz )
-		{
-			r_ratio = v1920x1080i_50Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1920x1080 50i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "1080i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 21,22 */
-		if ( (r_ratio == v720_or_1440x576i_50Hz) || (r_ratio == v720_or_1440x576i_50Hz22) )
-		{
-			r_ratio = v720_or_1440x576i_50Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "720x576 50i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-		/* 23,24 */
-		if ( (r_ratio == v720_or_1440x288p_50Hz) || (r_ratio == v720_or_1440x288p_50Hz24) )
-		{
-			r_ratio = v720_or_1440x288p_50Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1440x288 50p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "288p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 25,26 */
-		if ( (r_ratio == v2880x576i_50Hz) || (r_ratio == v2880x576i_50Hz26) )
-		{
-			r_ratio = v2880x576i_50Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "2880x576 50i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 27,28 */
-		if ( (r_ratio == v2880x288p_50Hz) || (r_ratio == v2880x288p_50Hz28) )
-		{
-			r_ratio = v2880x288p_50Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "2880x576 50p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "576p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 29，30 */
-		if ( (r_ratio == v1440x576p_50Hz) || (r_ratio == v1440x576p_50Hz30) )
-		{
-			r_ratio = v1440x576p_50Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1440x576 50p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "576p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		rest = VIDEO_INPUT_LOCK;
-		break;
-#if 0
-	case v59_94Hz:
-		/* 10,11 */
-		if ( (r_ratio == v2880x480i_59d94_or_60Hz) || (r_ratio == v2880x480i_59d94_or_60Hz11) )
-		{
-			r_ratio = v2880x480i_59d94_or_60Hz;
-			sprintf( (char *) config.localstatus.encoder_video_resolution, "2880x480 60i" );
-		}
-
-		/* 12,13 */
-		if ( (r_ratio == v2880x240p_59d94_or_60Hz) || (r_ratio == v2880x240p_59d94_or_60Hz13) )
-		{
-			r_ratio = v2880x240p_59d94_or_60Hz;
-		}
-
-		/* 14,15 */
-		if ( (r_ratio == v1440x480p_59d94_or_60Hz) || (r_ratio == v1440x480p_59d94_or_60Hz15) )
-		{
-			r_ratio = v1440x480p_59d94_or_60Hz;
-		}
-
-		rest = VIDEO_INPUT_LOCK;
-		break;
-#endif
-	case v60Hz:
-		if ( r_ratio == v1280x720p_59d94_or_60Hz )
-		{
-			r_ratio = v1280x720p_59d94_or_60Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1280x720 60p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "720p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-
-		if ( r_ratio == v1920x1080i_59d94_or_60Hz )
-		{
-			r_ratio = v1920x1080i_59d94_or_60Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1920x1080 60i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "1080i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 10,11 */
-		if ( (r_ratio == v2880x480i_59d94_or_60Hz) || (r_ratio == v2880x480i_59d94_or_60Hz11) )
-		{
-			r_ratio = v2880x480i_59d94_or_60Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "2880x480 60i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 12,13 */
-		if ( (r_ratio == v2880x240p_59d94_or_60Hz) || (r_ratio == v2880x240p_59d94_or_60Hz13) )
-		{
-			r_ratio = v2880x240p_59d94_or_60Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "2880x240 60p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "240p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 14,15 */
-		if ( (r_ratio == v1440x480p_59d94_or_60Hz) || (r_ratio == v1440x480p_59d94_or_60Hz15) )
-		{
-			r_ratio = v1440x480p_59d94_or_60Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1440x480 60p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "480p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		rest = VIDEO_INPUT_LOCK;
-		break;
-
-	case v100Hz:
-		/* 42,43 */
-		if ( (r_ratio == v720x576p_100Hz) || (r_ratio == v720x576p_100Hz43) )
-		{
-			r_ratio = v720x576p_100Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "720x576 100p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "576p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 44,45 */
-		if ( (r_ratio == v720_or_1440x576i_100Hz) || (r_ratio == v720_or_1440x576i_100Hz45) )
-		{
-			r_ratio = v720_or_1440x576i_100Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1440x576 100i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		rest = VIDEO_INPUT_LOCK;
-		break;
-	case v119_88Hz:
-		/* 50,51 */
-		if ( (r_ratio == v720_or_1440x480i_119d88_or_120Hz) || (r_ratio == v720_or_1440x480i_119d88_or_120Hz) )
-		{
-			r_ratio = v720_or_1440x480i_119d88_or_120Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1440x480 119.88i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-
-		rest = VIDEO_INPUT_LOCK;
-		break;
-	case v120Hz:
-
-		/* 50,51 */
-		if ( (r_ratio == v720_or_1440x480i_119d88_or_120Hz) || (r_ratio == v720_or_1440x480i_119d88_or_120Hz) )
-		{
-			r_ratio = v720_or_1440x480i_119d88_or_120Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1440x480 120i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		rest = VIDEO_INPUT_LOCK;
-		break;
-	case v200Hz:
-		/* 52,53 */
-		if ( (r_ratio == v720x576p_200Hz) || (r_ratio == v720x576p_200Hz53) )
-		{
-			r_ratio = v720x576p_200Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "720x576 200i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 54,55 */
-		if ( (r_ratio == v720_or_1440x576i_200Hz) || (r_ratio == v720_or_1440x576i_200Hz55) )
-		{
-			r_ratio = v720_or_1440x576i_200Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "1440x576 200i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "576i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-
-		rest = VIDEO_INPUT_LOCK;
-		break;
-	case v239Hz:
-		/* 56,57 */
-		if ( (r_ratio == v720x480p_239d76_or_240Hz) || (r_ratio == v720x480p_239d76_or_240Hz57) )
-		{
-			r_ratio = v720x480p_239d76_or_240Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "720x480 239p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "480p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 58,59 */
-		if ( (r_ratio == v720_1440x480i_239d76_or_240Hz) || (r_ratio == v720_1440x480i_239d76_or_240Hz59) )
-		{
-			r_ratio = v720_1440x480i_239d76_or_240Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "720x480 239i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-		rest = VIDEO_INPUT_LOCK;
-		break;
-	case v240Hz:
-		/* 56,57 */
-		if ( (r_ratio == v720x480p_239d76_or_240Hz) || (r_ratio == v720x480p_239d76_or_240Hz57) )
-		{
-			r_ratio = v720x480p_239d76_or_240Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "720x480 240p" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "480p" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-
-		/* 58,59 */
-		if ( (r_ratio == v720_1440x480i_239d76_or_240Hz) || (r_ratio == v720_1440x480i_239d76_or_240Hz59) )
-		{
-			r_ratio = v720_1440x480i_239d76_or_240Hz;
-			sprintf( config.localstatus.encoder_video_resolution, "720x480 240i" );
-			sprintf( config.localstatus.encoder_video_shrot_resolution, "480i" );
-			DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		}
-		rest = VIDEO_INPUT_LOCK;
-		break;
-	case vlowfieldrate:
-		rest = VIDEO_INPUT_LOCK;
-		sprintf( config.localstatus.encoder_video_resolution, "lowfieldrate" );
-		DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
-		break;
-
-	default:
-	{
-		rest = VIDEO_INPUT_UNLOCK;
-		sprintf( config.localstatus.encoder_video_resolution, "unknown" );
-		sprintf( config.localstatus.encoder_video_shrot_resolution, "unknown" );
-		DEBUG( "Error..HDMI...%d..%d......", opcode, r_ratio );
-		DEBUG( "%s   %p", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution );
 	}
 
-	break;
-	}
-
+	
 	return(rest);
 }
 

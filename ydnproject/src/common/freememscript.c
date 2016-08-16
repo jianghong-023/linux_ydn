@@ -204,6 +204,7 @@ void sys_ect_conf( void )
 		fprintf( file, "NetWorkName network-01\n\n" );
 		fprintf( file, "NETWORKNUMB 31\n\n" );
 		fprintf( file, "EITISERTENABLE Enable\n\n" );
+		fprintf( file, "NITISERTENABLE Enable\n\n" );
 		fprintf( file, "RFENABLE Denable\n\n" );
 		fprintf( file, "LockPwdStu Denable\n\n" );
 		fprintf( file, "ProgramOutput Denable\n\n" );

@@ -448,6 +448,10 @@
 #define EIT_OFFSET		(0x1000)
 #define EIT_ENABLE		"Enable"
 #define EIT_DESENABLE		"Denable"
+#define NIT_DESENABLE  EIT_DESENABLE
+#define NIT_ENABLE 	EIT_ENABLE
+
+#define PROGRAM_OUT  EIT_ENABLE
 
 #define ENABLE		"Enable"
 #define DESENABLE	"Denable"
@@ -511,6 +515,7 @@
 
 #define MONITOER_TRUE	1
 #define MONITOER_FALSE	0
+#define MONITOER_STAGE	3
 
 #define ENCODE_BITRTE_START	0x00000010
 #define ENCODE_BITRTE_STOP	0x00000011

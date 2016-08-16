@@ -67,6 +67,7 @@ typedef enum {
 	oNetWorkName,
 	oNETWORKNUMB,
 	oEITISERTENABLE,
+	oNITISERTENABLE,
 	oRFENABLE,
 	oAudioFormat,
 } OpCodes;

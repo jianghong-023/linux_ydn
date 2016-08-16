@@ -370,6 +370,7 @@ int fetch_token( usb_token *ptr, int size )
 	if ( size <= 0 )
 		return(-EINVAL);
 	gettimeofday( &tpstart, NULL );
+
 	while ( mem->token <= 0 )
 	{
 		nano_sleep( 0, 10 );
@@ -474,7 +475,7 @@ static void clean_date()
  * incom_count  记录开始录制时的参数
  * off   循环时需要的开关
  */
-static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *init_b, int incom_count, int *off )
+static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *init_b, int incom_count, int *off, int *start_stop )
 {
 	int	i_count = 0;
 	ssize_t ret	= -1;
@@ -489,6 +490,15 @@ static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *i
 		if ( *wr_size >= i_size )
 		{
 			close( *sfd );
+			init_bus_t * init = (init_bus_t *) init_b;
+
+			if ( init->mod == USB_RECORD_SIG )
+			{
+				*start_stop	= -1;
+				stop		= 0;
+				ts_add_toal	= 0;
+				return(ret);
+			}
 			*wr_size	= 0;
 			ts_add_toal	= 0;
 			*sfd		= descriptor_generation( init_b, incom_count, off );
@@ -644,7 +654,8 @@ static int descriptor_generation( void *init_b, int incom_count, int  *off )
 		DEBUG( "re_mod = %d", re_mod );
 		if ( re_mod == 4 )
 		{
-			stop = 0;
+			stop	= 0;
+			sfd	= -1;
 			break;
 		}else if ( re_mod == 5 )
 		{
@@ -697,9 +708,9 @@ static int descriptor_generation( void *init_b, int incom_count, int  *off )
  */
 static int  creat_job_thread( void *init_b )
 {
-	int	result	= -1, sfd = -1, count = 0;
-	int	node	= 0, off = 0;
-
+	int		result		= -1, sfd = -1, count = 0;
+	int		node		= 0, off = 0;
+	int		start_stop	= 0;
 	pthread_attr_t	attr;
 	size_t		wr_size = 0;
 	config_read( get_profile()->script_configfile );
@@ -718,8 +729,17 @@ static int  creat_job_thread( void *init_b )
 
 	while ( 1 )
 	{
+		if ( stop <= 0 )
+			break;
+
 		if ( (stop = recv_usb_notify() ) <= 0 )
 			break;
+
+		if ( start_stop < 0 )
+		{
+			stop = 0;
+			break;
+		}
 
 		nano_sleep( 2, 0 );
 
@@ -740,8 +760,7 @@ static int  creat_job_thread( void *init_b )
 		if ( (node = node_seach() ) < 0 )
 			continue;
 
-
-		if ( (result = wr_usb( &sfd, count, node, &wr_size, init_b, incom_count, &off ) ) < 0 )
+		if ( (result = wr_usb( &sfd, count, node, &wr_size, init_b, incom_count, &off, &start_stop ) ) < 0 )
 		{
 			destory_date( count, node );
 			break;
@@ -749,14 +768,14 @@ static int  creat_job_thread( void *init_b )
 
 		destory_date( count, node );
 	}
-
-
+	DEBUG( "-------------" );
+	desory_thread( init_b, &attr );
+	DEBUG( "-----2--------" );
 	clean_date();
 
 	close( sfd );
-	_destroy( token );
 
-	desory_thread( init_b, &attr );
+	_destroy( token );
 
 	return(result);
 }

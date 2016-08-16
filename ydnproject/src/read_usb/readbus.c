@@ -139,7 +139,7 @@ static void inter_signal( uint8_t *map_addr )
 	while ( readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) != 1 )
 	{
 		usleep( 0 );
-		if ( r_time_out( tpstart ) >= 1000 )
+		if ( r_time_out( tpstart ) >= 2000 )
 		{
 			r_time_out_flag = 1;
 			break;

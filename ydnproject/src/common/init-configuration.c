@@ -76,6 +76,7 @@ static const struct {
 	{ "NetWorkName",    oNetWorkName    },
 	{ "NETWORKNUMB",    oNETWORKNUMB    },
 	{ "EITISERTENABLE", oEITISERTENABLE },
+	{ "NITISERTENABLE", oNITISERTENABLE },
 	{ "RFENABLE",	    oRFENABLE	    },
 	{ "LockPwdStu",	    oLockPwdStu	    },
 	{ "AudioFormat",    oAudioFormat    },
@@ -168,7 +169,7 @@ cgf_stor_data stor_data[] = {
 	{ "320_kbps",	       0x140	       },
 	{ "384_kbps",	       0x180	       },
 
-	{ "MPEG-2",	       		0x00	       },
+	{ "MPEG-2",	       0x00	       },
 	{ "MPEG-2-AAC",	       0x01	       },
 	{ "MPEG-4-AAC",	       0x02	       },
 
@@ -640,6 +641,12 @@ int config_read( const char *filename )
 					ret = 0;
 					break;          /* oProgramName */
 
+				case oNITISERTENABLE:   /* oProgramOutputEnable */
+					memset( (char *) &config.scfg_Param.stream_nit_insert, 0, 8 );
+					strncpy( (char *) &config.scfg_Param.stream_nit_insert, p1, strlen( p1 ) + 1 );
+					ret = 0;
+					break;
+
 				case oAutoModle:        /* oProgramOutputEnable */
 					memset( (char *) &config.scfg_Param.stream_usb_record_auto, 0, 8 );
 					strncpy( (char *) &config.scfg_Param.stream_usb_record_auto, p1, strlen( p1 ) + 1 );
@@ -1010,6 +1017,9 @@ void config_init( void )
 	lenght = strlen( EIT_DESENABLE ) + 1;
 	memset( (char *) config.scfg_Param.stream_eit_insert, 0, 8 );
 	snprintf( (char *) config.scfg_Param.stream_eit_insert, lenght, "%s", EIT_DESENABLE );
+
+	memset( (char *) config.scfg_Param.stream_eit_insert, 0, 8 );
+	snprintf( (char *) config.scfg_Param.stream_eit_insert, lenght, "%s", NIT_DESENABLE );
 
 	memset( (char *) config.scfg_Param.stream_usb_record_auto, 0, 8 );
 	snprintf( (char *) config.scfg_Param.stream_usb_record_auto, lenght, "%s", EIT_DESENABLE );
@@ -1530,6 +1540,20 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				}
 				break;
 
+				case oNITISERTENABLE: { /* oProgramOutputEnable */
+					char file_name[12];
+					if ( strncmp( firset_str, "NITISERTENABLE", sizeof(firset_str) ) == 0 )
+					{
+						sprintf( file_name, "%s", replace_str );
+						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
+
+						result = system( tmpline );
+						if ( result != -1 )
+							DEBUG( "%dline %s , %s write successfull !\r\n", linenum, p1, replace_str );
+					}
+				}
+				break;
+
 				case oAutoModle: {
 					char file_name[12];
 					if ( strncmp( firset_str, "AutoModle", sizeof(firset_str) ) == 0 )
@@ -2012,20 +2036,20 @@ pid_t safe_fork( void )
 
 void video_status_lock()
 {
-	memset( config.localstatus.encoder_video_resolution, ' ', 16 );
-	memset( config.localstatus.encoder_video_shrot_resolution, ' ', 16 );
-
 	if ( (M_HDMI == config.scfg_Param.encoder_video_interface) )
 	{
 		/* 设备配置 */
 		int opcode, r_vic = read_vic();
 		opcode						= freq_parse_token( r_vic );
-		config.localstatus.encoder_video_input_lock	= hdmi_detection( opcode, r_vic );
-		DEBUG( "encoder_video_input_lock = 0x%02x", config.localstatus.encoder_video_input_lock );
+		config.localstatus.encoder_video_input_lock	= opcode;
+		hdmi_detection( r_vic );
+
+		//DEBUG( "encoder_video_input_lock = 0x%x", config.localstatus.encoder_video_input_lock );
 	} else if ( (M_YPbPr == config.scfg_Param.encoder_video_interface) )
 	{
 		int optcode;
-
+		memset( config.localstatus.encoder_video_resolution, ' ', 16 );
+		memset( config.localstatus.encoder_video_shrot_resolution, ' ', 16 );
 		optcode = pare_YPbPr_HDMI();
 
 		switch ( optcode )
@@ -2067,7 +2091,8 @@ void video_status_lock()
 	} else if ( (M_CVBS == config.scfg_Param.encoder_video_interface) )
 	{
 		int optcode;
-
+		memset( config.localstatus.encoder_video_resolution, ' ', 16 );
+		memset( config.localstatus.encoder_video_shrot_resolution, ' ', 16 );
 		optcode = pare_cvbs();
 
 		switch ( optcode )

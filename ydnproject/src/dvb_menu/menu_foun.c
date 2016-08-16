@@ -31,7 +31,6 @@ static loopdsplay desplay_hand;
 
 static usb_handler usb_wrhandler;
 
-int time_cheack_flag = 0;
 
 static _stream_info wr_stream_info;
 
@@ -130,7 +129,6 @@ static DSPLAY_SIGNAL_SET_T signal_init_t =
 	.user_opt_coder		= NONE,
 	.user_dsplay_flag	= NONE,
 	.auto_monitor_flag	= MONITOER_FALSE,
-	.status_ret = MONITOER_FALSE,
 };
 
 DSPLAY_SIGNAL_SET_T* get_DSPLAY_SIGNAL_SET_T( void )
@@ -161,11 +159,6 @@ void set_state_desplay( int monitor_flag, int coder, int flags )
 	signal_init_t.auto_monitor_flag = monitor_flag;
 	signal_init_t.user_opt_coder	= coder;
 	signal_init_t.user_dsplay_flag	= flags;
-}
-
-void set_status_ret( int flags )
-{
-	signal_init_t.status_ret= flags;
 }
 
 
@@ -714,7 +707,7 @@ uint8_t video_bitrate()
 
 
 	int get_value = dconfig->scfg_Param.encoder_video_bitrate;
-	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 20000, 0, INPUT_DIGIT_STATUS, input_lenth, &text_videotare_save );
+	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 30000, 0, INPUT_DIGIT_STATUS, input_lenth, &text_videotare_save );
 
 	return(0);
 }
@@ -858,6 +851,25 @@ uint8_t eit_insert_Cfg()
 
 	int menu_item_lenth = sizeof(Bandwidth) / sizeof(Bandwidth[0]);
 	menu_general_enter( Bandwidth, menu_item_lenth, eit_insert_commom );
+
+	return(0);
+}
+
+
+uint8_t nit_insert_Cfg()
+{
+	s_config *dconfig = config_t();
+	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_nit_insert );
+	init_cache();
+	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
+	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	static char *Bandwidth[] = {
+		"Yes",
+		"No ",
+	};
+
+	int menu_item_lenth = sizeof(Bandwidth) / sizeof(Bandwidth[0]);
+	menu_general_enter( Bandwidth, menu_item_lenth, nit_insert_commom );
 
 	return(0);
 }
@@ -1208,11 +1220,6 @@ uint8_t mbitrate()
 	static int count = 0;
 	signal_open( NORMAL_SIG );
 
-	if ( time_cheack_flag )
-	{
-		count			= 0;
-		time_cheack_flag	= 0;
-	}
 
 	if ( !count )
 	{
@@ -1509,12 +1516,6 @@ uint8_t systemstat_cfg()
 	static int count = 0;
 	signal_open( NORMAL_SIG );
 
-	if ( time_cheack_flag )
-	{
-		count			= 0;
-		time_cheack_flag	= 0;
-	}
-
 	if ( !count )
 	{
 		start_alarm();
@@ -1714,6 +1715,7 @@ static void video_lock_status( int flag )
 	switch ( dconfig->localstatus.encoder_video_ident )
 	{
 	case ENCODE_IDENT_LOCK: {
+		
 		if ( VIDEO_INPUT_LOCK == dconfig->localstatus.encoder_video_input_lock )
 		{
 			char	*arr_cfg	= "lock    ";
@@ -1788,25 +1790,18 @@ uint8_t  video_lock_status_Cfg()
 	dconfig->localstatus.encoder_video_ident = ENCODE_IDENT_LOCK;
 	signal_open( NORMAL_SIG );
 
-	if ( time_cheack_flag )
-	{
-		count			= 0;
-		time_cheack_flag	= 0;
-	}
-
 
 	if ( !count )
 	{
 		start_alarm();
 		set_state_desplay( MONITOER_TRUE, SYS_RUN_TIME_START, SYS_RUN_TIME_FLAG );
 		function_inter( video_lock_status );
-		set_status_ret( MONITOER_TRUE );
+
 
 		count = 1;
 	}else{
 		stop_alarm();
 		signal_close();
-		set_status_ret( MONITOER_FALSE);
 		count = 0;
 	}
 
@@ -1829,11 +1824,6 @@ uint8_t  video_resolution()
 	s_config *dconfig = config_get_config(); /*  */
 	dconfig->localstatus.encoder_video_ident = ENCODE_IDENT_RES;
 
-	if ( time_cheack_flag )
-	{
-		count			= 0;
-		time_cheack_flag	= 0;
-	}
 
 	if ( !count )
 	{
@@ -2171,12 +2161,16 @@ void gener_table()
 	sprintf( (char *) cfg_eit_t.eit_next_duration, "%s", dconfig->scfg_Param.encoder_eit_next_duration );
 	sprintf( (char *) cfg_eit_t.eit_next_eventname, "%s", dconfig->scfg_Param.encoder_eit_next_eventname );
 
-	if ( strncmp( (char *) dconfig->scfg_Param.stream_eit_insert, EIT_ENABLE,
-		      sizeof( (char *) dconfig->scfg_Param.stream_eit_insert) ) == 0 )
-		set_eit_table( &cfg_eit_t );
-	usleep( 2000 );
+
+/*
+ * if ( strncmp( (char *) dconfig->scfg_Param.stream_eit_insert, EIT_ENABLE,
+ *            sizeof( (char *) dconfig->scfg_Param.stream_eit_insert) ) == 0 )
+ */
+	set_eit_table( &cfg_eit_t );
+/*	usleep( 2000 ); */
 	/* program output */
-	if ( strncmp( (char *) dconfig->scfg_Param.encoder_program_output, EIT_ENABLE,
+
+	if ( strncmp( (char *) dconfig->scfg_Param.encoder_program_output, PROGRAM_OUT,
 		      sizeof( (char *) dconfig->scfg_Param.encoder_program_output) ) == 0 )
 		DEBUG( "Program output [%s]", dconfig->scfg_Param.encoder_program_output );
 	else
@@ -3013,6 +3007,33 @@ int eit_insert_commom( char *buffer )
 		sprintf( tmp_buf, "%s", dconfig->scfg_Param.stream_eit_insert );
 
 		config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "EITISERTENABLE" );
+	}
+	config_read( get_profile()->script_configfile );
+	return(0);
+}
+
+
+int nit_insert_commom( char *buffer )
+{
+	char	tmp_buf[18];
+	char	*orgbuf;
+
+	if ( buffer == NULL )
+		return(-1);
+	else {
+		s_config *dconfig = config_t(); /*  */
+
+		if ( strncmp( "Yes", buffer, strlen( buffer ) ) == 0 )
+		{
+			orgbuf = NIT_ENABLE;
+		} else if ( strncmp( "No ", buffer, strlen( buffer ) ) == 0 )
+		{
+			orgbuf = NIT_DESENABLE;
+		}
+
+		sprintf( tmp_buf, "%s", dconfig->scfg_Param.stream_nit_insert );
+
+		config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "NITISERTENABLE" );
 	}
 	config_read( get_profile()->script_configfile );
 	return(0);
