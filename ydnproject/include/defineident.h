@@ -201,7 +201,7 @@
 
 
 /* 共享内存 */
-#define MEMSIZE_2M	(0x2000B0)
+#define MEMSIZE_2M	(0x400160) //0x2000B0 by 2016-8-17 jh
 #define MEMSTARTADD_2	(0x1400000)     /* 100MB */
 #define MISCMODRST	(0x20)
 #define RSTMGR		(0XFFD05000)

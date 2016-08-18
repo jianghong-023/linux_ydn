@@ -222,6 +222,7 @@ static void dev_mount( usb_no_and_stat_t  *usb_dev )
 		ret = mount( usb_dev->devfile_parts[i], usb_dev->mount_path[i], "vfat", 0, "codepage=437,iocharset=iso8859-1" );
 		if ( ret == -1 )
 		{
+			DEBUG("usb_dev->devfile_parts[i]:%s usb_dev->mount_path[i]:%s",usb_dev->devfile_parts[i], usb_dev->mount_path[i]);
 			perror( "mount()" );
 			memset( usb_dev->mount_path[i], 0, 100 );
 			return;
@@ -283,13 +284,14 @@ static int seach_dev( char *dev_no, usb_no_and_stat_t  *usb_dev, int n_part )
 					if ( dev_no[i] >= '1' && dev_no[i] < '9' )
 					{
 						parts_num = dev_no[i] - 48;
+						DEBUG("dev_no :%s",dev_no);
 						if ( n_part == 1 )
 						{
 							usb_dev->part_num += 1;
 							sprintf( usb_dev->devfile_parts[parts_num - 1], "/dev/%s", dev_no );
 						}else{
 							usb_dev->part_num = 1;
-							sprintf( usb_dev->devfile_parts[parts_num - 1], "/dev/%s", dev_no );
+							sprintf( usb_dev->devfile_parts[0], "/dev/%s", dev_no );
 						}
 						break;
 					}else

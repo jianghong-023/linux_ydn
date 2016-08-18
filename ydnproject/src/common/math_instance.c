@@ -18,7 +18,7 @@ char * itoa_( int num, char*str, int radix )
 	char		index[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	unsigned	unum;           /*中间变量*/
 	int		i = 0, j, k;
-	DEBUG( "num= %d ", num );
+//	DEBUG( "num= %d ", num );
 	/*确定unum的值*/
 	if ( radix == 10 && num < 0 )   /*十进制负数*/
 	{

@@ -28,13 +28,15 @@
 #define STOP_OP		0
 #define STAR_OP		1
 #define TMIEROUT	800000 * 9
-#define MAX_FREE	(100)
+#define MAX_FREE	(2048)
 #define MYTPF_MAX	100
 #define PATHLENGTH	150
 #define NAMESIZE	30
 #define PATHSIZE	1024
+#define DTS_STREAM_TIME (12000)
 
-#define  BUFFER_SIZE_1M (0x100058)
+/* #define  BUFFER_SIZE_1M (0x100058) */
+#define  BUFFER_SIZE_1M (0x2000b0) /* 2016-8-17 */
 #define  BUFFER_SIZE_2M (0x2000b0)
 
 
@@ -42,6 +44,7 @@ extern s_config		config;
 extern pthread_t	usb_sig;
 static uint8_t		* sharemem_base = NULL;
 static int8_t		stop		= 1;
+static int8_t		wait_stop	= 0;
 static int		r_time_out_flag = 0;
 static double		ts_lenth	= 0.0, ts_add_toal = 0.0;
 #define CPS		(1)
@@ -86,7 +89,7 @@ static int32_t writ_usb( void * );
 static void *read_cache( void * );
 
 
-static void inter_signal( uint8_t * );
+static void inter_signal( uint8_t *, uint8_t * );
 
 
 static int disk_check( void );
@@ -153,7 +156,7 @@ static int management_document( char* i_path, char *file_name, uint32_t order, c
  * 写模式
  * 返回值 : 0  单模式 ，1 分段模式，2 循环模式,4 无条件结束,5 小空间循环
  */
-static int mod_manage( int play_mod, int *test_incom_count )
+static int mod_manage( int play_mod, int *next_incom_count )
 {
 	int ret = -1, dick_is_full;
 
@@ -168,7 +171,7 @@ static int mod_manage( int play_mod, int *test_incom_count )
 			ret = 4;
 		else{
 			ret = 0;
-			++(*test_incom_count);
+			++(*next_incom_count);
 		}
 		DEBUG( "USB_RECORD_SIG" );
 	}
@@ -180,7 +183,7 @@ static int mod_manage( int play_mod, int *test_incom_count )
 
 		else{
 			ret = 1;
-			++(*test_incom_count);
+			++(*next_incom_count);
 		}
 		DEBUG( "UAB_RECORD_SEG" );
 	}
@@ -192,7 +195,7 @@ static int mod_manage( int play_mod, int *test_incom_count )
 			ret = 5;
 		}else{
 			ret = 2;
-			++(*test_incom_count);
+			++(*next_incom_count);
 		}
 		DEBUG( "USB_RECORD_LOOP" );
 	}
@@ -208,9 +211,13 @@ static void  initialize_bus( void *init_b, uint8_t* map_base )
 	init_bus_t* init = (init_bus_t *) init_b;
 
 
-	map_base[(BUS_OFFSET_ADDR + 0x07) / sizeof(uint8_t)]	= 0x00;
-	map_base[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)]	= 0x00;
-	map_base[(BUS_OFFSET_ADDR + 6) / sizeof(uint8_t)]	= init->bus_t.usb_dir;
+	map_base[(BUS_OFFSET_ADDR + 0x07) / sizeof(uint8_t)] = 0x00;
+
+
+	/*
+	 * map_base[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)]	= 0x00;
+	 * map_base[(BUS_OFFSET_ADDR + 6) / sizeof(uint8_t)]	= init->bus_t.usb_dir;
+	 */
 
 	while ( 0x01 == map_base[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] )
 	{
@@ -247,13 +254,30 @@ static int  get_free_pos( void )
 
 
 /*
+ * 获取ts流写入的位置
+ */
+/*
+ * static int get_sharemem_read_pos(uint8_t* map_base)
+ * {
+ * int result;
+ * char w_pos;
+ * w_pos = map_base[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)];
+ * result = ((w_pos >> 1) & 0x1);
+ * return (result);
+ * }
+ */
+
+
+/*
  * 令牌管理
  */
-static void token_hander( void )
+/* #define text */
+static void token_hander( uint8_t post )
 {
-	int		i, backcps;
-	static int	flag = 0;
+	int	i, backcps;
+	uint8_t flag = post;
 
+	DEBUG("post:%d",flag);
 	for ( i = 0; i < MYTPF_MAX; i++ )
 	{
 		if ( job[i] != NULL )
@@ -267,12 +291,12 @@ static void token_hander( void )
 				job[i]->token = backcps;
 				DEBUG( "calloc()" );
 				return;
-				break;
 			}
 
 			if ( job[i]->token > job[i]->burst )
 				job[i]->token = job[i]->burst;
 
+#if 0
 			if ( flag == 0 )
 			{
 				memcpy( job[i]->ts_date, sharemem_base, BUFFER_SIZE_1M );
@@ -283,6 +307,17 @@ static void token_hander( void )
 				memcpy( job[i]->ts_date, sharemem_base + BUFFER_SIZE_1M, BUFFER_SIZE_1M );
 				flag = 0;
 			}
+#else
+
+			if ( flag == 0 )
+			{
+				memcpy( job[i]->ts_date, sharemem_base, BUFFER_SIZE_1M );
+			}else if ( flag == 1 )
+			{
+				memcpy( job[i]->ts_date, sharemem_base + BUFFER_SIZE_1M, BUFFER_SIZE_1M );
+			}
+#endif
+
 
 			if ( squeue_t.flag == SEG_FLAG )
 			{
@@ -293,7 +328,6 @@ static void token_hander( void )
 			}else{
 				free( job[i]->ts_date );
 				return;
-				break;
 			}
 
 			++squeue_t.node;
@@ -316,6 +350,7 @@ static void destory_date( int count, int node )
 		free( jobsqueue_date[node + i] );
 		jobsqueue_date[node + i] = NULL;
 	}
+//	DEBUG( "clean date :%d", count );
 }
 
 
@@ -375,7 +410,7 @@ int fetch_token( usb_token *ptr, int size )
 	{
 		nano_sleep( 0, 10 );
 
-		if ( r_time_out( tpstart ) >= 2000 )
+		if ( r_time_out( tpstart ) >= DTS_STREAM_TIME )
 		{
 			break;
 		}
@@ -463,6 +498,7 @@ static void clean_date()
 
 	if ( count > 0 )
 		destory_date( count, node );
+//	DEBUG( "clean :%d ", count );
 }
 
 
@@ -483,6 +519,8 @@ static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *i
 	s_config	* dconfig	= config_t();
 	size_t		i_size		= dconfig->configParam.usb_tsfilesize;
 
+//	DEBUG( "current package count : %d ", node_count );
+
 	while ( i_count < node_count )
 	{
 		size_t len = BUFFER_SIZE_1M;
@@ -496,8 +534,10 @@ static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *i
 			{
 				*start_stop	= -1;
 				stop		= 0;
+				*wr_size	= 0;
 				ts_add_toal	= 0;
-				return(ret);
+				
+				break;
 			}
 			*wr_size	= 0;
 			ts_add_toal	= 0;
@@ -519,8 +559,9 @@ static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *i
 				perror( "write()" );
 				return(-1);
 			}
+			
+			*wr_size	+= (ret / 1048664);
 			len		-= ret;
-			*wr_size	+= (ret / 1024 / 1024);
 			ts_add_toal++;
 		}
 
@@ -618,11 +659,11 @@ static int disk_check( void )
 }
 
 
-static void record_ts_count( int test_incom_count )
+static void record_ts_count( int first_incom_count, int next_incom_count )
 {
 	char orig[5] = "", repl[5] = "";
-	gcvt_char( test_incom_count - 1, 1, orig );
-	gcvt_char( test_incom_count, 1, repl );
+	gcvt_char( first_incom_count, 1, orig );
+	gcvt_char( next_incom_count, 1, repl );
 
 	config_set_config( SYS_ETC_CONF, orig, (uint8_t *) repl, "WriteRecord" );
 }
@@ -638,19 +679,20 @@ static int descriptor_generation( void *init_b, int incom_count, int  *off )
 {
 	int		sfd			= -1, re_mod = 0, i_mod;
 	char		path_name[PATHSIZE]	= "";
-	int		test_incom_count	= 0;
-	static int	back_incom_count	= 0;
+	int		next_incom_count	= 0;
+	static int	first_incom_count	= 0;
 
 	init_bus_t * init = (init_bus_t *) init_b;
 	config_read( get_profile()->script_configfile );
 	s_config * dconfig = config_t();
 
-	test_incom_count	= dconfig->scfg_Param.stream_usb_used_count;
+	next_incom_count	= dconfig->scfg_Param.stream_usb_used_count;
 	i_mod			= init->mod;
+
 
 	do
 	{
-		re_mod = mod_manage( i_mod, &test_incom_count );
+		re_mod = mod_manage( i_mod, &next_incom_count );
 		DEBUG( "re_mod = %d", re_mod );
 		if ( re_mod == 4 )
 		{
@@ -662,24 +704,26 @@ static int descriptor_generation( void *init_b, int incom_count, int  *off )
 			/*
 			 * 循环模式处理
 			 * 不论何只记录第一次满足条件的值，其它任何时候不得改变
-			 * 接着对满足back_incom_count后继的加值做重复置位操作
+			 * 接着对满足first_incom_count后继的加值做重复置位操作
 			 */
 			if ( *off == 0 )
 			{
-				back_incom_count	= dconfig->scfg_Param.stream_usb_used_count;    /* 最后一次的记录 */
-				test_incom_count	= incom_count;                                  /* 最初进来和值 */
-				DEBUG( "test_incom_count:%d max :%d", test_incom_count, back_incom_count );
+				first_incom_count	= dconfig->scfg_Param.stream_usb_used_count;    /* 最后一次的记录 */
+				next_incom_count	= incom_count;                                  /* 最初进来和值 */
+
+				record_ts_count( first_incom_count, next_incom_count );
+				DEBUG( "next_incom_count:%d max :%d", next_incom_count, first_incom_count );
 				*off = 1;
 			}
 
-			++test_incom_count;
+			++next_incom_count;
 
-			if ( back_incom_count <= test_incom_count )
-				test_incom_count = back_incom_count; /* 最初进来和值 */
+			if ( first_incom_count <= next_incom_count )
+				next_incom_count = first_incom_count; /* 最初进来和值 */
 		}
 
 
-		if ( management_document( init->path, dconfig->configParam.usb_tsfilename, test_incom_count, path_name ) < 0 )
+		if ( management_document( init->path, dconfig->configParam.usb_tsfilename, next_incom_count, path_name ) < 0 )
 		{
 			return(sfd);
 			break;
@@ -694,7 +738,8 @@ static int descriptor_generation( void *init_b, int incom_count, int  *off )
 			}
 		}
 
-		record_ts_count( test_incom_count );
+		int f_incom_count = next_incom_count - 1;
+		record_ts_count( f_incom_count, next_incom_count );
 		tmp_dsplay = rindex( path_name, '/' );
 	}
 	while ( sfd < 0 );
@@ -713,11 +758,14 @@ static int  creat_job_thread( void *init_b )
 	int		start_stop	= 0;
 	pthread_attr_t	attr;
 	size_t		wr_size = 0;
+	wait_stop = 0;
 	config_read( get_profile()->script_configfile );
 	s_config * dconfig = config_t();
-	ts_lenth	= dconfig->configParam.usb_tsfilesize;
+
+	ts_lenth	= dconfig->configParam.usb_tsfilesize / 2; /* by jh 2016-8-17 */
 	ts_add_toal	= 0.0;
 	int incom_count = dconfig->scfg_Param.stream_usb_used_count;
+
 
 	if ( creat_thread( init_b, &attr ) != 0 )
 		return(result);
@@ -730,13 +778,19 @@ static int  creat_job_thread( void *init_b )
 	while ( 1 )
 	{
 		if ( stop <= 0 )
+		{
+			while ( wait_stop != 0 )
+				usleep( 0 );
 			break;
+		}
 
 		if ( (stop = recv_usb_notify() ) <= 0 )
 			break;
 
 		if ( start_stop < 0 )
 		{
+			while ( wait_stop != 1 )
+				usleep( 0 );
 			stop = 0;
 			break;
 		}
@@ -768,9 +822,10 @@ static int  creat_job_thread( void *init_b )
 
 		destory_date( count, node );
 	}
-	DEBUG( "-------------" );
+
+/*	DEBUG( "-------------" ); */
 	desory_thread( init_b, &attr );
-	DEBUG( "-----2--------" );
+/*	DEBUG( "-----2--------" ); */
 	clean_date();
 
 	close( sfd );
@@ -897,15 +952,16 @@ uint8_t  send_usb_writ_message()
 /*
  * 读中断
  */
-static void inter_signal( uint8_t *map_addr )
+static void inter_signal( uint8_t* map_addr, uint8_t *post )
 {
-	struct timeval tpstart;
+	struct timeval	tpstart;
+	char		tmp;
 	gettimeofday( &tpstart, NULL );
 
-	while ( map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] != 1 )
+	while ( ( (tmp = map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)]) & 0x1) != 1 )
 	{
 		usleep( 0 );
-		if ( r_time_out( tpstart ) >= 2000 )
+		if ( r_time_out( tpstart ) >= DTS_STREAM_TIME )
 		{
 			r_time_out_flag = 1;
 
@@ -914,16 +970,24 @@ static void inter_signal( uint8_t *map_addr )
 		r_time_out_flag = 0;
 	}
 
-	if ( 1 == map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] )
-	{
-		map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] = 0x00;
-	}
+	*post = ( (tmp >> 1) & 0x1);
+
+	map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] = tmp & 0xFE;
+
+/*
+ * if ( 1 == ((tmp = map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)])&0x1) )
+ * {
+ *      map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] = tmp & 0xFE;
+ * }
+ */
 }
 
 
+/* #define __SET_TIME_P */
 static void *read_cache( void *arg )
 {
-	init_bus_t * init = (init_bus_t *) arg;
+	init_bus_t	* init = (init_bus_t *) arg;
+	uint8_t		post;
 
 	if ( !init )
 		return(NULL);
@@ -934,21 +998,39 @@ static void *read_cache( void *arg )
 		fprintf( stderr, "tokens_init()\n" );
 		return(NULL);
 	}
-
+#if defined(__SET_TIME_P)
+	float		timeuse;
+	struct timeval	tpstart, tpend;
+	int		t	= 0;
+	int		count	= 0;
+	gettimeofday( &tpstart, NULL );                 /* 开始计算程序运行时间 */
+#endif
 	while ( 1 )
 	{
-		if ( stop <= 0 )
-			break;
+		inter_signal( init->mem, &post );
 
-		inter_signal( init->mem );
-
-		if ( is_usb_online() != DEVACTT ) /*  */
+		if ( is_usb_online() != DEVACTT )       /*  */
 			r_time_out_flag = 1;
 
 		if ( r_time_out_flag == 1 )
 			break;
 
-		token_hander();
+		token_hander( post );
+
+		if ( stop <= 0 )
+		{
+			wait_stop = 1;
+			break;
+		}
+
+#if defined(__SET_TIME_P)
+		/* 结束计算程序运行时间 */
+		++count;
+		gettimeofday( &tpend, NULL );
+		timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + (tpend.tv_usec - tpstart.tv_usec);
+		timeuse /= 1000000;
+		printf( "\t%d Time : %f count=%d \r\n", ++t, timeuse, count );
+#endif
 	}
 
 	if ( r_time_out_flag != 1 )
@@ -961,10 +1043,10 @@ static void *read_cache( void *arg )
 
 void exit_retset_bus( void *init_b, uint8_t* map_base )
 {
-	init_bus_t* init = (init_bus_t *) init_b;
-	map_base[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)]	= 0x00;
+	/* init_bus_t* init = (init_bus_t *) init_b; */
 	map_base[(BUS_OFFSET_ADDR + 0x07) / sizeof(uint8_t)]	= 0x00;
-	map_base[(BUS_OFFSET_ADDR + 6) / sizeof(uint8_t)]	= init->bus_t.usb_dir;
+	map_base[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)]	= 0x00;
+	/* map_base[(BUS_OFFSET_ADDR + 6) / sizeof(uint8_t)]	= init->bus_t.usb_dir; */
 }
 
 
@@ -1004,6 +1086,7 @@ static int  usb_write_handler( char *i_path, off_t size, int play_mod )
 		close_mem_fd( fd );
 		return(ret);
 	}
+
 	memset( sharemem_base, 0, MEMSIZE_2M + 0xFF );
 
 	initialize_bus( &init_t, init_t.mem );
