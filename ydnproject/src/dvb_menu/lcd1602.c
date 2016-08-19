@@ -2397,7 +2397,7 @@ void ChangeMenu( int keySigNum )
 		}else{
 			extern pthread_t	usb_sig;
 			s_config		*dconfig = config_get_config();
-			send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
+			send_usb_stop_message( usb_sig, SIGUSR2, dconfig, STARTSTOP );
 
 			return;
 		}

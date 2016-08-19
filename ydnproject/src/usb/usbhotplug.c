@@ -27,6 +27,13 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <dirent.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <linux/fd.h>
+#include <sys/mount.h>
+#include <scsi/scsi.h>
+#include <scsi/sg.h>
+#include <scsi/scsi_ioctl.h>
 #include <menu_foun.h>
 #include <usbhotplug.h>
 #include <debug.h>
@@ -43,6 +50,83 @@ static usb_no_and_stat_t usb_dev_info;
 usb_no_and_stat_t *get_stata_path()
 {
 	return(&usb_dev_info);
+}
+
+
+/*
+ * µ¯³öusb
+ */
+int  eject_usb( void *usb_stat_t )
+{
+	int		usb_fd;
+	int		result = -1;
+	int		flage;
+	sg_io_hdr_t	d_usb;
+	unsigned char	allow_r_b[6]		= { ALLOW_MEDIUM_REMOVAL, 0, 0, 0, 0, 0 };;
+	unsigned char	start_stop_d_b[6]	= { START_STOP, 0, 0, 0, 1, 0 };
+	unsigned char	start_stop_d_2b[6]	= { START_STOP, 0, 0, 0, 2, 0 };
+	unsigned char	t_list[2];
+	unsigned char	buffer[32];
+
+	usb_no_and_stat_t *device_path = (usb_no_and_stat_t *) usb_stat_t;
+
+	if ( !device_path )
+		return(result);
+
+
+	usb_fd = open( device_path->devfile_parts[0], O_RDONLY | O_NONBLOCK );
+	if ( usb_fd < 0 )
+		return(result);
+	memset( &d_usb, 0, sizeof(sg_io_hdr_t) );
+
+
+	if ( (ioctl( usb_fd, SG_GET_VERSION_NUM, &flage ) < 0) || (flage < 30000) )
+	{
+		DEBUG( "not an sg device, or old sg driver\n" );
+		goto error__;
+	}
+
+	d_usb.interface_id	= 'S';
+	d_usb.cmd_len		= 6;
+	d_usb.mx_sb_len		= sizeof(buffer);
+	d_usb.dxfer_direction	= SG_DXFER_NONE;
+	d_usb.dxfer_len		= 0;
+	d_usb.dxferp		= t_list;
+	d_usb.sbp		= buffer;
+	d_usb.timeout		= 10000;
+	d_usb.cmdp		= allow_r_b;
+
+	result = ioctl( usb_fd, SG_IO, (void *) &d_usb );
+	if ( result < 0 )
+	{
+		goto error__;
+	}
+	d_usb.cmdp	= start_stop_d_b;
+	result		= ioctl( usb_fd, SG_IO, (void *) &d_usb );
+	if ( result < 0 )
+	{
+		goto error__;
+	}
+	d_usb.cmdp	= start_stop_d_2b;
+	result		= ioctl( usb_fd, SG_IO, (void *) &d_usb );
+	if ( result < 0 )
+	{
+		goto error__;
+	}
+
+	ioctl( usb_fd, BLKRRPART );
+
+	memset( device_path->devfile_parts[0], 0, MAX_NAME_LEN );
+	memset( device_path->mount_path[0], 0, MAX_NAME_LEN );
+	device_path->is_active = DEVROMV;
+	close( usb_fd );
+
+	DEBUG( "result :%d ", result );
+	return(result);
+
+error__:
+	close( usb_fd );
+	return(result);
 }
 
 
@@ -222,7 +306,7 @@ static void dev_mount( usb_no_and_stat_t  *usb_dev )
 		ret = mount( usb_dev->devfile_parts[i], usb_dev->mount_path[i], "vfat", 0, "codepage=437,iocharset=iso8859-1" );
 		if ( ret == -1 )
 		{
-			DEBUG("usb_dev->devfile_parts[i]:%s usb_dev->mount_path[i]:%s",usb_dev->devfile_parts[i], usb_dev->mount_path[i]);
+			DEBUG( "usb_dev->devfile_parts[i]:%s usb_dev->mount_path[i]:%s", usb_dev->devfile_parts[i], usb_dev->mount_path[i] );
 			perror( "mount()" );
 			memset( usb_dev->mount_path[i], 0, 100 );
 			return;
@@ -284,7 +368,7 @@ static int seach_dev( char *dev_no, usb_no_and_stat_t  *usb_dev, int n_part )
 					if ( dev_no[i] >= '1' && dev_no[i] < '9' )
 					{
 						parts_num = dev_no[i] - 48;
-						DEBUG("dev_no :%s",dev_no);
+						DEBUG( "dev_no :%s", dev_no );
 						if ( n_part == 1 )
 						{
 							usb_dev->part_num += 1;

@@ -85,7 +85,7 @@ static int			play_count		= 0;
 static struct read_bus init_bus_r = {
 	.bus_inttt.reset		= 0x01,
 	.bus_inttt.rest_usb_op		= 0x01,
-	.bus_inttt.usb_dir			= 0x01, /* 改0时为读 */
+	.bus_inttt.usb_dir		= 0x01, /* 改0时为读 */
 	.bus_inttt.usb_rdaddr_b3124	= 0x01, /* 地址读时为0x6400000 */
 	.bus_inttt.usb_rdaddr_b2316	= 0x40,
 	.bus_inttt.usb_rdaddr_b158	= 0x00,
@@ -131,30 +131,56 @@ static int r_time_out( struct timeval tpstart )
 /*
  * 写中断
  */
-static void inter_signal( uint8_t *map_addr )
+static void inter_signal( uint8_t* map_addr, uint8_t *post )
 {
-	struct timeval tpstart;
+	struct timeval	tpstart;
+	char		tmp;
 	gettimeofday( &tpstart, NULL );
 
-	while ( readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) != 1 )
+	while ( ( (tmp = map_addr[(BUS_OFFSET_ADDR + 0x13) / sizeof(uint8_t)]) & 0x1) != 1 )
 	{
 		usleep( 0 );
-		if ( r_time_out( tpstart ) >= 2000 )
+		if ( r_time_out( tpstart ) >= DTS_STREAM_TIME )
 		{
 			r_time_out_flag = 1;
+
 			break;
 		}
 		r_time_out_flag = 0;
 	}
-	if ( 1 == readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) )
-	{
-		writeb( 0x00, &map_addr[BUS_OFFSET_ADDR + 0x13] );
-	}
+
+	*post = ( (tmp >> 1) & 0x1);
+
+	map_addr[(BUS_OFFSET_ADDR + 0x13) / sizeof(uint8_t)] = tmp & 0xFE;
+
+
+/*
+ * struct timeval tpstart;
+ * gettimeofday( &tpstart, NULL );
+ */
+
+
+/*
+ * while ( readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) != 1 )
+ * {
+ *      usleep( 0 );
+ *      if ( r_time_out( tpstart ) >= 2000 )
+ *      {
+ *              r_time_out_flag = 1;
+ *              break;
+ *      }
+ *      r_time_out_flag = 0;
+ * }
+ * if ( 1 == readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) )
+ * {
+ *      writeb( 0x00, &map_addr[BUS_OFFSET_ADDR + 0x13] );
+ * }
+ */
 }
 
 
 /*
- * 写总线操作 1M
+ * 写总线操作 2M
  */
 static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 {
@@ -163,9 +189,12 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 	int	segment = 0;
 
 
-	uint8_t* stor_addr = calloc( 1, MEMSIZE_2M + 0xf );
+	uint8_t* stor_addr = calloc( 1, FRISTSIZE + 0xf );
 	if ( !stor_addr )
+	{
+		DEBUG( "calloc error" );
 		return;
+	}
 
 	while ( (cntr = read( fd, stor_addr, copy_size ) ) != 0 )
 	{
@@ -178,7 +207,9 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 			break;
 		}else if ( cntr > 0 )
 		{
-			inter_signal( map_addr );
+			uint8_t post;
+
+			inter_signal( map_addr, &post );
 
 			if ( is_usb_online() != DEVACTT )
 				r_time_out_flag = 1;
@@ -186,13 +217,14 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 			if ( r_time_out_flag == 1 )
 				break;
 
+			DEBUG( "post :%d  cntr:%x", post, cntr );
 			if ( segment == 0 )
 			{
 				memcpy( sharemem_map_base, stor_addr, cntr );
 				segment = 1;
 			}else if ( segment == 1 )
 			{
-				memcpy( sharemem_map_base + FRISTSIZE, stor_addr, copy_size );
+				memcpy( sharemem_map_base + FRISTSIZE, stor_addr, cntr );
 				segment = 0;
 			}
 			size		+= cntr;
@@ -200,7 +232,7 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 		}
 	}
 	ts_add_toal += cntr;
-	memset( stor_addr, 0, MEMSIZE_2M + 0xf );
+	memset( stor_addr, 0, FRISTSIZE + 0xf );
 	free( stor_addr );
 	stor_addr = NULL;
 }
@@ -216,7 +248,10 @@ static int init_bus_wrop( int fd )
 
 	uint8_t* stor_addr = calloc( 1, MEMSIZE_2M + 0xf );
 	if ( !stor_addr )
+	{
+		DEBUG( "calloc error" );
 		return(ret);
+	}
 
 
 	while ( (cntr = read( fd, stor_addr, MEMSIZE_2M ) ) != 0 )              /* 读文件 */
@@ -238,6 +273,7 @@ static int init_bus_wrop( int fd )
 	ts_add_toal = cntr;
 	free( stor_addr );
 
+	DEBUG( "cntr :%x ", cntr );
 	return(ret);
 }
 
@@ -1067,7 +1103,6 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 	}
 	break;
 	case USB_SEGMENT: {
-		
 		if ( ts_archives( path, ts_name ) != -1 )
 		{
 			int node;
@@ -1079,12 +1114,10 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 			ts_lenth	= 1;
 			ts_add_toal	= 0;
 			play_count	= 0;
-			
 		}
 	}
 	break;
 	case USB_LOOP: {
-		
 		if ( ts_archives( path, ts_name ) != -1 )
 		{
 			int node;
@@ -1097,7 +1130,6 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 			ts_lenth	= 1;
 			ts_add_toal	= 0;
 			play_count	= 0;
-			
 		}
 	}
 	break;
@@ -1172,7 +1204,7 @@ int32_t read_usb( void *usb_hand )
 
 	DEBUG( "file size : %lld\n", st.st_size );
 
-	if ( usb_action->is_start == START_STOP )
+	if ( usb_action->is_start == STARTSTOP )
 		return(ret);
 
 	usb_read_handler( path, ts_path, tmpname, pos, st.st_size, usb_action->op_mod );
@@ -1181,7 +1213,7 @@ int32_t read_usb( void *usb_hand )
 	signal_close();
 
 	s_config *dconfig = config_get_config();
-	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
+	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, STARTSTOP );
 	loop_cl_cah();
 
 	usb_sop_notify();

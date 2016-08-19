@@ -200,28 +200,23 @@ uint8_t manu_do_mount_dev()
 					return(0);
 				sprintf( FileName, "%s", get_stata_path()->mount_path[i] );
 
-				if ( umount2( FileName, MNT_FORCE ) == 0 )
+				if ( umount2( FileName, MNT_FORCE ) != 0 )
+					DEBUG( "umount %s failed\n", FileName );
+
+
+				int ret = eject_usb( get_stata_path() );
+				if ( ret != -1 )
 				{
 					char tmpdir[50] = { 0 };
 
 					sprintf( tmpdir, "rm -rf %s", FileName );
 					system( tmpdir );
 					DEBUG( "umount %s success\n", FileName );
-					usleep( 500000 );
+
 					lcd_clear( discontrl_t()->lcdfd ); /* ²¢Çå³ýÄÚ´æ */
 					lcd_Write_String( 0, "Successful remov" );
 					lcd_Write_String( 1, "al of USB       " );
 					nano_sleep( 2, 0 );
-				} else {
-					DEBUG( "umount %s failed\n", FileName );
-				}
-
-				memset( FileName, 0, 50 );
-				sprintf( FileName, "%s", get_stata_path()->devfile_parts[i] );
-
-				if ( umount2( FileName, MNT_FORCE ) == 0 )
-				{
-					DEBUG( "umount %s success\n", FileName );
 				}
 			}
 		}

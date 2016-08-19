@@ -33,7 +33,7 @@ static int32_t is_usb_status( int32_t mod )
 
 	if ( mod == START_R )
 		retmod = (mod & 0x1);
-	else if ( mod == START_STOP )
+	else if ( mod == STARTSTOP )
 		retmod = (mod & 0x0);
 
 	return(retmod);

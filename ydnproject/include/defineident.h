@@ -77,6 +77,7 @@
 #define  FILE_Y (1)
 #define  FILE_N (0)
 
+#define DTS_STREAM_TIME (12000)
 
 /*
  * 带宽
@@ -158,7 +159,7 @@
 #define  CHANGE_N	('N')
 
 #define  START_R	(0x01)
-#define  START_STOP	(0x02)
+#define  STARTSTOP	(0x02)
 #define  USB_READ	(0x40)
 #define  USB_WRITE	(0x50)
 
@@ -201,7 +202,8 @@
 
 
 /* 共享内存 */
-#define MEMSIZE_2M	(0x400160) //0x2000B0 by 2016-8-17 jh
+#define MEMSIZE_4M	(0x400160) //0x2000B0 by 2016-8-17 jh
+#define MEMSIZE_2M	(0x2000B0) //0x2000B0 by 2016-8-17 jh
 #define MEMSTARTADD_2	(0x1400000)     /* 100MB */
 #define MISCMODRST	(0x20)
 #define RSTMGR		(0XFFD05000)

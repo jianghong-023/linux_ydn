@@ -33,7 +33,7 @@
 #define PATHLENGTH	150
 #define NAMESIZE	30
 #define PATHSIZE	1024
-#define DTS_STREAM_TIME (12000)
+
 
 /* #define  BUFFER_SIZE_1M (0x100058) */
 #define  BUFFER_SIZE_1M (0x2000b0) /* 2016-8-17 */
@@ -96,6 +96,9 @@ static int disk_check( void );
 
 
 static int descriptor_generation( void *init_b, int incom_count, int * );
+
+
+void exit_retset_bus( void *init_b, uint8_t* map_base );
 
 
 init_bus_t init_t = {
@@ -256,6 +259,8 @@ static int  get_free_pos( void )
 /*
  * 获取ts流写入的位置
  */
+
+
 /*
  * static int get_sharemem_read_pos(uint8_t* map_base)
  * {
@@ -277,14 +282,14 @@ static void token_hander( uint8_t post )
 	int	i, backcps;
 	uint8_t flag = post;
 
-	DEBUG("post:%d",flag);
+/*	DEBUG("post:%d",flag); */
 	for ( i = 0; i < MYTPF_MAX; i++ )
 	{
 		if ( job[i] != NULL )
 		{
 			backcps = job[i]->cps;
 
-			job[i]->ts_date = calloc( 1, BUFFER_SIZE_1M );
+			job[i]->ts_date = calloc( 1, BUFFER_SIZE_2M );
 
 			if ( !job[i]->ts_date )
 			{
@@ -299,22 +304,22 @@ static void token_hander( uint8_t post )
 #if 0
 			if ( flag == 0 )
 			{
-				memcpy( job[i]->ts_date, sharemem_base, BUFFER_SIZE_1M );
+				memcpy( job[i]->ts_date, sharemem_base, BUFFER_SIZE_2M );
 
 				flag = 1;
 			}else if ( flag == 1 )
 			{
-				memcpy( job[i]->ts_date, sharemem_base + BUFFER_SIZE_1M, BUFFER_SIZE_1M );
+				memcpy( job[i]->ts_date, sharemem_base + BUFFER_SIZE_2M, BUFFER_SIZE_2M );
 				flag = 0;
 			}
 #else
 
 			if ( flag == 0 )
 			{
-				memcpy( job[i]->ts_date, sharemem_base, BUFFER_SIZE_1M );
+				memcpy( job[i]->ts_date, sharemem_base, BUFFER_SIZE_2M );
 			}else if ( flag == 1 )
 			{
-				memcpy( job[i]->ts_date, sharemem_base + BUFFER_SIZE_1M, BUFFER_SIZE_1M );
+				memcpy( job[i]->ts_date, sharemem_base + BUFFER_SIZE_2M, BUFFER_SIZE_2M );
 			}
 #endif
 
@@ -350,7 +355,7 @@ static void destory_date( int count, int node )
 		free( jobsqueue_date[node + i] );
 		jobsqueue_date[node + i] = NULL;
 	}
-//	DEBUG( "clean date :%d", count );
+/*	DEBUG( "clean date :%d", count ); */
 }
 
 
@@ -498,7 +503,7 @@ static void clean_date()
 
 	if ( count > 0 )
 		destory_date( count, node );
-//	DEBUG( "clean :%d ", count );
+/*	DEBUG( "clean :%d ", count ); */
 }
 
 
@@ -519,15 +524,22 @@ static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *i
 	s_config	* dconfig	= config_t();
 	size_t		i_size		= dconfig->configParam.usb_tsfilesize;
 
-//	DEBUG( "current package count : %d ", node_count );
 
+/*
+ * DEBUG( "current package count : %d ", node_count );
+ * static int count = 0;
+ */
 	while ( i_count < node_count )
 	{
-		size_t len = BUFFER_SIZE_1M;
+		size_t	len = BUFFER_SIZE_2M;
+		uint8_t *date;
+		date = jobsqueue_date[node + i_count];
+
 
 		if ( *wr_size >= i_size )
 		{
-			close( *sfd );
+			syncfs( *sfd );
+
 			init_bus_t * init = (init_bus_t *) init_b;
 
 			if ( init->mod == USB_RECORD_SIG )
@@ -536,9 +548,11 @@ static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *i
 				stop		= 0;
 				*wr_size	= 0;
 				ts_add_toal	= 0;
-				
+				/*	count		= 0; */
+
 				break;
 			}
+			close( *sfd );
 			*wr_size	= 0;
 			ts_add_toal	= 0;
 			*sfd		= descriptor_generation( init_b, incom_count, off );
@@ -551,24 +565,26 @@ static int  wr_usb( int *sfd, int node_count, int node, size_t *wr_size, void *i
 
 		while ( len > 0 )
 		{
-			ret = write( *sfd, jobsqueue_date[node + i_count], len );
+			ret = write( *sfd, date, len );
 			if ( ret < 0 )
 			{
-				if ( errno == EINTR )
-					continue;
-				perror( "write()" );
-				return(-1);
+				perror( "write usb error" );;
+				break;
 			}
-			
+
+#if 0
+			DEBUG( "len :%x  %d", ret, ++count );
+#endif
+
 			*wr_size	+= (ret / 1048664);
 			len		-= ret;
+			date		+= ret;
 			ts_add_toal++;
 		}
 
 
 		++i_count;
 	}
-
 
 	return(ret);
 }
@@ -766,14 +782,12 @@ static int  creat_job_thread( void *init_b )
 	ts_add_toal	= 0.0;
 	int incom_count = dconfig->scfg_Param.stream_usb_used_count;
 
-
-	if ( creat_thread( init_b, &attr ) != 0 )
-		return(result);
-
 	sfd = descriptor_generation( init_b, incom_count, &off );
 	if ( sfd < 0 )
 		return(result);
 
+	if ( creat_thread( init_b, &attr ) != 0 )
+		return(result);
 
 	while ( 1 )
 	{
@@ -823,15 +837,13 @@ static int  creat_job_thread( void *init_b )
 		destory_date( count, node );
 	}
 
-/*	DEBUG( "-------------" ); */
 	desory_thread( init_b, &attr );
-/*	DEBUG( "-----2--------" ); */
+
 	clean_date();
-
-	close( sfd );
-
 	_destroy( token );
 
+	syncfs( sfd );
+	close( sfd );
 	return(result);
 }
 
@@ -974,6 +986,7 @@ static void inter_signal( uint8_t* map_addr, uint8_t *post )
 
 	map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)] = tmp & 0xFE;
 
+
 /*
  * if ( 1 == ((tmp = map_addr[(BUS_OFFSET_ADDR + 0x12) / sizeof(uint8_t)])&0x1) )
  * {
@@ -1078,7 +1091,7 @@ static int  usb_write_handler( char *i_path, off_t size, int play_mod )
 		return(ret);
 	}
 
-	sharemem_base = init_mem( MEMSIZE_2M + 0xFF, s_fd, MEMSTARTADD_2 );
+	sharemem_base = init_mem( MEMSIZE_4M + 0xFF, s_fd, MEMSTARTADD_2 );
 	if ( !sharemem_base )
 	{
 		close_mem_fd( s_fd );
@@ -1087,7 +1100,7 @@ static int  usb_write_handler( char *i_path, off_t size, int play_mod )
 		return(ret);
 	}
 
-	memset( sharemem_base, 0, MEMSIZE_2M + 0xFF );
+	memset( sharemem_base, 0, MEMSIZE_4M + 0xFF );
 
 	initialize_bus( &init_t, init_t.mem );
 	init_t.mod = play_mod;
@@ -1098,8 +1111,8 @@ static int  usb_write_handler( char *i_path, off_t size, int play_mod )
 	comom_stream_info( write_stream_info );
 	creat_job_thread( &init_t );
 	exit_retset_bus( &init_t, init_t.mem );
-	memset( sharemem_base, 0, MEMSIZE_2M + 0xFF );
-	destory_mem( sharemem_base, MEMSIZE_2M + 0xFF );
+	memset( sharemem_base, 0, MEMSIZE_4M + 0xFF );
+	destory_mem( sharemem_base, MEMSIZE_4M + 0xFF );
 	sharemem_base = NULL;
 	close_mem_fd( s_fd );
 	destory_mem( init_t.mem, MAP_SIZE );
@@ -1171,7 +1184,7 @@ static int32_t writ_usb( void *usb_hand )
 	if ( !usb_action )
 		goto goback;
 
-	if ( usb_action->is_start == START_STOP )
+	if ( usb_action->is_start == STARTSTOP )
 	{
 		discontrl_t()->usb_wr_flag	= USBWRITESET;
 		ret				= -1;
@@ -1186,7 +1199,7 @@ goback:
 	signal_close();
 
 	s_config *dconfig = config_get_config();
-	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, START_STOP );
+	send_usb_stop_message( usb_sig, SIGUSR2, dconfig, STARTSTOP );
 
 	loop_cl_cah();
 
