@@ -901,8 +901,8 @@ uint8_t usb_rec_enable()
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
 	discontrl.write_char_dig_status = 0x03;
-
-	if ( usb_probe() < 0 )
+	int ret = usb_probe();
+	if ( ret < 0 )
 	{
 		paren_menu();
 		return(-1);
@@ -910,7 +910,7 @@ uint8_t usb_rec_enable()
 
 	if ( discontrl.usb_wr_flag == USBWRITESET || discontrl.usb_wr_flag == USBWRITECTL )
 		discontrl.usb_wr_flag = USBWRITESTART; /* ¿ªÆôÐ´ */
-
+	clean_lcd();
 	static char *Bandwidth[] = {
 		"Yes",
 		"No ",
@@ -1888,6 +1888,8 @@ void auto_usb_test( void )
 }
 
 
+
+
 uint8_t Bandwidth_Cfg()
 {
 	/* ??¡À?LCD2?¦Ì£¤1|?¨¹ */
@@ -2066,7 +2068,7 @@ void text_digfilesize_save( char *orgbuf, char *repbuf )
 
 void gener_table()
 {
-	config_read( get_profile()->script_configfile );
+	//config_read( get_profile()->script_configfile );
 	s_config	*dconfig	= config_t();
 	int		_tsid		= dconfig->scfg_Param.stream_tsid;
 	if ( _tsid < 0 )

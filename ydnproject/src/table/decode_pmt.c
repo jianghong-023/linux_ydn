@@ -243,10 +243,13 @@ static void DumpPMT( void* p_zero, dvbpsi_pmt_t* p_pmt )
 			}
 		if ( p_es->i_type == 0x03 ){
 			parse_ts_id.i_audieo_pid = p_es->i_pid;
+			DEBUG( "   audio pid :%x \n" ,parse_ts_id.i_audieo_pid);
 			parse_ts_id.i_parse_status = 0x02;
-			}
+		}
 		DumpDescriptors( "    |  ]", p_es->p_first_descriptor );
+		
 		p_es = p_es->p_next;
+		DEBUG("%d",i);
 	}
 
 
@@ -273,24 +276,20 @@ static void DumpPMT( void* p_zero, dvbpsi_pmt_t* p_pmt )
 /*****************************************************************************
 * main
 *****************************************************************************/
-/* int main(int i_argc, char* pa_argv[]) */
 int pmt_parse_enter( char *file, uint16_t i_program_number, uint16_t i_pmt_pid )
 {
 	int		i_fd;
 	uint8_t		data[188];
 	dvbpsi_t	*p_dvbpsi;
 	bool		b_ok;
-	/* uint16_t i_program_number, i_pmt_pid; */
+	
 
 	DEBUG( "i_program_number =%04x  i_pmt_pid=%04x", i_program_number, i_pmt_pid );
 	i_fd = open( file, O_RDONLY, S_IRUSR | S_IWUSR );
 	if ( i_fd < 0 )
 		return(1);
 
-/*
- *  i_program_number = atoi(pa_argv[2]);
- *  i_pmt_pid = atoi(pa_argv[3]);
- */
+
 
 	p_dvbpsi = dvbpsi_new( &message, DVBPSI_MSG_DEBUG );
 	if ( p_dvbpsi == NULL )
@@ -300,16 +299,79 @@ int pmt_parse_enter( char *file, uint16_t i_program_number, uint16_t i_pmt_pid )
 		goto out;
 
 	b_ok = ReadPacket( i_fd, data );
-
+	int count = 32 ;
 	while ( b_ok )
 	{
+		
 		uint16_t i_pid = ( (uint16_t) (data[1] & 0x1f) << 8) + data[2];
-		if ( i_pid == i_pmt_pid )
+		if ( i_pid == i_pmt_pid ){
 			dvbpsi_packet_push( p_dvbpsi, data );
-		b_ok = ReadPacket( i_fd, data );
-		if(parse_ts_id.i_parse_status == 0x02){
-			break;
+			//DEBUG("---------------------");
+#if 0
+			uint16_t secion_length = (data[1]& 0x0F) << 8 | data[2];
+			uint16_t program_info_length =  (data[10] & 0x0F) << 8 | data[11];
+			int pos = 12;
+
+			if(program_info_length != 0)
+				pos += program_info_length;
+
+			DEBUG("secion_length:%x  program_info_length:%x  pos = %d",secion_length,program_info_length,pos);
+			for(;pos <= (secion_length +2)-4;){
+				uint8_t stream_type = data[pos];
+				
+				uint32_t elmentary_pid = ((data[pos+1]<< 8) | (data[pos+2] & 0x1FFF));
+				
+
+				uint32_t es_info_lenght = (data[pos +3] & 0x0F) << 8 | data[pos + 4];
+				
+				if(es_info_lenght != 0){
+
+					uint32_t description = data[pos + 5];
+
+					int len;
+					
+					for(len = 2;len <= es_info_lenght ; len++){
+
+						description = description << 8 | data[pos +4 + len];
+					}
+
+					pos +=5;
+
+					
+				}
+
+				DEBUG("stream_type:%x elmentary_pid:%x es_info_lenght:%x ",stream_type,elmentary_pid,es_info_lenght);
+
+			}
+#endif
+			
+#if 0
+			int	i;
+			int	y = 0;
+
+			for ( i = 0; i < 188; i++ )
+			{
+				printf( "%02x ", data[i] );
+
+				++y;
+
+				if ( y >= 20 )
+				{
+					y = 0;
+
+					DEBUG( "\n" );
+				}
+			}
+			DEBUG( "\n" );
+#endif		
 		}
+		--count;
+		
+		b_ok = ReadPacket( i_fd, data );
+		if(parse_ts_id.i_parse_status == 0x02 ){
+			break;
+		}else if(count <= 0)
+		 		break;
 	}
 
 out:

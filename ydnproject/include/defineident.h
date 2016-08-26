@@ -71,6 +71,9 @@
 #define DEVACTT			(1)
 #define OTHER			(3)
 
+#define DELAY_ON		(5)
+#define DELAY_OFF			(6)
+
 #define  STORE_FILE	(1)
 #define  PALAY_FILE	(2)
 

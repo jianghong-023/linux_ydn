@@ -89,6 +89,8 @@ uint8_t eauto_wr_usb_Cfg(void);
 uint8_t sys_serial();
 
 
+void usb_pl_message(void);
+
 uint8_t sys_Version();
 
 
@@ -211,7 +213,7 @@ uint8_t eit_insert_Cfg();
 
 uint8_t nit_insert_Cfg();
 
-
+void clean_lcd(void);
 
 uint8_t start_eventname_Cfg();
 

@@ -70,6 +70,18 @@ void filter_ts_pmt( uint8_t* map_base, char pmt_0, char pmt_1 )
 }
 
 
+void filter_pmt( char pmt_0, char pmt_1 )
+{
+	int		fd_mmap;
+	struct _bus_initial *bus_addr = NULL;
+	bus_addr = malloc_bus_addr( &fd_mmap );
+	
+	filter_ts_pmt( bus_addr->map_base, pmt_0, pmt_1 );
+
+	free_bus_addr( bus_addr, fd_mmap );
+}
+
+
 /* 0x00 enable 0x01 deenable */
 void eit_insert_table( uint8_t* map_base, char eitflags )
 {
@@ -104,7 +116,7 @@ void modulator_set( uint8_t* map_base, s_config *dconfig )
 	writeb( dconfig->scfg_Param.fft_mode, &map_base[(BUS_INIT_BASE + 0x03) / sizeof(uint8_t)] );
 	writeb( dconfig->scfg_Param.deltal, &map_base[(BUS_INIT_BASE + 0x04) / sizeof(uint8_t)] );
 	writeb( dconfig->scfg_Param.channel_width, &map_base[(BUS_INIT_BASE + 0x05) / sizeof(uint8_t)] );
-#if 1
+#if 0
 	DEBUG( "encode_rate =%d \n", dconfig->scfg_Param.encode_rate );
 	DEBUG( "modulelate_mode =%d \n", dconfig->scfg_Param.modulelate_mode );
 	DEBUG( "fft_mode =%d \n", dconfig->scfg_Param.fft_mode );
@@ -171,7 +183,7 @@ void init_bus( void )
 	pmt_pid_a[0]	= GET_HEX( pmtpid, 2 );
 	pmt_pid_a[1]	= GET_HEX( pmtpid, 1 );
 
-#if 1
+#if 0
 	DEBUG( "encoder_pmt_pid =%x ", pmtpid );
 	DEBUG( "pmtpid[0]= %02x  pmtpid[1]=%02x ", pmt_pid_a[0], pmt_pid_a[1] );
 
@@ -270,8 +282,9 @@ void put_tale( char *data, int type )
 	}
 	break;
 	}
+	
+#if 0
 	DEBUG( "type %x:", type );
-#if 1
 	int	i;
 	int	y = 0;
 

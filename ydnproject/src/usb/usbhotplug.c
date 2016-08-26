@@ -46,10 +46,34 @@
 
 static usb_no_and_stat_t usb_dev_info;
 
+static int usb_pl_status;
+
 
 usb_no_and_stat_t *get_stata_path()
 {
 	return(&usb_dev_info);
+}
+
+
+static void set_usb_status( int value )
+{
+	usb_pl_status = value;
+}
+
+
+int get_usb_status( void )
+{
+	return(usb_pl_status);
+}
+
+
+static void delay_time()
+{
+	set_usb_status( 1 );
+	usb_pl_message();
+	nano_sleep( 3, 0 );
+	current_menu();
+	set_usb_status( 0 );
 }
 
 
@@ -314,6 +338,7 @@ static void dev_mount( usb_no_and_stat_t  *usb_dev )
 
 		usb_dev->is_active = DEVACTT;
 
+		delay_time();
 		auto_usb_test();
 	}
 }

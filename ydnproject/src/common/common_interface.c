@@ -62,26 +62,35 @@ int usb_probe( void )
 	float		timeuse = 0.0, sdtime, rstime;
 	int		mask	= 0, ret = -1; /* 防止超时检测时不断刷新 */
 	struct timeval	tpstart;
+	
 
 	while ( 1 )
 	{
+		 discontrl_t()->delay_statusl = DELAY_ON;
+
+		while(get_usb_status() != 0)
+			nano_sleep( 0, 1000 );
+		 
 		if ( get_stata_path()->is_active != DEVROMV )
 		{
-			if ( get_stata_path()->mount_path != NULL )
+			if ( get_stata_path()->mount_path[0] != NULL )
 			{
 				lcd_clear( discontrl_t()->lcdfd ); /* 并清除内存 */
 				lcd_Write_String( 0, "Connect USB...  " );
 				lcd_Write_String( 1, "                " );
 				nano_sleep( 0, 500000000 );
 				ret = 0;
+				discontrl_t()->delay_statusl = DELAY_OFF;
 				break;
 			}
 		} else if ( mask == 0 )
 		{
 			mask = 1;
 			lcd_clear( discontrl_t()->lcdfd ); /* 并清除内存 */
+			
 			lcd_Write_String( 0, "Please insert US" );
 			lcd_Write_String( 1, "B               " );
+			
 			nano_sleep( 0, 500000000 );
 			gettimeofday( &tpstart, NULL );
 			timeuse = 1000000 * (tpstart.tv_sec) + tpstart.tv_usec;
@@ -94,11 +103,13 @@ int usb_probe( void )
 		if ( rstime > TMIER_OUT )
 		{
 			lcd_clear( discontrl_t()->lcdfd ); /* 并清除内存 */
+			
 			lcd_Write_String( 0, "USB timeout...  " );
 			lcd_Write_String( 1, "                " );
+
 			nano_sleep( 0, 500000000 );
+			discontrl_t()->delay_statusl = DELAY_OFF;
 			return(-1);
-			break;
 		}
 		ret = 0;
 	}

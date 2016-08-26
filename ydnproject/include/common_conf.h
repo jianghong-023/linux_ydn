@@ -101,6 +101,7 @@ struct dis_contrl_t {
 	lcd_b_last_dsp_t lcd_b_last_dsp;
 
 	int8_t read_status; /* 只针对 usb 读时有效，其它此标志位无用 */
+	int8_t delay_statusl;
 
 	int8_t rtr_count;
 };
@@ -110,6 +111,8 @@ typedef struct {
 	int8_t	rtr_option;
 	int8_t	rtr_displaystart;
 	int8_t	rtr_arrlenght;
+	struct  MenuItem *p_menupoint;
+	struct  MenuItem *p_chaild_menupoint;
 }menu_return_arr_t;
 
 

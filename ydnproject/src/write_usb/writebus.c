@@ -282,7 +282,7 @@ static void token_hander( uint8_t post )
 	int	i, backcps;
 	uint8_t flag = post;
 
-/*	DEBUG("post:%d",flag); */
+	DEBUG("post:%d",flag); 
 	for ( i = 0; i < MYTPF_MAX; i++ )
 	{
 		if ( job[i] != NULL )
@@ -415,7 +415,7 @@ int fetch_token( usb_token *ptr, int size )
 	{
 		nano_sleep( 0, 10 );
 
-		if ( r_time_out( tpstart ) >= DTS_STREAM_TIME )
+		if ( r_time_out( tpstart ) >= (DTS_STREAM_TIME-10000) )
 		{
 			break;
 		}
@@ -809,7 +809,7 @@ static int  creat_job_thread( void *init_b )
 			break;
 		}
 
-		nano_sleep( 2, 0 );
+		nano_sleep( 1, 0 );
 
 		count = fetch_token( token, BURST );
 		if ( count < 0 )
@@ -1210,6 +1210,7 @@ goback:
 		paren_menu();
 	}else
 		current_menu();
+		
 	return(ret);
 }
 

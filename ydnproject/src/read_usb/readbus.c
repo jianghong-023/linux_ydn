@@ -154,28 +154,6 @@ static void inter_signal( uint8_t* map_addr, uint8_t *post )
 	map_addr[(BUS_OFFSET_ADDR + 0x13) / sizeof(uint8_t)] = tmp & 0xFE;
 
 
-/*
- * struct timeval tpstart;
- * gettimeofday( &tpstart, NULL );
- */
-
-
-/*
- * while ( readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) != 1 )
- * {
- *      usleep( 0 );
- *      if ( r_time_out( tpstart ) >= 2000 )
- *      {
- *              r_time_out_flag = 1;
- *              break;
- *      }
- *      r_time_out_flag = 0;
- * }
- * if ( 1 == readb( &map_addr[BUS_OFFSET_ADDR + 0x13] ) )
- * {
- *      writeb( 0x00, &map_addr[BUS_OFFSET_ADDR + 0x13] );
- * }
- */
 }
 
 
@@ -217,7 +195,7 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 			if ( r_time_out_flag == 1 )
 				break;
 
-			DEBUG( "post :%d  cntr:%x", post, cntr );
+			
 			if ( segment == 0 )
 			{
 				memcpy( sharemem_map_base, stor_addr, cntr );
@@ -229,6 +207,7 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 			}
 			size		+= cntr;
 			ts_add_toal	+= cntr;
+			DEBUG( "post :%d  cntr:%x", segment, cntr );
 		}
 	}
 	ts_add_toal += cntr;
@@ -287,7 +266,8 @@ static int path_noloop( const char *path )
 	pos = strrchr( path, '/' );
 
 	if ( pos == NULL )
-		exit( 1 );
+		/* exit( 1 ); */
+		return(-1);
 
 	if ( strcmp( pos + 1, "." ) == 0 || strcmp( pos + 1, ".." ) == 0 )
 		return(0);
@@ -415,7 +395,8 @@ static int64_t  seach_fts( const char *path, int flag )
 	if ( lstat( path, &statres ) < 0 )
 	{
 		perror( "lstat()" );
-		exit( 1 );
+		/* exit( 1 ); */
+		return(-1);
 	}
 
 	if ( !S_ISDIR( statres.st_mode ) )
@@ -444,7 +425,8 @@ static int64_t  seach_fts( const char *path, int flag )
 		if ( lstat( globres.gl_pathv[i], &statr ) < 0 )
 		{
 			perror( "lstat()" );
-			exit( 1 );
+			/* exit( 1 ); */
+			return(-1);
 		}
 		if ( S_ISDIR( statr.st_mode ) )
 		{
@@ -660,8 +642,8 @@ uint8_t usb_ts_inf()
 		return(ret);
 	}
 
-	itemcount = 0;
-
+	itemcount			= 0;
+	discontrl_t()->delay_statusl	= DELAY_ON;
 	for ( i = 0; i < get_stata_path()->part_num; i++ )
 	{
 		if ( get_stata_path()->mount_path[i] != NULL )
@@ -676,9 +658,9 @@ uint8_t usb_ts_inf()
 	if ( ret < 0 )
 		return(ret);
 
-	ret	= seach_fts( path, 0 );
-	ret	= seach_fts( path, 1 );
-
+	ret				= seach_fts( path, 0 );
+	ret				= seach_fts( path, 1 );
+	discontrl_t()->delay_statusl	= DELAY_OFF;
 	return(ret);
 }
 
@@ -706,6 +688,14 @@ static void pat_parse_gener_table( char* streamfilename )
 	itoa_( hextodec( parse_ts_id.i_pcr_pid, buf ), (char *) dconfig->scfg_Param.encoder_pcr_pid, 16 );
 	itoa_( hextodec( parse_ts_id.i_video_pid, buf ), (char *) dconfig->scfg_Param.encoder_video_pid, 16 );
 	itoa_( hextodec( parse_ts_id.i_audieo_pid, buf ), (char *) dconfig->scfg_Param.encoder_audio_pid, 16 );
+
+	uint16_t	pmtpid = (uint16_t) atoi( (char *) dconfig->scfg_Param.encoder_pmt_pid );
+	DEBUG("audio pid:%s",dconfig->scfg_Param.encoder_audio_pid);
+	DEBUG("pmt pid :%x  video pid :%x audio pid:%x",pmtpid,parse_ts_id.i_video_pid,parse_ts_id.i_audieo_pid);
+	uint8_t		pmt_pid_a[2];
+	pmt_pid_a[0]	= GET_HEX( pmtpid, 2 );
+	pmt_pid_a[1]	= GET_HEX( pmtpid, 1 );
+	filter_pmt( pmt_pid_a[0], pmt_pid_a[1] );
 
 	gener_table();
 

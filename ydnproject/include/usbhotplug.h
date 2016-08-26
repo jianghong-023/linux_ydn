@@ -55,9 +55,14 @@ typedef struct usb_no_stat_t {
 
 int dev_umount( void *dev );
 
-int  eject_usb(void *);
+
+int eject_usb( void * );
+
 
 usb_no_and_stat_t *get_stata_path();
+
+
+int get_usb_status( void );
 
 
 void thread_for_usb( void );

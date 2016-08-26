@@ -50,6 +50,8 @@
 struct parse_ts_id parse_ts_id;
 
 
+
+
 /*****************************************************************************
 * ReadPacket
 *****************************************************************************/
@@ -82,11 +84,6 @@ static bool ReadPacket( int i_fd, uint8_t* p_dst )
 static void DumpPAT( void* p_zero, dvbpsi_pat_t* p_pat )
 {
 	dvbpsi_pat_program_t* p_program = p_pat->p_first_program;
-
-	/*
-	 * sprintf((int)parse_ts_id.i_number,"%d",p_program->i_number);
-	 * sprintf((int)parse_ts_id.i_pmt_pid,"%d",p_program->i_pid);
-	 */
 
 	parse_ts_id.i_number	= p_program->i_number;
 	parse_ts_id.i_pmt_pid	= p_program->i_pid;

@@ -352,7 +352,7 @@ void v72060p_mod( int fd )
  * buf = "WD0020";	//STMODE STCLK
  * buf = "WD0006";	//STMODE STCLK=12.8MHz
  */
-	buf = "WD0402"; /* STMODE STCLK=27Mhz */
+	buf = "WD0002"; /* STMODE STCLK=27Mhz */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -369,7 +369,7 @@ void v72060p_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0000"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
+	buf = "WD0001"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -1122,7 +1122,7 @@ void v72050p_mod( int fd )
  * buf = "WD0020";	//STMODE STCLK
  * buf = "WD0006";	//STMODE STCLK=12.8MHz
  */
-	buf = "WD0402"; /* STMODE STCLK=27Mhz */
+	buf = "WD0002"; /* STMODE STCLK=27Mhz */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -1139,7 +1139,7 @@ void v72050p_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0000"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
+	buf = "WD0001"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -1741,7 +1741,7 @@ void v72050p_mod( int fd )
 	{
 		;
 	}
-
+#if 1
 	buf = "WA80114";
 	uart_send( fd, buf );
 	usleep( 2000 );
@@ -1751,6 +1751,7 @@ void v72050p_mod( int fd )
 		;
 	}
 	buf = "WD0302"; /* ES_INFO_04 */
+	//buf = "WD0000"; /* ES_INFO_04 */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -1758,7 +1759,7 @@ void v72050p_mod( int fd )
 	{
 		;
 	}
-
+#endif
 
 /*
  * buf = "WA80116";
@@ -1904,7 +1905,7 @@ void v57650i_mod( int fd )
  * buf = "WD0020";	//STMODE STCLK
  * buf = "WD0006";	//STMODE STCLK=12.8MHz
  */
-	buf = "WD0402"; /* STMODE STCLK=27Mhz */
+	buf = "WD0002"; /* STMODE STCLK=27Mhz */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -1921,7 +1922,7 @@ void v57650i_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0000"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
+	buf = "WD0001"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -2756,7 +2757,7 @@ void v48050i_mod( int fd )
  * buf = "WD0020";	//STMODE STCLK
  * buf = "WD0006";	//STMODE STCLK=12.8MHz
  */
-	buf = "WD0402"; /* STMODE STCLK=27Mhz */
+	buf = "WD0002"; /* STMODE STCLK=27Mhz */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -2773,7 +2774,7 @@ void v48050i_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0000"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
+	buf = "WD0001"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -3725,7 +3726,7 @@ void v48060i_mod( int fd )
  * buf = "WD0020";	//STMODE STCLK
  * buf = "WD0006";	//STMODE STCLK=12.8MHz
  */
-	buf = "WD0402"; /* STMODE STCLK=27Mhz */
+	buf = "WD0002"; /* STMODE STCLK=27Mhz */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -3742,7 +3743,7 @@ void v48060i_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0000"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
+	buf = "WD0001"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -4585,7 +4586,7 @@ void v108060i_mod( int fd )
 		;
 	}
 /*	buf = "WD0001";	//bit[2]:PCR_FIRST      bit[1:0]:AUTO_NULL_PACKET */
-	buf = "WD0000"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
+	buf = "WD0001"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -8170,7 +8171,7 @@ void v108030p_mod( int fd )
  * buf = "WD0020";	//STMODE STCLK
  * buf = "WD0006";	//STMODE STCLK=12.8MHz
  */
-	buf = "WD0402"; /* STMODE STCLK=27Mhz */
+	buf = "WD0002"; /* STMODE STCLK=27Mhz */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -8187,7 +8188,7 @@ void v108030p_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0000"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
+	buf = "WD0001"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -8972,7 +8973,7 @@ void v57650p_mod( int fd )
  * buf = "WD0020";	//STMODE STCLK
  * buf = "WD0006";	//STMODE STCLK=12.8MHz
  */
-	buf = "WD0402"; /* STMODE STCLK=27Mhz */
+	buf = "WD0002"; /* STMODE STCLK=27Mhz */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -8989,7 +8990,7 @@ void v57650p_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0000"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
+	buf = "WD0001"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );

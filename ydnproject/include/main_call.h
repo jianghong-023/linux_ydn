@@ -3,10 +3,16 @@
 
 #include "init-configuration.h"
 
+void set_progr_bar( int value );
 
 
-void h46_set(int optcode);
+int get_progr_bar( void );
 
-int peripheral_dev_config(struct dvb_peripheral *devconfig);
+
+void h46_set( int optcode );
+
+
+int peripheral_dev_config( struct dvb_peripheral *devconfig );
+
 
 #endif

@@ -43,7 +43,7 @@ extern struct cache_t	*cache_pr;
 extern struct  MenuItem * MenuPoint;
 extern uint8_t		t_date[16];
 extern struct cache_t	*cachep;
-extern int		progr_bar;
+/* extern int		progr_bar; */
 extern DSPLAY_SIGNAL_SET_T* get_DSPLAY_SIGNAL_SET_T();
 
 
@@ -53,7 +53,7 @@ extern void gpiocfg( struct h64_gpio_et_cfg_t *pcfg );
 extern void gpio_mask( uint8_t setval );
 
 
-menu_return_arr_t menu_return_arr[8];
+menu_return_arr_t menu_return_arr[10];
 
 static time_t	lasttime;
 static int	start_machine, progr_bar_flag = 0;
@@ -71,13 +71,13 @@ static void monitor_opt( int coder, int flags );
 static void sys_start_prompt( void );
 
 
-static void set_rtr_arr( signed char userChoose, signed char displaystart, uint8_t subscripts );
+static void set_rtr_arr( signed char userChoose, signed char displaystart, uint8_t subscripts, struct  MenuItem *, struct  MenuItem * );
 
 
 static void loop_hand( void );
 
 
-static void esc_rtr_arr( uint8_t subscripts );
+static void esc_rtr_arr( uint8_t subscripts,struct  MenuItem * );
 
 
 static void mod_rtr_arr( signed char displaystart, uint8_t subscripts );
@@ -280,10 +280,18 @@ uint8_t scan_key_resvale( uint8_t choose )
 }
 
 
+void clean_lcd( void )
+{
+	lcd_Write_String( 0, "               " );
+	lcd_Write_String( 1, "               " );
+}
+
+
 /* 父菜单 */
 void paren_menu( void )
 {
 	recode_menu();
+	clean_lcd();
 	ShowMenu();
 }
 
@@ -292,19 +300,35 @@ void paren_menu( void )
 void current_menu( void )
 {
 	signed char count = discontrl.rtr_count;
+
+	DEBUG("current_ count :%d ",count);
 	if ( count < 0 )
-		count = 0;
+		discontrl.rtr_count = count = 0;
+	
+		
 
-	esc_rtr_arr( count );
+	esc_rtr_arr( count ,NULL);
+	struct  MenuItem *menupoint = menu_return_arr[count].p_chaild_menupoint;
+	DEBUG("rtr_count : %d MenuPoint[discontrl.UserChoose].ParentMenus:%p MenuPoint:%p ",
+		discontrl.rtr_count,menu_return_arr[count].p_menupoint, menupoint);
 
-	if ( MenuPoint[discontrl.DisplayStart].ChildrenMenus != NULL )
-		MenuPoint = MenuPoint[discontrl.DisplayStart].ChildrenMenus;
+	/*
+	 * if ( MenuPoint[discontrl.DisplayStart].ParentMenus != NULL )
+	 * MenuPoint = MenuPoint[discontrl.DisplayStart].ParentMenus;      / * 指向父菜单 * /
+	 */
+	if ( menupoint != NULL )
+		MenuPoint = menupoint;
 
-	discontrl.changemenuflag	= DEFAULTE;
-	discontrl.rightliftmove		= DEFAULTE;
-	discontrl.updownchoose		= DEFAULTE;
+	clean_lcd();
 
 	ShowMenu();
+}
+
+
+void usb_pl_message( void )
+{
+	lcd_Write_String( 0, " Initialization " );
+	lcd_Write_String( 1, " USB please wait" );
 }
 
 
@@ -369,14 +393,26 @@ static void  recode_menu()
 {
 	signed char count = --discontrl.rtr_count;
 	if ( count < 0 )
-		count = 0;
+		discontrl.rtr_count = count = 0;
 
-	esc_rtr_arr( count );
+	esc_rtr_arr( count ,NULL);
+	struct  MenuItem *menupoint = menu_return_arr[count].p_menupoint;
+DEBUG("rtr_count : %d MenuPoint[discontrl.UserChoose].ParentMenus:%p MenuPoint:%p ",
+		discontrl.rtr_count,menu_return_arr[count].p_menupoint, menupoint);
 
-	if ( MenuPoint[discontrl.DisplayStart].ParentMenus != NULL )
-		MenuPoint = MenuPoint[discontrl.DisplayStart].ParentMenus;      /* 指向父菜单 */
 
-	discontrl.changemenuflag	= DEFAULTE;                             /* 置0 */
+	/*
+	 * if ( MenuPoint[discontrl.DisplayStart].ParentMenus != NULL )
+	 * MenuPoint = MenuPoint[discontrl.DisplayStart].ParentMenus;      / * 指向父菜单 * /
+	 * DEBUG("args... 2");
+	 */
+	if ( menupoint != NULL )
+	{
+		/*	DEBUG("args... 2"); */
+		MenuPoint = menupoint;
+	}
+
+	discontrl.changemenuflag	= DEFAULTE; /* 置0 */
 	discontrl.rightliftmove		= DEFAULTE;
 	discontrl.updownchoose		= DEFAULTE;
 }
@@ -1697,10 +1733,21 @@ static void menu_selected_cfg( char **arr, int size, char *cfgmenu )
 }
 
 
-static void set_rtr_arr( signed char userChoose, signed char displaystart, uint8_t subscripts )
+static void set_rtr_arr( signed char userChoose, signed char displaystart, uint8_t subscripts, 
+	struct  MenuItem *pmenupoint, struct  MenuItem *chaildmenupoint )
 {
 	menu_return_arr[subscripts].rtr_option		= userChoose;
 	menu_return_arr[subscripts].rtr_displaystart	= displaystart;
+	menu_return_arr[subscripts].p_menupoint		= pmenupoint;
+	menu_return_arr[subscripts].p_chaild_menupoint	= chaildmenupoint;
+}
+
+
+static void set_pchange_arr( uint8_t subscripts, struct  MenuItem *pmenupoint, struct  MenuItem *chaildmenupoint )
+{
+
+	menu_return_arr[subscripts].p_menupoint		= pmenupoint;
+	menu_return_arr[subscripts].p_chaild_menupoint	= chaildmenupoint;
 }
 
 
@@ -1710,11 +1757,19 @@ static void mod_rtr_arr( signed char displaystart, uint8_t subscripts )
 }
 
 
-static void esc_rtr_arr( uint8_t subscripts )
+static void esc_rtr_arr( uint8_t subscripts ,struct  MenuItem *menupoint)
 {
 	discontrl.UserChoose	= menu_return_arr[subscripts].rtr_option;
 	discontrl.DisplayStart	= menu_return_arr[subscripts].rtr_displaystart;
+	menupoint = menu_return_arr[subscripts].p_menupoint;
 }
+
+//static void shift_rtr_arr( uint8_t subscripts ,uint8_t rtr_displaystart,uint8_t rtr_option)
+//{
+//	menu_return_arr[subscripts].rtr_option = rtr_option;
+//	menu_return_arr[subscripts].rtr_displaystart = rtr_displaystart;
+//	
+//}
 
 
 void enter_code()
@@ -1730,7 +1785,13 @@ void enter_code()
 		discontrl.Option	= discontrl.UserChoose;
 		/* 在此记录 */
 		signed char count = discontrl.rtr_count;
-		set_rtr_arr( discontrl.UserChoose, DEFAULTE, count );
+		if(count < 0)
+			count = discontrl.rtr_count = 0;
+		
+		DEBUG("rtr_count : %d MenuPoint[discontrl.UserChoose].ParentMenus:%p MenuPoint:%p discontrl.DisplayStart:%d",
+	discontrl.rtr_count,MenuPoint[discontrl.UserChoose].ParentMenus,  &(*MenuPoint),discontrl.DisplayStart);
+		
+		set_rtr_arr( discontrl.UserChoose, discontrl.DisplayStart, count, MenuPoint[discontrl.UserChoose].ParentMenus, MenuPoint );
 		discontrl.rtr_count += 1;
 
 		discontrl.UserChoose	= DEFAULTE;
@@ -2054,6 +2115,7 @@ static int menu_browse_change( int keynumber )
 			discontrl.UserChoose = discontrl.MaxItems - 1;
 		}
 		ret = 0;
+		
 		break;
 	case down:
 
@@ -2078,18 +2140,38 @@ static int menu_browse_change( int keynumber )
 
 		if ( MenuPoint[discontrl.DisplayStart].ParentMenus != NULL )
 		{
+
 			MenuPoint = MenuPoint[discontrl.DisplayStart].ParentMenus; /* 指向父菜单 */
+			//DEBUG("1 rtr_count : %d MenuPoint[discontrl.DisplayStart].ParentMenus:%p MenuPoint:%p discontrl.DisplayStart:%d ",discontrl.rtr_count,
+			//	MenuPoint[discontrl.DisplayStart].ParentMenus,  &(*MenuPoint),discontrl.DisplayStart);
+
 			signed char count = --discontrl.rtr_count;
-			esc_rtr_arr( count );
+				if(count < 0)
+				discontrl.rtr_count = count = 0;
+				
+			set_rtr_arr( menu_return_arr[count].rtr_option, menu_return_arr[count].rtr_displaystart, count, 
+				MenuPoint[discontrl.DisplayStart].ParentMenus, MenuPoint );
+			
+		
+			DEBUG(" rtr_count : %d MenuPoint[discontrl.DisplayStart].ParentMenus:%p MenuPoint:%p discontrl.DisplayStart:%d",discontrl.rtr_count,
+				MenuPoint[discontrl.DisplayStart].ParentMenus, &(*MenuPoint),menu_return_arr[count].rtr_displaystart);
+			esc_rtr_arr( count ,MenuPoint);
+
+			
+			
 			ret = 0;
 			break;
 		}
 
 		if ( MenuPoint[discontrl.DisplayStart].ParentMenus == NULL )
+		//if ( menupoint == NULL )
 		{
+			
 			ret			= 0;
+		
 			discontrl.UserChoose	= DEFAULTE;
 			discontrl.DisplayStart	= DEFAULTE;
+	
 
 			break;
 		}
@@ -2104,14 +2186,17 @@ static int menu_browse_change( int keynumber )
 	if ( (discontrl.UserChoose < discontrl.DisplayStart) ||
 	     (discontrl.UserChoose >= (discontrl.DisplayStart + 2) ) )
 	{
+		DEBUG("iscontrl.UserChoose:%d discontrl.DisplayStart:%d ",discontrl.UserChoose ,discontrl.DisplayStart);
 		discontrl.DisplayStart = discontrl.UserChoose;
-
+		
 		signed char count = discontrl.rtr_count - 1;
-		if ( count < 0 )
+
+		if ( count <= -1 )
 		{
-			count = 0;
+			discontrl.rtr_count = count = 0;
 			mod_rtr_arr( discontrl.DisplayStart, count );
 		}
+		//shift_rtr_arr( count ,discontrl.DisplayStart,discontrl.UserChoose);
 	}
 
 	return(ret);
@@ -2306,11 +2391,11 @@ static void sys_start_timer( void )
 
 	gettimeofday( &tpstart, NULL );
 
-	while ( progr_bar != 0x40 )
+	while ( get_progr_bar() != 0x40 )
 	{
 		if ( start_time_out( tpstart ) >= 4000 )
 		{
-			progr_bar = 0x40;
+			set_progr_bar( 0x40 );
 			break;
 		}
 	}
@@ -2351,6 +2436,8 @@ void ChangeMenu( int keySigNum )
 	if ( !progr_bar_flag )
 		return;
 
+	if ( get_usb_status() == 1 )
+		return;
 
 /* 清理定时器 */
 	cl_time();
@@ -2383,6 +2470,11 @@ void ChangeMenu( int keySigNum )
 /* 过滤不相干中断 */
 	if ( keynumber < 0 )
 		return;
+
+/* 长延时，不能响应任何中断 */
+	if ( discontrl.delay_statusl == DELAY_ON )
+		return;
+
 
 /* 信号测试 */
 	switch ( test_signal() )
@@ -2515,16 +2607,17 @@ __agin:
 			{
 				lock_count = 0;
 				close_info();
-				paren_menu();
+//				DEBUG( "args..." );
+				//paren_menu();
+				current_menu();
+	//			DEBUG( "args...2" );
 				lockcount = 0;
-				
 			}
 			if ( lock_count == 1 )
 			{
 				stream_info();
 				start_machine = 2;
 				return;
-				break;
 			}
 		}
 		}
@@ -2605,8 +2698,8 @@ __agin:
 
 				signed char count = --discontrl.rtr_count;
 				if ( count < 0 )
-					count = 0;
-				esc_rtr_arr( count );
+					discontrl.rtr_count = count = 0;
+				esc_rtr_arr( count ,MenuPoint);
 				keynumber = 0x7f;
 			}
 		}

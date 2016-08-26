@@ -27,7 +27,20 @@ static int adf4350_configuration( void );
 
 static int ad9789_configuration( void );
 
-int progr_bar = 0;
+
+static int progr_bar;
+
+void set_progr_bar( int value )
+{
+	progr_bar = value;
+}
+
+
+int get_progr_bar( void )
+{
+	return(progr_bar);
+}
+
 
 /* Baseband Digital Upconverter */
 static double ftw_clac( double mhz )

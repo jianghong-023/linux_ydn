@@ -280,7 +280,7 @@ static void main_loop( void )
 
 	/*
 	 * 开机前默认设置，使其生效，方可进行读写配置
-	 * DEBUG("dconfig->scfg_Param.encoder_video_interface %d ",dconfig->scfg_Param.encoder_video_interface);
+	 *
 	 */
 
 	/* 开机时的初始模式 */
@@ -361,10 +361,8 @@ static void main_loop( void )
 			 */
 
 			optcode = pare_YPbPr_HDMI();
-			if ( optcode == -1 )
-				;//DEBUG( "pare YPbPr error" );
 
-			else if ( bakcode != optcode )
+			if ( bakcode != optcode )
 			{
 				bakcode = optcode;      /* 防止重复性 */
 
@@ -420,11 +418,8 @@ static void main_loop( void )
 			 */
 
 			optcode = pare_cvbs();
-			if ( optcode == -1 )
-				;//DEBUG( "pare_cvbs error" );
 
-
-			else if ( bakcodecvbs != optcode )
+			if ( bakcodecvbs != optcode )
 			{
 				bakcodecvbs = optcode;  /* 防止重复性 */
 
@@ -485,9 +480,9 @@ static void main_loop( void )
 
 int main( int argc, char **argv )
 {
-	char			*strdt = SYS_SET_TIME;
+	char *strdt = SYS_SET_TIME;
 	set_system_time( strdt );
-	
+
 	all_config_s();
 
 	init_lcddefault_donfig();

@@ -20,6 +20,8 @@ void free_bus_addr( struct _bus_initial *bus_map, int fd );
 
 void filter_ts_pmt( uint8_t* map_base ,char pmt_0 ,char pmt_1);
 
+void filter_pmt( char pmt_0, char pmt_1 );
+
 
 extern void audio_video_pid( uint8_t *bus_addr, s_config *dconfig );
 

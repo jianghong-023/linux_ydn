@@ -63,7 +63,7 @@ bool dvbpsi_pmt_attach( dvbpsi_t *p_dvbpsi, uint16_t i_program_number,
 
 	dvbpsi_pmt_decoder_t* p_pmt_decoder;
 	p_pmt_decoder = (dvbpsi_pmt_decoder_t *) dvbpsi_decoder_new( &dvbpsi_pmt_sections_gather,
-								     1024, true, sizeof(dvbpsi_pmt_decoder_t) );
+								     4096, true, sizeof(dvbpsi_pmt_decoder_t) );
 	if ( p_pmt_decoder == NULL )
 		return(false);
 
@@ -296,7 +296,7 @@ static bool dvbpsi_CheckPMT( dvbpsi_t *p_dvbpsi, dvbpsi_psi_section_t *p_section
 	return(b_reinit);
 }
 
-
+#include <debug.h>
 static bool dvbpsi_AddSectionPMT( dvbpsi_t *p_dvbpsi, dvbpsi_pmt_decoder_t *p_pmt_decoder,
 				  dvbpsi_psi_section_t* p_section )
 {
@@ -309,11 +309,11 @@ static bool dvbpsi_AddSectionPMT( dvbpsi_t *p_dvbpsi, dvbpsi_pmt_decoder_t *p_pm
 	{
 		p_pmt_decoder->p_building_pmt = dvbpsi_pmt_new( p_pmt_decoder->i_program_number,
 								p_section->i_version, p_section->b_current_next,
-								( (uint16_t) (p_section->p_payload_start[0] & 0x1f) << 8)
-								| p_section->p_payload_start[1] );
+								( (uint16_t) (p_section->p_payload_start[0] & 0x1f) << 8)//0x02
+								| p_section->p_payload_start[1] );// 0xb0
 		if ( p_pmt_decoder->p_building_pmt == NULL )
 			return(false);
-
+		
 		p_pmt_decoder->i_last_section_number = p_section->i_last_number;
 	}
 
@@ -331,11 +331,13 @@ static bool dvbpsi_AddSectionPMT( dvbpsi_t *p_dvbpsi, dvbpsi_pmt_decoder_t *p_pm
 *****************************************************************************
 * Callback for the PSI decoder.
 *****************************************************************************/
+#include <debug.h>
 void dvbpsi_pmt_sections_gather( dvbpsi_t *p_dvbpsi, dvbpsi_psi_section_t* p_section )
 {
 	assert( p_dvbpsi );
 	assert( p_dvbpsi->p_decoder );
 
+	/* 检查table_id */
 	if ( !dvbpsi_CheckPSISection( p_dvbpsi, p_section, 0x02, "PMT decoder" ) )
 	{
 		dvbpsi_DeletePSISections( p_section );
@@ -347,6 +349,7 @@ void dvbpsi_pmt_sections_gather( dvbpsi_t *p_dvbpsi, dvbpsi_psi_section_t* p_sec
 	assert( p_pmt_decoder );
 
 	/* We have a valid PMT section */
+	/* 节目号检查*/
 	if ( p_pmt_decoder->i_program_number != p_section->i_extension )
 	{
 		/* Invalid program_number */
@@ -361,7 +364,9 @@ void dvbpsi_pmt_sections_gather( dvbpsi_t *p_dvbpsi, dvbpsi_psi_section_t* p_sec
 	{
 		dvbpsi_ReInitPMT( p_pmt_decoder, true );
 		p_pmt_decoder->b_discontinuity = false;
+		
 	}else  {
+	
 		/* Perform some few sanity checks */
 		if ( p_pmt_decoder->p_building_pmt )
 		{
@@ -403,6 +408,7 @@ void dvbpsi_pmt_sections_gather( dvbpsi_t *p_dvbpsi, dvbpsi_psi_section_t* p_sec
 		dvbpsi_pmt_sections_decode( p_pmt_decoder->p_building_pmt,
 					    p_pmt_decoder->p_sections );
 		/* signal the new PMT */
+
 		p_pmt_decoder->pf_pmt_callback( p_pmt_decoder->p_cb_data,
 						p_pmt_decoder->p_building_pmt );
 		/* Delete sections and Reinitialize the structures */
@@ -421,46 +427,55 @@ void dvbpsi_pmt_sections_decode( dvbpsi_pmt_t* p_pmt,
 				 dvbpsi_psi_section_t* p_section )
 {
 	uint8_t* p_byte, * p_end;
-
+/* sum: e0 67 f0 00 1b e0 6d f0 00 03 e0 70 f0 00 */
 	while ( p_section )
 	{
 		/* - PMT descriptors */
-		p_byte	= p_section->p_payload_start + 4;
-		p_end	= p_byte + ( ( (uint16_t) (p_section->p_payload_start[2] & 0x0f) << 8)
-				     | p_section->p_payload_start[3]);
+		/* ... e0 67 f0 00 1b ... */
+		p_byte	= p_section->p_payload_start + 4;// 0x1b (p_payload_start is start 0x02 pos to + 8Byte)
+		p_end	= p_byte + ( ( (uint16_t) (p_section->p_payload_start[2] & 0x0f) << 8)// 0xf0
+				     | p_section->p_payload_start[3]);// 0x00 --->0x1b+0
 
-		
+	//	DEBUG("p_section->p_payload_start :%p",p_section->p_payload_start);
+
+		//int n;
+
+		//for(n = 0; n< 100;n++){
+		//	DEBUG(" %x",p_section->p_payload_start[n]);
+		//}
 		while ( p_byte + 2 <= p_end )
 		{
 			uint8_t i_tag		= p_byte[0];
 			uint8_t i_length	= p_byte[1];
 			if ( i_length + 2 <= p_end - p_byte )
-				dvbpsi_pmt_descriptor_add( p_pmt, i_tag, i_length, p_byte + 2 );
+				dvbpsi_pmt_descriptor_add( p_pmt, i_tag, i_length, p_byte + 2 );// 
 			p_byte += 2 + i_length;
 		}
 
 		/* - ESs */
+		/*  p_byte = p_end = 0x1b */
 		int i =0;
 		for ( p_byte = p_end; p_byte + 5 <= p_section->p_payload_end; )
-		{
-			uint8_t		i_type		= p_byte[0];
-			uint16_t	i_pid		= ( (uint16_t) (p_byte[1] & 0x1f) << 8) | p_byte[2];
-			uint16_t	i_es_length	= ( (uint16_t) (p_byte[3] & 0x0f) << 8) | p_byte[4];
+		{/* p_byte->[1b e0 6d f0 00 03 e0 70 f0 00] */
+			uint8_t		i_type		= p_byte[0];// 1)1b
+			uint16_t	i_pid		= ( (uint16_t) (p_byte[1] & 0x1f) << 8) | p_byte[2];// 1)0x6d = 109
+			uint16_t	i_es_length	= ( (uint16_t) (p_byte[3] & 0x0f) << 8) | p_byte[4];// = 0x00
 			printf("     | type @ elementary_PID\n");
 			printf("    | 0x%02x @ 0x%x (%d)   byte[%d] i_es_length =%d \n",i_type,  i_pid, i_pid,++i,i_es_length);
 			dvbpsi_pmt_es_t * p_es		= dvbpsi_pmt_es_add( p_pmt, i_type, i_pid );
 			/* - ES descriptors */
-			p_byte	+= 5;
-			p_end	= p_byte + i_es_length;
+			
+			p_byte	+= 5;/* 03 e0 70 f0 00 */
+			p_end	= p_byte + i_es_length;// 1)(p_byte	+= 5) + 0)
 			if ( p_end > p_section->p_payload_end )
 			{
 				p_end = p_section->p_payload_end;
 			}
 			while ( p_byte + 2 <= p_end )
 			{
-				uint8_t i_tag		= p_byte[0];
-				uint8_t i_length	= p_byte[1];
-				if ( i_length + 2 <= p_end - p_byte )
+				uint8_t i_tag		= p_byte[0];// 0x03
+				uint8_t i_length	= p_byte[1];// 0xe0
+				if ( i_length + 2 <= p_end - p_byte )//
 					dvbpsi_pmt_es_descriptor_add( p_es, i_tag, i_length, p_byte + 2 );
 				p_byte += 2 + i_length;
 			}
@@ -483,6 +498,8 @@ dvbpsi_psi_section_t* dvbpsi_pmt_sections_generate( dvbpsi_t *p_dvbpsi, dvbpsi_p
 	dvbpsi_descriptor_t	* p_descriptor	= p_pmt->p_first_descriptor;
 	dvbpsi_pmt_es_t		* p_es		= p_pmt->p_first_es;
 	uint16_t		i_info_length;
+
+	
 
 	p_current->i_table_id		= 0x02;
 	p_current->b_syntax_indicator	= true;

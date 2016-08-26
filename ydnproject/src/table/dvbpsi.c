@@ -133,6 +133,7 @@ void dvbpsi_decoder_reset( dvbpsi_decoder_t* p_decoder, const bool b_force )
 /*****************************************************************************
 * dvbpsi_decoder_psi_sections_completed
 *****************************************************************************/
+#include <debug.h>
 bool dvbpsi_decoder_psi_sections_completed( dvbpsi_decoder_t* p_decoder )
 {
 	assert( p_decoder );
@@ -143,6 +144,7 @@ bool dvbpsi_decoder_psi_sections_completed( dvbpsi_decoder_t* p_decoder )
 	unsigned int		prev_nr = 0;
 	while ( p )
 	{
+		//DEBUG("p_decoder->i_last_section_number:%x  p->i_number:%x",p_decoder->i_last_section_number,p->i_number);
 		assert( prev_nr < 256 );
 		if ( prev_nr != p->i_number )
 			break;
@@ -159,6 +161,7 @@ bool dvbpsi_decoder_psi_sections_completed( dvbpsi_decoder_t* p_decoder )
 /*****************************************************************************
 * dvbpsi_decoder_psi_section_add
 *****************************************************************************/
+#include <debug.h>
 bool dvbpsi_decoder_psi_section_add( dvbpsi_decoder_t *p_decoder, dvbpsi_psi_section_t *p_section )
 {
 	assert( p_decoder );
@@ -180,6 +183,7 @@ bool dvbpsi_decoder_psi_section_add( dvbpsi_decoder_t *p_decoder, dvbpsi_psi_sec
 
 	while ( p )
 	{
+	
 		if ( p->i_number == p_section->i_number )
 		{
 			/* Replace */
@@ -264,6 +268,7 @@ bool dvbpsi_decoder_present( dvbpsi_t *p_dvbpsi )
 *****************************************************************************
 * Injection of a TS packet into a PSI decoder.
 *****************************************************************************/
+#include <debug.h>
 bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 {
 	uint8_t			i_expected_counter;     /* Expected continuity counter */
@@ -286,6 +291,7 @@ bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 	}
 
 	/* Continuity check */
+	//DEBUG("p_decoder->i_continuity_counter :%d ",p_decoder->i_continuity_counter);
 	bool b_first = (p_decoder->i_continuity_counter == DVBPSI_INVALID_CC);
 	if ( b_first )
 		p_decoder->i_continuity_counter = p_data[3] & 0xf;
@@ -361,9 +367,11 @@ bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 			/* No new section => return */
 			return(false);
 		}
+		//DEBUG("NULL");
 	}
 
 	/* Remaining bytes in the payload */
+	/* start :0x02 ---- end:(crc32 -4)  rigon*/
 	i_available = 188 + p_data - p_payload_pos;
 
 	while ( i_available > 0 )
@@ -372,7 +380,8 @@ bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 		{
 			/* There are enough bytes in this packet to complete the
 			 * header/section */
-			memcpy( p_section->p_payload_end, p_payload_pos, p_decoder->i_need );
+			// DEBUG("i_available :%d",i_available);
+			memcpy( p_section->p_payload_end, p_payload_pos, p_decoder->i_need );//
 			p_payload_pos			+= p_decoder->i_need;
 			p_section->p_payload_end	+= p_decoder->i_need;
 			i_available			-= p_decoder->i_need;
@@ -414,7 +423,7 @@ bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 			}else  {
 				bool	b_valid_crc32 = false;
 				bool	has_crc32;
-
+//DEBUG("===========");
 				/* PSI section is complete */
 				p_section->i_table_id		= p_section->p_data[0];
 				p_section->b_syntax_indicator	= p_section->p_data[1] & 0x80;
@@ -440,7 +449,8 @@ bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 						p_section->b_current_next	= p_section->p_data[5] & 0x1;
 						p_section->i_number		= p_section->p_data[6];
 						p_section->i_last_number	= p_section->p_data[7];
-						p_section->p_payload_start	= p_section->p_data + 8;
+						p_section->p_payload_start	= p_section->p_data + 8;// 0xe0 ->p_section->p_data[8]
+						//DEBUG("p_section->p_data + 8  p_section->p_payload_start:%p",p_section->p_payload_start);
 					}else  {
 						p_section->i_extension		= 0;
 						p_section->i_version		= 0;
@@ -448,6 +458,7 @@ bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 						p_section->i_number		= 0;
 						p_section->i_last_number	= 0;
 						p_section->p_payload_start	= p_section->p_data + 3;
+						//DEBUG("p_section->p_data + 3  ");
 					}
 					if ( p_decoder->pf_gather )
 						p_decoder->pf_gather( p_dvbpsi, p_section );
@@ -462,6 +473,7 @@ bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 					/* PSI section isn't valid => trash it */
 					dvbpsi_DeletePSISections( p_section );
 					p_decoder->p_current_section = NULL;
+					//DEBUG("has_crc32 error");
 				}
 
 
@@ -486,8 +498,10 @@ bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 					p_decoder->i_need		= 3;
 					p_decoder->b_complete_header	= false;
 					i_available			= 188 + p_data - p_payload_pos;
+					//DEBUG("i_available : %d",i_available);
 				}else  {
 					i_available = 0;
+					//DEBUG("i_available :%d ",i_available);
 				}
 			}
 		}else  {
@@ -497,6 +511,7 @@ bool dvbpsi_packet_push( dvbpsi_t *p_dvbpsi, uint8_t* p_data )
 			p_section->p_payload_end	+= i_available;
 			p_decoder->i_need		-= i_available;
 			i_available			= 0;
+			//DEBUG("end");
 		}
 	}
 	return(true);
