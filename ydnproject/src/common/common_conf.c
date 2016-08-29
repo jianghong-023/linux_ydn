@@ -178,7 +178,7 @@ struct  MenuItem AudioCfg[2] = {                /* “Ù∆µ±‡¬Î≈‰÷√≤Àµ• */
 	{
 		2, " Audio bitrate  ", &audio_bitrate, AudioBitrateCfg, EncoderCfg
 	},
-	{ 2, " Audio format   ", &audio_format, AudioFormatCfg, EncoderCfg },
+	{ 2, " Audio format   ", &audio_format, AudioFormatCfg, EncoderCfg },// ok
 };
 
 struct  MenuItem ProgInfoCfg[10] = {            /*  ”∆µ±‡¬Î≈‰÷√≤Àµ• */

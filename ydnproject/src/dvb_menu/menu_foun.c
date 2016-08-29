@@ -236,7 +236,7 @@ uint8_t file_size()
 	discontrl.write_size = WRITELIMIT & 0x00;
 
 	int get_value = dconfig->configParam.usb_tsfilesize;
-	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 4096, 64, INPUT_DIGIT_STATUS, input_lenth, &text_digfilesize_save );
+	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 4096, 10, INPUT_DIGIT_STATUS, input_lenth, &text_digfilesize_save );
 
 
 	return(0);
@@ -1715,7 +1715,6 @@ static void video_lock_status( int flag )
 	switch ( dconfig->localstatus.encoder_video_ident )
 	{
 	case ENCODE_IDENT_LOCK: {
-		
 		if ( VIDEO_INPUT_LOCK == dconfig->localstatus.encoder_video_input_lock )
 		{
 			char	*arr_cfg	= "lock    ";
@@ -1886,8 +1885,6 @@ void auto_usb_test( void )
 		      sizeof(dconfig->scfg_Param.stream_usb_record_auto) ) == 0 )
 		discontrl.record_auto_flag = USB_AUTO_HAND;
 }
-
-
 
 
 uint8_t Bandwidth_Cfg()
@@ -2068,7 +2065,7 @@ void text_digfilesize_save( char *orgbuf, char *repbuf )
 
 void gener_table()
 {
-	//config_read( get_profile()->script_configfile );
+	/* config_read( get_profile()->script_configfile ); */
 	s_config	*dconfig	= config_t();
 	int		_tsid		= dconfig->scfg_Param.stream_tsid;
 	if ( _tsid < 0 )
@@ -2193,7 +2190,7 @@ void text_program_num_save( char *orgbuf, char *repbuf )
 	pr_cfg();
 	gener_table();
 
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2231,7 +2228,7 @@ void bin_nitlcn_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2288,7 +2285,7 @@ void bin_eit_year_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2311,7 +2308,7 @@ void bin_eit_time_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2334,7 +2331,7 @@ void bin_eit_nexttime_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2357,7 +2354,7 @@ void bin_eit_duration_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2380,7 +2377,7 @@ void bin_eit_nextduration_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2401,7 +2398,7 @@ void bin_eit_next_year_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2491,7 +2488,7 @@ void bin_starteventname_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2530,7 +2527,7 @@ void bin_nexteventname_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2545,7 +2542,7 @@ void text_Programname_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2560,7 +2557,7 @@ void text_servername_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2574,7 +2571,7 @@ void text_digpmt_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2590,7 +2587,7 @@ void text_digprc_save( char *orgbuf, char *repbuf )
 	pr_cfg();
 	gener_table();
 
-/*	discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2604,7 +2601,7 @@ void text_digvpid_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2618,7 +2615,7 @@ void text_digapid_save( char *orgbuf, char *repbuf )
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
 	gener_table();
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2838,7 +2835,7 @@ void text_videohue_save( char *orgbuf, char *repbuf )
 		config_set_config( SYS_ETC_CONF, orgbuf, (uint8_t *) repbuf, "Videohue" );
 	}
 	config_read( get_profile()->script_configfile );
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -2850,7 +2847,7 @@ void text_videocphue_save( char *orgbuf, char *repbuf )
 		config_set_config( SYS_ETC_CONF, orgbuf, (uint8_t *) repbuf, "CpVideohue" );
 	}
 	config_read( get_profile()->script_configfile );
-	/* discontrl.pid_status = 0x01; / * ?a?? ????¡Á¡ä¨¬? * / */
+	discontrl.pid_status = 0x01;
 }
 
 
@@ -3149,6 +3146,7 @@ int program_enable_commom( char *buffer )
 		config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "ProgramOutput" );
 	}
 	config_read( get_profile()->script_configfile );
+	discontrl.pid_status = 0x01; /* ?a?? ????¡Á¡ä¨¬? */
 	return(0);
 }
 
@@ -3500,6 +3498,7 @@ int rf_comm( char *buffer )
 		config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "RFENABLE" );
 	}
 	config_read( get_profile()->script_configfile );
+	discontrl.pid_status = 0x01; /* ?a?? ????¡Á¡ä¨¬? */
 	return(0);
 }
 

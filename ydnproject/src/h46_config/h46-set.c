@@ -522,7 +522,7 @@ void v72060p_mod( int fd )
 	/* buf = "WD0065";	//A_PID=0x0065 */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	DEBUG("a_pid =%d ",a_pid);
+	DEBUG( "a_pid =%d ", a_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
@@ -548,7 +548,7 @@ void v72060p_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-	DEBUG("pmt_pid =%d ",pmt_pid);
+	DEBUG( "pmt_pid =%d ", pmt_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
@@ -1300,7 +1300,7 @@ void v72050p_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	DEBUG("a_pid =%d ",a_pid);
+	DEBUG( "a_pid =%d ", a_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
@@ -1326,7 +1326,7 @@ void v72050p_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-	DEBUG("pmt_pid =%d ",pmt_pid);
+	DEBUG( "pmt_pid =%d ", pmt_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -1751,7 +1751,7 @@ void v72050p_mod( int fd )
 		;
 	}
 	buf = "WD0302"; /* ES_INFO_04 */
-	//buf = "WD0000"; /* ES_INFO_04 */
+	/* buf = "WD0000"; / * ES_INFO_04 * / */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -1761,18 +1761,22 @@ void v72050p_mod( int fd )
 	}
 #endif
 
-/*
- * buf = "WA80116";
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- * buf = "WD0132";  //
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- */
+	buf = "WA80116";
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+	buf = "WD0148"; /*  */
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA80118";
 	uart_send( fd, buf );
@@ -2084,7 +2088,7 @@ void v57650i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	DEBUG("a_pid =%d ",a_pid);
+	DEBUG( "a_pid =%d ", a_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -2111,7 +2115,7 @@ void v57650i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-	DEBUG("pmt_pid =%d ",pmt_pid);
+	DEBUG( "pmt_pid =%d ", pmt_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -2611,18 +2615,22 @@ void v57650i_mod( int fd )
 	}
 
 
-/*
- * buf = "WA80116";
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- * buf = "WD0132";  //
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- */
+	buf = "WA80116";
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+	buf = "WD0148"; /*  */
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA80118";
 	uart_send( fd, buf );
@@ -3901,7 +3909,7 @@ void v48060i_mod( int fd )
  */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	DEBUG("a_pid =%d ",a_pid);
+	DEBUG( "a_pid =%d ", a_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -3928,7 +3936,7 @@ void v48060i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-	DEBUG("pmt_pid =%d ",pmt_pid);
+	DEBUG( "pmt_pid =%d ", pmt_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -4423,18 +4431,22 @@ void v48060i_mod( int fd )
 	}
 
 
-/*
- * buf = "WA80116";
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- * buf = "WD0132";  //
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- */
+	buf = "WA80116";
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+	buf = "WD0148"; /*  */
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA80118";
 	uart_send( fd, buf );
@@ -4740,7 +4752,7 @@ void v108060i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	DEBUG("a_pid =%d ",a_pid);
+	DEBUG( "a_pid =%d ", a_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -4767,7 +4779,7 @@ void v108060i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-	DEBUG("pmt_pid =%d ",pmt_pid);
+	DEBUG( "pmt_pid =%d ", pmt_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -5280,18 +5292,22 @@ void v108060i_mod( int fd )
 	}
 
 
-/*
- * buf = "WA80116";
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- * buf = "WD0132";  //
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- */
+	buf = "WA80116";
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+	buf = "WD0148"; /*  */
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA80118";
 	uart_send( fd, buf );
@@ -5455,8 +5471,8 @@ void v108050i_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0001";	//bit[2]:PCR_FIRST      bit[1:0]:AUTO_NULL_PACKET 
-//	buf = "WD0000"; /* bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET */
+	buf = "WD0001"; /* bit[2]:PCR_FIRST      bit[1:0]:AUTO_NULL_PACKET */
+/*	buf = "WD0000"; / * bit[2]:PCR_FIRST     bit[1:0]:AUTO_NULL_PACKET * / */
 	uart_send( fd, buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
@@ -5614,10 +5630,10 @@ void v108050i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	
+
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
-	DEBUG("a_pid=%d ",a_pid);
+	DEBUG( "a_pid=%d ", a_pid );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -5641,10 +5657,10 @@ void v108050i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-	
+
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
-	DEBUG("pmt_pid=%d ",pmt_pid);
+	DEBUG( "pmt_pid=%d ", pmt_pid );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -5670,7 +5686,7 @@ void v108050i_mod( int fd )
 	int pcr_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pcr_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pcr_pid, 2 ), GET_HEX( pcr_pid, 1 ) );
 	uart_send( fd, __buf );
-	DEBUG("pcr_pid=%d ",pcr_pid);
+	DEBUG( "pcr_pid=%d ", pcr_pid );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -6156,18 +6172,23 @@ void v108050i_mod( int fd )
 	}
 
 
-/*
- * buf = "WA80116";
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- * buf = "WD0132";  //
- * uart_send(fd,buf);
- * usleep(2000);
- * gettimeofday(&tpstart,NULL);
- * while((uart_rcv_ok(fd)!=1) && (time_out(tpstart)<=50)){;}
- */
+	buf = "WA80116";
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+	buf = "WD0148"; /*  */
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+
 
 	buf = "WA80118";
 	uart_send( fd, buf );
@@ -6487,7 +6508,7 @@ void v108050p_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	DEBUG("a_pid =%d ",a_pid);
+	DEBUG( "a_pid =%d ", a_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
@@ -6513,7 +6534,7 @@ void v108050p_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-	DEBUG("pmt_pid =%d ",pmt_pid);
+	DEBUG( "pmt_pid =%d ", pmt_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
@@ -7415,7 +7436,7 @@ void v108060p_mod( int fd )
  */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	DEBUG("a_pid =%d ",a_pid);
+	DEBUG( "a_pid =%d ", a_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -7442,7 +7463,7 @@ void v108060p_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-	DEBUG("pmt_pid =%d ",pmt_pid);
+	DEBUG( "pmt_pid =%d ", pmt_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );

@@ -184,7 +184,7 @@
 
 /* 文件及字符信号 */
 #define IDENT_CH	('A')
-#define MAX_FILE_LIMIT	(64)
+#define MAX_FILE_LIMIT	(10)
 #define DIG_SZIE	(1)
 #define SIGL_C		(2)
 #define sig_dig_error	(-1)

@@ -152,8 +152,6 @@ static void inter_signal( uint8_t* map_addr, uint8_t *post )
 	*post = ( (tmp >> 1) & 0x1);
 
 	map_addr[(BUS_OFFSET_ADDR + 0x13) / sizeof(uint8_t)] = tmp & 0xFE;
-
-
 }
 
 
@@ -195,7 +193,7 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 			if ( r_time_out_flag == 1 )
 				break;
 
-			
+
 			if ( segment == 0 )
 			{
 				memcpy( sharemem_map_base, stor_addr, cntr );
@@ -207,7 +205,7 @@ static void readusb( int fd, uint8_t*  map_addr, int copy_size )
 			}
 			size		+= cntr;
 			ts_add_toal	+= cntr;
-			DEBUG( "post :%d  cntr:%x", segment, cntr );
+/*			DEBUG( "post :%d  cntr:%x", segment, cntr ); */
 		}
 	}
 	ts_add_toal += cntr;
@@ -252,7 +250,7 @@ static int init_bus_wrop( int fd )
 	ts_add_toal = cntr;
 	free( stor_addr );
 
-	DEBUG( "cntr :%x ", cntr );
+/*	DEBUG( "cntr :%x ", cntr ); */
 	return(ret);
 }
 
@@ -689,10 +687,10 @@ static void pat_parse_gener_table( char* streamfilename )
 	itoa_( hextodec( parse_ts_id.i_video_pid, buf ), (char *) dconfig->scfg_Param.encoder_video_pid, 16 );
 	itoa_( hextodec( parse_ts_id.i_audieo_pid, buf ), (char *) dconfig->scfg_Param.encoder_audio_pid, 16 );
 
-	uint16_t	pmtpid = (uint16_t) atoi( (char *) dconfig->scfg_Param.encoder_pmt_pid );
-	DEBUG("audio pid:%s",dconfig->scfg_Param.encoder_audio_pid);
-	DEBUG("pmt pid :%x  video pid :%x audio pid:%x",pmtpid,parse_ts_id.i_video_pid,parse_ts_id.i_audieo_pid);
-	uint8_t		pmt_pid_a[2];
+	uint16_t pmtpid = (uint16_t) atoi( (char *) dconfig->scfg_Param.encoder_pmt_pid );
+	DEBUG( "audio pid:%s", dconfig->scfg_Param.encoder_audio_pid );
+	DEBUG( "pmt pid :%x  video pid :%x audio pid:%x", pmtpid, parse_ts_id.i_video_pid, parse_ts_id.i_audieo_pid );
+	uint8_t pmt_pid_a[2];
 	pmt_pid_a[0]	= GET_HEX( pmtpid, 2 );
 	pmt_pid_a[1]	= GET_HEX( pmtpid, 1 );
 	filter_pmt( pmt_pid_a[0], pmt_pid_a[1] );
@@ -1179,6 +1177,9 @@ int32_t read_usb( void *usb_hand )
 	char ts_path[100] = "";
 
 	if ( get_file_path( item, ts_path ) < 0 )
+		return(ret);
+
+	if ( ts_path[0] == '\0' )
 		return(ret);
 
 	sprintf( path, "%s%s", ts_path, tmpname );

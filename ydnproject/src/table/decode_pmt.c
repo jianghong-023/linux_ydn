@@ -299,7 +299,7 @@ int pmt_parse_enter( char *file, uint16_t i_program_number, uint16_t i_pmt_pid )
 		goto out;
 
 	b_ok = ReadPacket( i_fd, data );
-	int count = 32 ;
+	int count = 1024 ;
 	while ( b_ok )
 	{
 		

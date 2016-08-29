@@ -282,7 +282,7 @@ static void token_hander( uint8_t post )
 	int	i, backcps;
 	uint8_t flag = post;
 
-	DEBUG("post:%d",flag); 
+//	DEBUG("post:%d",flag); 
 	for ( i = 0; i < MYTPF_MAX; i++ )
 	{
 		if ( job[i] != NULL )
