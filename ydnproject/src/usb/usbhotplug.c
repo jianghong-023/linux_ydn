@@ -72,7 +72,7 @@ static void delay_time()
 	set_usb_status( 1 );
 	usb_pl_message();
 	nano_sleep( 3, 0 );
-	current_menu();
+	current_menu(0);
 	set_usb_status( 0 );
 }
 

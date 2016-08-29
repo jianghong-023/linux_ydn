@@ -262,7 +262,7 @@ struct  MenuItem EitCfg[2] = {                                          /* EIT配
 /*  */
 struct  MenuItem RecordTsCfg[2] = {                                     /* send_usb_writ_message                                / * usb_recode                                       / * TS流录制配置菜单 * / * / */
 	{
-		2, " Start record   ", &usb_rec_enable, NULL, UsbDevCfg /*, .offon = START_W_R, */
+		2, " Start record   ", &usb_rec_enable, NULL, UsbDevCfg 
 	},
 	{ 2, " Advanced config", &NullSubs, AdvancedCfg, UsbDevCfg },   /* 预设输入改变功能 */
 };

@@ -119,7 +119,7 @@ typedef struct {
 void paren_menu( void );
 
 
-void current_menu( void );
+void current_menu( int );
 
 
 int lcd_main( void );

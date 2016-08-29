@@ -1204,12 +1204,13 @@ goback:
 	loop_cl_cah();
 
 	usb_sop_notify();
+	discontrl_t()->changemenuflag  = ~CHAR_INPUT_ON;
 	if ( discontrl_t()->record_auto_flag == USB_AUTO_HAND )
 	{
 		discontrl_t()->record_auto_flag = DEFAULTE;
 		paren_menu();
 	}else
-		current_menu();
+		current_menu(1);
 		
 	return(ret);
 }
