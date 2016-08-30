@@ -314,6 +314,7 @@ void current_menu( int val )
 	esc_rtr_arr( count, NULL );
 	struct  MenuItem *menupoint = menu_return_arr[count].p_chaild_menupoint;
 
+
 	/*
 	 * DEBUG( "rtr_count : %d ParentMenus:%p childMenuPoint:%p ",
 	 *      count, menu_return_arr[count].p_menupoint, menupoint );
@@ -401,10 +402,11 @@ static void  recode_menu()
 	esc_rtr_arr( count, NULL );
 	struct  MenuItem *menupoint = menu_return_arr[count].p_menupoint;
 
-/*
- *   DEBUG( "rtr_count : %d MenuPoint[discontrl.UserChoose].ParentMenus:%p MenuPoint:%p ",
- *        discontrl.rtr_count, menu_return_arr[count].p_menupoint, menupoint );
- */
+
+	/*
+	 *  DEBUG( "rtr_count : %d MenuPoint[discontrl.UserChoose].ParentMenus:%p MenuPoint:%p ",
+	 *    discontrl.rtr_count, menu_return_arr[count].p_menupoint, menupoint );
+	 */
 
 
 	/*
@@ -1806,7 +1808,7 @@ void enter_code()
 
 
 /*
- *       DEBUG( "rtr_count : %d ParentMenus:%p chaildMenuPoint:%p discontrl.DisplayStart:%d",
+ *        DEBUG( "rtr_count : %d ParentMenus:%p chaildMenuPoint:%p discontrl.DisplayStart:%d",
  *              discontrl.rtr_count, MenuPoint[discontrl.UserChoose].ParentMenus, &(*MenuPoint), discontrl.DisplayStart );
  */
 
@@ -2610,7 +2612,7 @@ __agin:
 					lock_count				= 0;
 					t_count					= 0;
 					dconfig->scfg_Param.system_pwd_count	= 0;
-					paren_menu();
+					current_menu( 0 );
 					return;
 				}else if ( ret < 0 )
 				{

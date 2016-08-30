@@ -7,6 +7,10 @@
 static void audio_birate( int audio_bitrate, int fd );
 
 
+#define  MPEG_2_4_AAC	(0x0021)
+#define  MPEG_2		(0x0031)
+
+
 enum h46_opt {
 	v72060p = 30,
 	v57650i,
@@ -31,11 +35,12 @@ static int vn_calc( double v_bitrate, double framerate )
 	int	v2	= 183 * 8 * (framerate);
 	int	v3	= (v1 + v2) * (188 / 184);
 	res = ( (int) (v3 + 0.5) );
-
+#if 0
 	DEBUG( "v0=%d \n", v0 );
 	DEBUG( "v1=%d \n", v1 );
 	DEBUG( "v2=%d \n", v2 );
 	DEBUG( "v3=%d \n", v3 );
+#endif
 	return(res);
 }
 
@@ -51,7 +56,7 @@ static int sn_calc( double sysofms )
 	tmp = (188 * 8) / (sysofms / 1000);
 
 	res = ( (int) (tmp + 0.5) );
-	DEBUG( "S =%d \n", res );
+	//DEBUG( "S =%d \n", res );
 	return(res);
 }
 
@@ -86,6 +91,63 @@ static int sn_calc( double sysofms )
  * }
  */
 
+#if 0
+/* 保留将来使用 */
+static void audio_format_option( uint32_t fd, uint16_t mode )
+{
+	switch ( mode )
+	{
+	case MPEG_2:
+
+		break;
+	case MPEG_2_4_AAC:
+
+		break;
+
+	default:
+		break;
+	}
+}
+
+
+/*
+ * A_MODE (0x1C00, bit [15:0])
+ * 0x0001: AC-3
+ * 0x0008: SPDIF-AC3
+ * 0x0011: LPCM
+ * 0x0021: MPEG-2/4 AAC
+ * 0x0031: MPEG-1 layer2
+ */
+static void audio_mode( uint32_t fd, uint16_t audo_format )
+{
+	char		*buf		= NULL;
+	char		__buf[14]	= { 0 };
+	struct timeval	tpstart;
+	buf = "WA1C00";
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+
+	sprintf( __buf, "WD%04x", audo_format );
+	DEBUG( "audo_format:%04x", audo_format );
+	uart_send( fd, __buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+
+	audio_format_option( fd, audo_format );
+}
+
+
+#endif
+
 static int  MUX_RATE( int v3, int a3, int s0, int s1, int s2, int s3 )
 {
 	double	tmp;
@@ -95,7 +157,7 @@ static int  MUX_RATE( int v3, int a3, int s0, int s1, int s2, int s3 )
 
 	res = ( (int) (tmp + 0.5) );
 
-	DEBUG( "mux_rate = %d   %x \n", res, res );
+//	DEBUG( "mux_rate = %d   %x \n", res, res );
 	return(res);
 }
 
@@ -186,7 +248,7 @@ static void audio_birate( int audio_bitrate, int fd )
 
 	sprintf( __buf, "WD%02x%02x", GET_HEX( audio_bitrate, 2 ), GET_HEX( audio_bitrate, 1 ) );
 	uart_send( fd, __buf );
-	DEBUG( "audio_bitrate =%04x   l=%02x  h=%02x  %s\n", audio_bitrate, GET_HEX( audio_bitrate, 1 ), GET_HEX( audio_bitrate, 2 ), __buf );
+//	DEBUG( "audio_bitrate =%04x   l=%02x  h=%02x  %s\n", audio_bitrate, GET_HEX( audio_bitrate, 1 ), GET_HEX( audio_bitrate, 2 ), __buf );
 	usleep( 2000 );
 
 	gettimeofday( &tpstart, NULL );
@@ -269,7 +331,7 @@ static void other_pi( int fd )
 
 void h64_common_set( int fd )
 {
-	DEBUG( "h64 init set.." );
+//	DEBUG( "h64 init set.." );
 	char		*buf = NULL;
 	struct timeval	tpstart;
 	buf = "CHK";
@@ -1968,7 +2030,7 @@ void v57650i_mod( int fd )
 					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
-	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
+//	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2064,7 +2126,7 @@ void v57650i_mod( int fd )
 	int v_pid = atoi( (const char *) dconfig->scfg_Param.encoder_video_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_pid, 2 ), GET_HEX( v_pid, 1 ) );
 	uart_send( fd, __buf );
-	DEBUG( "encoder_video_pid =%04x   l=%02x  h=%02x  %s\n", v_pid, GET_HEX( v_pid, 1 ), GET_HEX( v_pid, 2 ), __buf );
+//	DEBUG( "encoder_video_pid =%04x   l=%02x  h=%02x  %s\n", v_pid, GET_HEX( v_pid, 1 ), GET_HEX( v_pid, 2 ), __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2088,7 +2150,7 @@ void v57650i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	DEBUG( "a_pid =%d ", a_pid );
+	//DEBUG( "a_pid =%d ", a_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -2115,7 +2177,7 @@ void v57650i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-	DEBUG( "pmt_pid =%d ", pmt_pid );
+//	DEBUG( "pmt_pid =%d ", pmt_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -2257,7 +2319,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( rate_mode, 2 ), GET_HEX( rate_mode, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-	DEBUG( "rate mode =%s ", __buf );
+//	DEBUG( "rate mode =%s ", __buf );
 	buf = "WA01406";
 	uart_send( fd, buf );
 	usleep( 2000 );
@@ -2283,7 +2345,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-	DEBUG( "video_bitrate =%s ", __buf );
+//	DEBUG( "video_bitrate =%s ", __buf );
 
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2392,7 +2454,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-	DEBUG( "v_profile =%s ", __buf );
+//	DEBUG( "v_profile =%s ", __buf );
 
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2419,7 +2481,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_level, 2 ), GET_HEX( v_level, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-	DEBUG( "v_level =%s ", __buf );
+	//DEBUG( "v_level =%s ", __buf );
 
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -9881,7 +9943,7 @@ void v57650p_mod( int fd )
 
 void ret_opt( int fd )
 {
-	DEBUG( "ret_opt.." );
+//	DEBUG( "ret_opt.." );
 	char		*buf = NULL;
 	struct timeval	tpstart;
 

@@ -697,7 +697,7 @@ static void pat_parse_gener_table( char* streamfilename )
 
 	gener_table();
 
-	config_read( get_profile()->script_configfile );
+	
 }
 
 
@@ -1080,7 +1080,7 @@ static int  usb_read_handler( char *path_name, const char *path, const char *ts_
 	}
 
 	send_filter_ect( mem );
-
+	config_read( get_profile()->script_configfile );
 
 	switch ( play_mod )
 	{

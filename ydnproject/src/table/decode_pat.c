@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+
 /*
  * #if defined(HAVE_INTTYPES_H)
  * #include <inttypes.h>
@@ -48,8 +49,6 @@
 #include <pares_psi.h>
 
 struct parse_ts_id parse_ts_id;
-
-
 
 
 /*****************************************************************************
@@ -85,12 +84,8 @@ static void DumpPAT( void* p_zero, dvbpsi_pat_t* p_pat )
 {
 	dvbpsi_pat_program_t* p_program = p_pat->p_first_program;
 
-	parse_ts_id.i_number	= p_program->i_number;
-	parse_ts_id.i_pmt_pid	= p_program->i_pid;
-
-	if(parse_ts_id.i_number !=0x00 && parse_ts_id.i_pmt_pid != 0x00 )
-		parse_ts_id.i_parse_status = 0x01;
-	
+	parse_ts_id.i_number	= 0;
+	parse_ts_id.i_pmt_pid	= 0;
 	DEBUG( "\n" );
 	DEBUG( "New PAT\n" );
 	DEBUG( "  transport_stream_id : %d\n", p_pat->i_ts_id );
@@ -99,6 +94,15 @@ static void DumpPAT( void* p_zero, dvbpsi_pat_t* p_pat )
 
 	while ( p_program )
 	{
+		if ( p_program->i_number != 0x00 && p_program->i_pid != 0x00 )
+		{
+			parse_ts_id.i_parse_status	= 0x01;
+			parse_ts_id.i_number		= p_program->i_number;
+			parse_ts_id.i_pmt_pid		= p_program->i_pid;
+		}
+
+		DEBUG( "i_number:%x  i_pmt_pid:%x ", parse_ts_id.i_number, parse_ts_id.i_pmt_pid );
+
 		DEBUG( "    | %14d @ 0x%x (%d)\n",
 		       p_program->i_number, p_program->i_pid, p_program->i_pid );
 		p_program = p_program->p_next;
@@ -150,17 +154,18 @@ int pat_parse_enter( char *file )
 		goto out;
 
 	b_ok = ReadPacket( i_fd, data );
-
+	int count = 1024;
 	while ( b_ok )
 	{
 		uint16_t i_pid = ( (uint16_t) (data[1] & 0x1f) << 8) + data[2];
 		if ( i_pid == 0x0 )
 			dvbpsi_packet_push( p_dvbpsi, data );
+		--count;
 		b_ok = ReadPacket( i_fd, data );
-		if(parse_ts_id.i_parse_status == 0x01){
-			printf("parse_ts_id.i_parse_status = %x \n",parse_ts_id.i_parse_status);
+		if ( parse_ts_id.i_parse_status == 0x01 )
 			break;
-		}
+		else if ( count <= 0 )
+			break;
 	}
 
 out:
@@ -170,7 +175,7 @@ out:
 		dvbpsi_delete( p_dvbpsi );
 	}
 	close( i_fd );
-
+	parse_ts_id.i_parse_status = 0x00;
 	return(0);
 }
 

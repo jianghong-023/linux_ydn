@@ -63,7 +63,7 @@ bool dvbpsi_pat_attach( dvbpsi_t *p_dvbpsi, dvbpsi_pat_callback pf_callback,
 	/* PSI decoder configuration and initial state */
 	dvbpsi_pat_decoder_t *p_pat_decoder;
 	p_pat_decoder = (dvbpsi_pat_decoder_t *) dvbpsi_decoder_new( &dvbpsi_pat_sections_gather,
-								     1024, true, sizeof(dvbpsi_pat_decoder_t) );
+								     4096, true, sizeof(dvbpsi_pat_decoder_t) );
 	if ( p_pat_decoder == NULL )
 		return(false);
 

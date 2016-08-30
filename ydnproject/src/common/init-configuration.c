@@ -92,6 +92,9 @@ cgf_stor_data stor_data[] = {
 	{ "7MHz",	       0x01	       },
 	{ "6MHz",	       0x02	       },
 
+	{ "Enable",	       0x2580	       },
+	{ "Denable",	       0x2500	       },
+
 
 /*
  * 帧保护间�?
@@ -659,11 +662,23 @@ int config_read( const char *filename )
 /*					ret = 0; */
 /*					break;          / * oProgramName * / */
 
-				case oRFENABLE:         /* oProgramOutputEnable */
-					memset( (char *) &config.scfg_Param.modulator_rf_on_name, 0, 8 );
-					strncpy( (char *) &config.scfg_Param.modulator_rf_on_name, p1, strlen( p1 ) + 1 );
-					ret = 0;
-					break;          /* oProgramName */
+				case oRFENABLE:  {/* oProgramOutputEnable */
+					/*
+					 * memset( (char *) &config.scfg_Param.modulator_rf_on_name, 0, 8 );
+					 * strncpy( (char *) &config.scfg_Param.modulator_rf_on_name, p1, strlen( p1 ) + 1 );
+					 */
+
+					char *name;
+					name = get_parse_str( (uint8_t *) p1 );
+					if ( name )
+					{
+						memset( (char *) &config.scfg_Param.modulator_rf_on_name, 0, 8 );
+						strncpy( (char *) &config.scfg_Param.modulator_rf_on_name, p1, strlen( p1 ) + 1 );
+						config.scfg_Param.modulator_rf_on	= store_parse_token( p1 );
+						ret					= 0;
+					}
+				}
+				break;                  /* oProgramName */
 
 				case oProgramOutput:    /*  */
 					memset( (char *) &config.scfg_Param.encoder_program_output, 0, 8 );
@@ -2044,7 +2059,7 @@ void video_status_lock()
 		config.localstatus.encoder_video_input_lock	= opcode;
 		hdmi_detection( r_vic );
 
-		//DEBUG( "encoder_video_input_lock = 0x%x", config.localstatus.encoder_video_input_lock );
+		/* DEBUG( "encoder_video_input_lock = 0x%x", config.localstatus.encoder_video_input_lock ); */
 	} else if ( (M_YPbPr == config.scfg_Param.encoder_video_interface) )
 	{
 		int optcode;

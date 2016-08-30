@@ -274,8 +274,7 @@
 #define LCD_SUROS_MOVE \
 	_IO( MEMDEV_IOC_MAGIC, 0x60 )
 
-#define CGF_MHZ \
-	_IO( MEMDEV_IOC_MAGIC, 0x68 )
+
 
 #define  ACSSECC_PATH "/project/pass.dat"
 

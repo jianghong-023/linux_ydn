@@ -104,6 +104,7 @@ typedef struct cfgt {
 	uint8_t		rf_power;
 	uint8_t		FSC_H;
 	uint8_t		FSC_L;
+	uint16_t	fr_out;
 }cfgt_t;
 
 typedef struct {

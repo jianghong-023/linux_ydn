@@ -63,7 +63,7 @@ typedef struct _bus_init_ {
 } bus_init;
 
 typedef struct _cfg_param_ {
-	uint8_t cfg_len;           /* for check struct length */
+	uint8_t cfg_len;    /* for check struct length */
 	/* ºÏ≤‚±Í÷æ */
 	int8_t encoder_video_interface;
 
@@ -108,15 +108,15 @@ typedef struct _cfg_param_ {
 
 
 	/* modulator/ */
-	uint8_t encode_rate;
-	uint8_t modulelate_mode;
-	uint8_t fft_mode;
-	uint8_t deltal;
-	uint8_t channel_width;
-	uint8_t modulator_rf_frequency[6];
-	float	modulator_rf_level;
-	uint8_t modulator_rf_on;
-	uint8_t modulator_rf_on_name[8];
+	uint8_t		encode_rate;
+	uint8_t		modulelate_mode;
+	uint8_t		fft_mode;
+	uint8_t		deltal;
+	uint8_t		channel_width;
+	uint8_t		modulator_rf_frequency[6];
+	float		modulator_rf_level;
+	uint16_t	modulator_rf_on;
+	uint8_t		modulator_rf_on_name[8];
 
 	/* stream */
 	uint32_t	stream_tsid;
@@ -141,18 +141,18 @@ typedef struct _cfg_param_ {
 	uint8_t		system_pwd_count;
 
 	/* system */
-	uint8_t system_lcd_time_out;
-	uint8_t system_lcd_backlighting;
-	uint8_t system_gpio_mask;
-	uint8_t system_key_password;
-	uint8_t system_lock_keyboard;
-	uint8_t system_product_id[32];
-	uint8_t system_version_date[8];
-	uint8_t system_version_sw[4];
-	uint8_t system_version_hw[4];
-	uint8_t system_root_pwd[7];
-	uint8_t system_def_root_pwd[7];
-	uint32_t system_restart_flag;
+	uint8_t		system_lcd_time_out;
+	uint8_t		system_lcd_backlighting;
+	uint8_t		system_gpio_mask;
+	uint8_t		system_key_password;
+	uint8_t		system_lock_keyboard;
+	uint8_t		system_product_id[32];
+	uint8_t		system_version_date[8];
+	uint8_t		system_version_sw[4];
+	uint8_t		system_version_hw[4];
+	uint8_t		system_root_pwd[7];
+	uint8_t		system_def_root_pwd[7];
+	uint32_t	system_restart_flag;
 
 	int	encoder_video_ratemode_fre;
 	int	encoder_video_bitrate;
@@ -182,6 +182,8 @@ typedef struct _local_status_ {
 	char	encoder_video_shrot_resolution[17];
 	uint8_t encoder_video_ident;
 /* modulator */
+
+
 /*
  * uint8_t modulator_bitrate_act[5];
  * uint8_t modulator_bitrate_max[5];

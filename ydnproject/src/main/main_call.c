@@ -17,15 +17,17 @@
 	_IO( MEMDEV_IOC_MAGIC, 0x66 )
 #define DEF \
 	_IO( MEMDEV_IOC_MAGIC, 0x67 )
+#define CGF_MHZ \
+	_IO( MEMDEV_IOC_MAGIC, 0x68 )
+
+#define FR_OUT \
+	_IO( MEMDEV_IOC_MAGIC, 0x69 )
 
 
 void input_mod_gpio( uint8_t i_mod );
 
 
 static int adf4350_configuration( void );
-
-
-static int ad9789_configuration( void );
 
 
 static int progr_bar;
@@ -109,7 +111,7 @@ static float powrt_calc( uint8_t channel_width, signed char level, float fre_q )
 	default: rf_power_init		= rf_power_init;
 	}
 
-	DEBUG( "freq=%d ", freq );
+//	DEBUG( "freq=%d ", freq );
 
 	if ( freq >= 30 && freq <= 60 )
 		rf_power_init = rf_power_init / pow( pow( 10, 0.05 ), 1.2 ) / pow( pow( 10, 0.05 ), 0.3 / (60 - 30) * (60 - freq) );
@@ -124,7 +126,7 @@ static float powrt_calc( uint8_t channel_width, signed char level, float fre_q )
 	else if ( freq > 470 && freq <= 500 )
 	{
 		rf_power_init = rf_power_init / pow( pow( 10, 0.05 ), 0.3 / (500 - 470) * (500 - freq) );
-		DEBUG( "rf_power_init = %f ", rf_power_init );
+		//DEBUG( "rf_power_init = %f ", rf_power_init );
 	}else if ( freq > 500 && freq <= 550 )
 	{
 		rf_power_init = rf_power_init * pow( pow( 10, 0.05 ), 1.0 / (550 - 500) * (freq - 500) );
@@ -179,7 +181,7 @@ static void choose_f( float fre_q, uint8_t *FSC_H, uint8_t *FSC_L )
  *
  *
  ************************************/
-static int ad9789_configuration()
+int ad9789_configuration()
 {
 	int		fd, res;
 	unsigned int	tmp;
@@ -216,9 +218,12 @@ static int ad9789_configuration()
 
 	cfgt_t.flags	= tmp & 0xffffff;
 	cfgt_t.rf_power = rf_power & 0xff;
-
+	cfgt_t.fr_out	= dconfig->scfg_Param.modulator_rf_on;
+#if 0
+	DEBUG( "fr out :%x   cfgt_t.fr_out:%x", dconfig->scfg_Param.modulator_rf_on, cfgt_t.fr_out );
 	DEBUG( "flags %ld ", cfgt_t.flags );
 	DEBUG( "rf_power %d ", cfgt_t.rf_power );
+#endif
 	usleep( 4000 );
 	res = ioctl( fd, F_CENTER, &cfgt_t );
 	if ( res == -1 )
@@ -234,6 +239,12 @@ static int ad9789_configuration()
 		if ( res == -1 )
 			DEBUG( "ioctl 9789 error" );
 
+
+		res = ioctl( fd, FR_OUT, &cfgt_t );
+		if ( res == -1 )
+			DEBUG( "ioctl 9789 error" );
+
+
 		cfgt_t.flags	= tmp;
 		res		= ioctl( fd, BPF, &cfgt_t );
 		if ( res == -1 )
@@ -245,6 +256,11 @@ static int ad9789_configuration()
 		if ( res == -1 )
 			DEBUG( "ioctl 9789 error" );
 
+		res = ioctl( fd, FR_OUT, &cfgt_t );
+		if ( res == -1 )
+			DEBUG( "ioctl 9789 error" );
+
+
 		cfgt_t.flags	= tmp;
 		res		= ioctl( fd, BPF, &cfgt_t );
 		if ( res == -1 )
@@ -255,6 +271,11 @@ static int ad9789_configuration()
 		res		= ioctl( fd, CGF_MHZ, &cfgt_t );
 		if ( res == -1 )
 			DEBUG( "ioctl 9789 error" );
+
+		res = ioctl( fd, FR_OUT, &cfgt_t );
+		if ( res == -1 )
+			DEBUG( "ioctl 9789 error" );
+
 
 		cfgt_t.flags	= tmp;
 		res		= ioctl( fd, BPF, &cfgt_t );
@@ -304,7 +325,7 @@ int peripheral_dev_config( struct dvb_peripheral *devconfig )
 				DEBUG( "peripheral_dev_config fail...%d", devmofd );
 
 			close( devmofd );
-			DEBUG( "peripheral_dev_config end..." );
+//			DEBUG( "peripheral_dev_config end..." );
 #endif
 
 			/* adf4350 and ad9789 */

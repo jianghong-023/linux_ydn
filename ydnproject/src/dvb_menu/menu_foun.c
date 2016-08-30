@@ -1945,6 +1945,7 @@ uint8_t rf_out()
 	int menu_item_lenth = sizeof(Bandwidth) / sizeof(Bandwidth[0]);
 	menu_general_enter( Bandwidth, menu_item_lenth, rf_comm );
 
+
 	return(0);
 }
 
@@ -2687,9 +2688,12 @@ int text_audiotare_save( char *buffer )
 
 int text_audioformat_save( char *buffer )
 {
+	return(0);
+
+#if 0
 	char	tmp_buf[18];
 	char	*orgbuf;
-
+/* 保留将来使用 */
 	if ( buffer == NULL )
 		return(-1);
 	else {
@@ -2715,6 +2719,7 @@ int text_audioformat_save( char *buffer )
 		discontrl.pid_status = 0x01; /* ?a?? ????×′ì? */
 	}
 	return(0);
+#endif
 }
 
 
@@ -3498,7 +3503,17 @@ int rf_comm( char *buffer )
 		config_set_config( SYS_ETC_CONF, tmp_buf, (uint8_t *) orgbuf, "RFENABLE" );
 	}
 	config_read( get_profile()->script_configfile );
-	discontrl.pid_status = 0x01; /* ?a?? ????×′ì? */
+
+	int fd;
+
+	if ( (fd = ad9789_configuration() ) < 0 )
+	{
+		DEBUG( "9789 config fail ..." );
+	} else
+		close( fd );
+
+	DEBUG( "9789 config over ..." );
+
 	return(0);
 }
 

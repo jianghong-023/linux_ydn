@@ -229,7 +229,7 @@ static void DumpPMT( void* p_zero, dvbpsi_pmt_t* p_pmt )
 	printf( "  PCR_PID        : 0x%x (%d)\n",
 		p_pmt->i_pcr_pid, p_pmt->i_pcr_pid );
 
-	parse_ts_id.i_pcr_pid =p_pmt->i_pcr_pid;
+	parse_ts_id.i_pcr_pid = p_pmt->i_pcr_pid;
 	DumpDescriptors( "    ]", p_pmt->p_first_descriptor );
 	printf( "    | type @ elementary_PID\n" );
 	int i = 0;
@@ -238,18 +238,20 @@ static void DumpPMT( void* p_zero, dvbpsi_pmt_t* p_pmt )
 		DEBUG( "    | 0x%02x (%s) @ 0x%x (%d)  byte[%d]\n",
 		       p_es->i_type, GetTypeName( p_es->i_type ),
 		       p_es->i_pid, p_es->i_pid, ++i );
-		if ( p_es->i_type == 0x1b || p_es->i_type == 0x01 ){
-				parse_ts_id.i_video_pid = p_es->i_pid;
-			}
-		if ( p_es->i_type == 0x03 ){
+		if ( p_es->i_type == 0x1b || p_es->i_type == 0x01 )
+		{
+			parse_ts_id.i_video_pid = p_es->i_pid;
+		}
+		if ( p_es->i_type == 0x03 )
+		{
 			parse_ts_id.i_audieo_pid = p_es->i_pid;
-			DEBUG( "   audio pid :%x \n" ,parse_ts_id.i_audieo_pid);
+			DEBUG( "   audio pid :%x \n", parse_ts_id.i_audieo_pid );
 			parse_ts_id.i_parse_status = 0x02;
 		}
 		DumpDescriptors( "    |  ]", p_es->p_first_descriptor );
-		
+
 		p_es = p_es->p_next;
-		DEBUG("%d",i);
+		DEBUG( "%d", i );
 	}
 
 
@@ -282,13 +284,12 @@ int pmt_parse_enter( char *file, uint16_t i_program_number, uint16_t i_pmt_pid )
 	uint8_t		data[188];
 	dvbpsi_t	*p_dvbpsi;
 	bool		b_ok;
-	
+
 
 	DEBUG( "i_program_number =%04x  i_pmt_pid=%04x", i_program_number, i_pmt_pid );
 	i_fd = open( file, O_RDONLY, S_IRUSR | S_IWUSR );
 	if ( i_fd < 0 )
 		return(1);
-
 
 
 	p_dvbpsi = dvbpsi_new( &message, DVBPSI_MSG_DEBUG );
@@ -299,52 +300,50 @@ int pmt_parse_enter( char *file, uint16_t i_program_number, uint16_t i_pmt_pid )
 		goto out;
 
 	b_ok = ReadPacket( i_fd, data );
-	int count = 1024 ;
+	int count = 1024;
 	while ( b_ok )
 	{
-		
 		uint16_t i_pid = ( (uint16_t) (data[1] & 0x1f) << 8) + data[2];
-		if ( i_pid == i_pmt_pid ){
+		if ( i_pid == i_pmt_pid )
+		{
 			dvbpsi_packet_push( p_dvbpsi, data );
-			//DEBUG("---------------------");
+			/* DEBUG("---------------------"); */
 #if 0
-			uint16_t secion_length = (data[1]& 0x0F) << 8 | data[2];
-			uint16_t program_info_length =  (data[10] & 0x0F) << 8 | data[11];
-			int pos = 12;
+			uint16_t	secion_length		= (data[1] & 0x0F) << 8 | data[2];
+			uint16_t	program_info_length	= (data[10] & 0x0F) << 8 | data[11];
+			int		pos			= 12;
 
-			if(program_info_length != 0)
+			if ( program_info_length != 0 )
 				pos += program_info_length;
 
-			DEBUG("secion_length:%x  program_info_length:%x  pos = %d",secion_length,program_info_length,pos);
-			for(;pos <= (secion_length +2)-4;){
+			DEBUG( "secion_length:%x  program_info_length:%x  pos = %d", secion_length, program_info_length, pos );
+			for (; pos <= (secion_length + 2) - 4; )
+			{
 				uint8_t stream_type = data[pos];
-				
-				uint32_t elmentary_pid = ((data[pos+1]<< 8) | (data[pos+2] & 0x1FFF));
-				
 
-				uint32_t es_info_lenght = (data[pos +3] & 0x0F) << 8 | data[pos + 4];
-				
-				if(es_info_lenght != 0){
+				uint32_t elmentary_pid = ( (data[pos + 1] << 8) | (data[pos + 2] & 0x1FFF) );
 
+
+				uint32_t es_info_lenght = (data[pos + 3] & 0x0F) << 8 | data[pos + 4];
+
+				if ( es_info_lenght != 0 )
+				{
 					uint32_t description = data[pos + 5];
 
 					int len;
-					
-					for(len = 2;len <= es_info_lenght ; len++){
 
-						description = description << 8 | data[pos +4 + len];
+					for ( len = 2; len <= es_info_lenght; len++ )
+					{
+						description = description << 8 | data[pos + 4 + len];
 					}
 
-					pos +=5;
-
-					
+					pos += 5;
 				}
 
-				DEBUG("stream_type:%x elmentary_pid:%x es_info_lenght:%x ",stream_type,elmentary_pid,es_info_lenght);
-
+				DEBUG( "stream_type:%x elmentary_pid:%x es_info_lenght:%x ", stream_type, elmentary_pid, es_info_lenght );
 			}
 #endif
-			
+
 #if 0
 			int	i;
 			int	y = 0;
@@ -363,15 +362,15 @@ int pmt_parse_enter( char *file, uint16_t i_program_number, uint16_t i_pmt_pid )
 				}
 			}
 			DEBUG( "\n" );
-#endif		
+#endif
 		}
 		--count;
-		
+
 		b_ok = ReadPacket( i_fd, data );
-		if(parse_ts_id.i_parse_status == 0x02 ){
+		if ( parse_ts_id.i_parse_status == 0x02 )
 			break;
-		}else if(count <= 0)
-		 		break;
+		else if ( count <= 0 )
+			break;
 	}
 
 out:
@@ -381,7 +380,7 @@ out:
 		dvbpsi_delete( p_dvbpsi );
 	}
 	close( i_fd );
-
+	parse_ts_id.i_parse_status = 0;
 	return(0);
 }
 

@@ -196,6 +196,7 @@ void exception_handling( int status, void* arg )
 static void main_loop( void )
 {
 	int result;
+	/* int error; */
 
 	signed int	b_val = -1, r_vic = -1;
 	int		bakcode, bakcodecvbs, ret;
@@ -325,9 +326,16 @@ static void main_loop( void )
 			{
 				b_val = r_vic;
 
-				usercode_mod( dconfig->scfg_Param.encoder_video_interface, 0, r_vic );/* 0 没用此位 */
+				if ( r_vic <= 0 )
+				{
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, 0, v1920x1080i_50Hz );       /* 0 没用此位 */
 
-				change_seach();
+					change_seach();
+				}else{
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, 0, r_vic );                  /* 0 没用此位 */
+
+					change_seach();
+				}
 			}
 
 
@@ -394,6 +402,10 @@ static void main_loop( void )
 				}
 				if ( result != -1 )
 					change_seach();
+				else{
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, YPbPr1080Isign50Hz, 0 );
+					change_seach();
+				}
 			}
 		} else if ( (M_CVBS == dconfig->scfg_Param.encoder_video_interface)
 			    || (p_discontrl->pid_status == 0x01) )
@@ -471,6 +483,10 @@ static void main_loop( void )
 				}
 				if ( result != -1 )
 					change_seach();
+				else{
+					usercode_mod( dconfig->scfg_Param.encoder_video_interface, PAL_50_NOTROW, 0 );
+					change_seach();
+				}
 			}
 		}
 	}
