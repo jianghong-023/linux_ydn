@@ -282,7 +282,7 @@ static void token_hander( uint8_t post )
 	int	i, backcps;
 	uint8_t flag = post;
 
-//	DEBUG("post:%d",flag); 
+/*	DEBUG("post:%d",flag); */
 	for ( i = 0; i < MYTPF_MAX; i++ )
 	{
 		if ( job[i] != NULL )
@@ -415,7 +415,7 @@ int fetch_token( usb_token *ptr, int size )
 	{
 		nano_sleep( 0, 10 );
 
-		if ( r_time_out( tpstart ) >= (DTS_STREAM_TIME-10000) )
+		if ( r_time_out( tpstart ) >= (DTS_STREAM_TIME - 10000) )
 		{
 			break;
 		}
@@ -1194,6 +1194,13 @@ static int32_t writ_usb( void *usb_hand )
 
 	usb_write_handler( path, usb_action->ts_size, usb_action->op_mod );
 
+	/* 清理定时器 */
+	cl_time();
+	last_time();
+
+/* 背光 */
+	m_backlighting( LCD_LIGHT_ON );
+
 goback:
 	stop_alarm();
 	signal_close();
@@ -1204,14 +1211,15 @@ goback:
 	loop_cl_cah();
 
 	usb_sop_notify();
-	discontrl_t()->changemenuflag  = ~CHAR_INPUT_ON;
+	discontrl_t()->changemenuflag = ~CHAR_INPUT_ON;
 	if ( discontrl_t()->record_auto_flag == USB_AUTO_HAND )
 	{
 		discontrl_t()->record_auto_flag = DEFAULTE;
 		paren_menu();
 	}else
-		current_menu(1);
-		
+		current_menu( 1 );
+
+
 	return(ret);
 }
 

@@ -35,6 +35,15 @@ void cfg_discontrl_c( int char_digit_status, int curos_stat,
 		      void (* loopdsplay)() );
 
 
+void m_backlighting( uint8_t _backlighting );
+
+
+void last_time();
+
+
+void cl_time();
+
+
 uint8_t ts();
 
 
@@ -83,13 +92,14 @@ uint8_t guardIntv_dalay_cfg( void );
 uint8_t RF_frequency_status( void );
 
 
-uint8_t eauto_wr_usb_Cfg(void);
+uint8_t eauto_wr_usb_Cfg( void );
 
 
 uint8_t sys_serial();
 
 
-void usb_pl_message(void);
+void usb_pl_message( void );
+
 
 uint8_t sys_Version();
 
@@ -106,14 +116,13 @@ int comm_constell( char *buffer );
 int comm_video_interface( char *buffer );
 
 
-void auto_usb_test(void );
+void auto_usb_test( void );
 
 
 int eit_insert_commom( char *buffer );
 
 
 int nit_insert_commom( char *buffer );
-
 
 
 int comm_Bandwidth( char* buffer );
@@ -211,9 +220,12 @@ uint8_t language_Cfg();
 
 uint8_t eit_insert_Cfg();
 
+
 uint8_t nit_insert_Cfg();
 
-void clean_lcd(void);
+
+void clean_lcd( void );
+
 
 uint8_t start_eventname_Cfg();
 
@@ -404,7 +416,9 @@ void get_state_desplay( int *monitor_flag, int *coder, int *flags );
 
 void set_state_desplay( int monitor_flag, int coder, int flags );
 
+
 void set_status_ret( int flags );
+
 
 void function_inter( loopdsplay desplay );
 

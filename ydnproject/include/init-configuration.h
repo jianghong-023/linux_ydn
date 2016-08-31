@@ -60,7 +60,7 @@ typedef enum {
 	oRecordModle,
 	oPMTPID,
 	oPRCPID,
-	oVideoPID,
+	oVideo_PID,
 	oAudioPID,
 
 	oNETWORKID,

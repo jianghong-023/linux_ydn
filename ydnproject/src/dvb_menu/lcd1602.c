@@ -161,16 +161,7 @@ static int lock_enter_input_pwd( int dsplay_status, int keynumber );
 static void lock_enter_input_prompt( int dsplay_status );
 
 
-static void m_backlighting( uint8_t _backlighting );
-
-
 static int m_timers( int scend );
-
-
-static void last_time();
-
-
-static void cl_time();
 
 
 static int pwd_state();
@@ -341,7 +332,7 @@ void usb_pl_message( void )
  *
  */
 
-static void m_backlighting( uint8_t _backlighting )
+void m_backlighting( uint8_t _backlighting )
 {
 	lcd_bkl_offon( _backlighting );
 }
@@ -351,7 +342,7 @@ static void m_backlighting( uint8_t _backlighting )
  * 上一次开始时间
  *
  */
-static void last_time()
+void last_time()
 {
 	time( &lasttime );
 }
@@ -381,7 +372,7 @@ static int  m_timers( int scend )
 /*
  * 清定时器
  */
-static void cl_time()
+void cl_time()
 {
 	time_t s_nowtime;
 	time( &s_nowtime );

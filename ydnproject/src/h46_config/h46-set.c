@@ -22,6 +22,86 @@ enum h46_opt {
 	v57650p
 };
 
+#if 1
+static const struct {
+	char	name[20];
+	int	framrate;
+} frame_rate[] = {
+	/*50hZ (17~31,37~39) */
+	{ "720x576 50p",   50 },
+	{ "720x576 50p",   50 },
+	{ "1280x720 50p",  50 },
+	{ "1920x1080 50i", 25 },
+	{ "720x576 50i",   25 },
+	{ "720x576 50i",   25 },
+	{ "720x288 50p",   50 },
+	{ "720x288 50p",   50 },
+	{ "2880x576 50i",  25 },
+	{ "2880x576 50i",  25 },
+	{ "2880x288 50p",  50 },
+	{ "2880x288 50p",  50 },
+	{ "1440x576 50p",  50 },
+	{ "1440x576 50p",  50 },
+	{ "1920x1080 50p", 50 },
+	{ "2880x576 50p",  50 },
+	{ "2880x576 50p",  50 },
+	{ "1920x1080 50i", 25 },
+/* 59.94Hz (1~16,35,36) */
+
+/* 60Hz3 (1~16,35,36) */
+	{ "640x480 60p",   60 },
+	{ "720x480 60p",   60 },
+	{ "720x480 60p",   60 },
+	{ "2880x240 60p",  60 },
+	{ "1280x720 60p",  60 },
+	{ "1440x480 60p",  60 },
+	{ "1920x1080 60i", 30 },
+	{ "720x480 60i",   30 },
+	{ "720x480 60i",   30 },
+	{ "720x240 60p",   60 },
+	{ "720x240 60p",   60 },
+	{ "2880x480 60i",  30 },
+	{ "2880x480 60i",  30 },
+	{ "2880x240 60p",  60 },
+	{ "1440x480 60p",  60 },
+	{ "1920x1080 60p", 60 },
+	{ "2880x480 60p",  60 },
+	{ "2880x480 60p",  60 },
+
+
+/*
+ * Low Field Rate (32~34)
+ * 24Hz,25Hz,30Hz
+ */
+	{ "1920x1080 24p", 24 },
+	{ "1920x1080 25p", 25 },
+	{ "1920x1080 30p", 30 },
+};
+
+
+#endif
+
+
+int get_frame_rate( char * name )
+{
+	int i;
+
+	if ( !name )
+		return(-1);
+
+
+	for ( i = 0; i < (sizeof(frame_rate) / (sizeof(frame_rate[0]) ) ); i++ )
+	{
+		if ( strncmp( name, frame_rate[i].name, sizeof(frame_rate[i].name) ) == 0 )
+		{
+			DEBUG( "frame_rate_name:%s  frame_rate:%d ", name, frame_rate[i].framrate );
+			return(frame_rate[i].framrate);
+		}
+	}
+
+	return(-1);
+}
+
 
 static int vn_calc( double v_bitrate, double framerate )
 {
@@ -30,9 +110,9 @@ static int vn_calc( double v_bitrate, double framerate )
 	if ( v_bitrate == 0 || framerate == 0 )
 		return(res = -1);
 
-	int	v0	= 19 * 8 * (framerate);
+	int	v0	= 19 * 8 * (framerate + 0.5);
 	int	v1	= v_bitrate * 1000 + v0;
-	int	v2	= 183 * 8 * (framerate);
+	int	v2	= 183 * 8 * (framerate + 0.5);
 	int	v3	= (v1 + v2) * (188 / 184);
 	res = ( (int) (v3 + 0.5) );
 #if 0
@@ -56,40 +136,38 @@ static int sn_calc( double sysofms )
 	tmp = (188 * 8) / (sysofms / 1000);
 
 	res = ( (int) (tmp + 0.5) );
-	//DEBUG( "S =%d \n", res );
+	/* DEBUG( "S =%d \n", res ); */
 	return(res);
 }
 
 
-/*
- * static int an_calc(double a_bitrate,double fre)
- * {
- * double tmp;
- * int res;
- * DEBUG("a_bitrate=%f \n",a_bitrate);
- * if(a_bitrate == 0 || fre == 0 )
- * return res = -1;
- *
- * tmp = a_bitrate * 1000 * 1152 /fre / 8;
- * int A0 = ((int)(tmp + 0.5));
- * int A1 =A0 + 14;
- * tmp = A1 / 184;
- * int A2 = ((int)(tmp + 0.5));
- *
- * tmp  = 188 * 8 * A2 /1152 / fre;
- *
- * int A3 = ((int)(tmp + 0.5));
- * res = A3;
- * DEBUG("A0=%d \n",A0);
- * DEBUG("A1=%d \n",A1);
- * DEBUG("A2=%d \n",A2);
- * DEBUG("A3=%d \n",A3);
- *
- *
- *
- * return res;
- * }
- */
+static int an_calc( double a_bitrate, double fre )
+{
+	double	tmp;
+	int	res;
+	DEBUG( "a_bitrate=%f \n", a_bitrate );
+	if ( a_bitrate == 0 || fre == 0 )
+		return(res = -1);
+
+	tmp = a_bitrate * 1000 * 1152 / fre / 8;
+	int	A0	= ( (int) (tmp + 0.5) );
+	int	A1	= A0 + 14;
+	tmp = A1 / 184;
+	int A2 = ( (int) (tmp + 0.5) );
+
+	tmp = 188 * 8 * A2 / (1152 / fre);
+
+	int A3 = ( (int) (tmp + 0.5) );
+	res = A3;
+	DEBUG( "A0=%d \n", A0 );
+	DEBUG( "A1=%d \n", A1 );
+	DEBUG( "A2=%d \n", A2 );
+	DEBUG( "A3=%d \n", A3 );
+
+
+	return(res);
+}
+
 
 #if 0
 /* 保留将来使用 */
@@ -148,7 +226,7 @@ static void audio_mode( uint32_t fd, uint16_t audo_format )
 
 #endif
 
-static int  MUX_RATE( int v3, int a3, int s0, int s1, int s2, int s3 )
+static int MUX_RATE( int v3, int a3, int s0, int s1, int s2, int s3 )
 {
 	double	tmp;
 	int	res;
@@ -157,7 +235,7 @@ static int  MUX_RATE( int v3, int a3, int s0, int s1, int s2, int s3 )
 
 	res = ( (int) (tmp + 0.5) );
 
-//	DEBUG( "mux_rate = %d   %x \n", res, res );
+/*	DEBUG( "mux_rate = %d   %x \n", res, res ); */
 	return(res);
 }
 
@@ -248,7 +326,7 @@ static void audio_birate( int audio_bitrate, int fd )
 
 	sprintf( __buf, "WD%02x%02x", GET_HEX( audio_bitrate, 2 ), GET_HEX( audio_bitrate, 1 ) );
 	uart_send( fd, __buf );
-//	DEBUG( "audio_bitrate =%04x   l=%02x  h=%02x  %s\n", audio_bitrate, GET_HEX( audio_bitrate, 1 ), GET_HEX( audio_bitrate, 2 ), __buf );
+/*	DEBUG( "audio_bitrate =%04x   l=%02x  h=%02x  %s\n", audio_bitrate, GET_HEX( audio_bitrate, 1 ), GET_HEX( audio_bitrate, 2 ), __buf ); */
 	usleep( 2000 );
 
 	gettimeofday( &tpstart, NULL );
@@ -331,7 +409,7 @@ static void other_pi( int fd )
 
 void h64_common_set( int fd )
 {
-//	DEBUG( "h64 init set.." );
+/*	DEBUG( "h64 init set.." ); */
 	char		*buf = NULL;
 	struct timeval	tpstart;
 	buf = "CHK";
@@ -469,8 +547,17 @@ void v72060p_mod( int fd )
 
 	int	video_bitrate	= dconfig->scfg_Param.encoder_video_bitrate;
 	int	audio_bitrate	= dconfig->scfg_Param.encoder_audio_bitrate;
-	int	sys_rate	= MUX_RATE( vn_calc( video_bitrate, 30 ), audio_bitrate,
-					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
+
+	int	framerate = get_frame_rate( dconfig->localstatus.encoder_video_resolution );
+	int	f_rate;
+	if ( framerate < 0 )
+		f_rate = 30;
+	else
+		f_rate = framerate;
+
+
+	int sys_rate = MUX_RATE( vn_calc( video_bitrate, f_rate ), an_calc( audio_bitrate, 48000 ) /*audio_bitrate*/,
+				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
 	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
@@ -1239,8 +1326,16 @@ void v72050p_mod( int fd )
 
 	int	video_bitrate	= dconfig->scfg_Param.encoder_video_bitrate;
 	int	audio_bitrate	= dconfig->scfg_Param.encoder_audio_bitrate;
-	int	sys_rate	= MUX_RATE( vn_calc( video_bitrate, 30 ), audio_bitrate,
-					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
+
+	int	framerate = get_frame_rate( dconfig->localstatus.encoder_video_resolution );
+	int	f_rate;
+	if ( framerate < 0 )
+		f_rate = 30;
+	else
+		f_rate = framerate;
+
+	int sys_rate = MUX_RATE( vn_calc( video_bitrate, f_rate ), an_calc( audio_bitrate, 48000 ),
+				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
 	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
@@ -2026,11 +2121,19 @@ void v57650i_mod( int fd )
 
 	int	video_bitrate	= dconfig->scfg_Param.encoder_video_bitrate;
 	int	audio_bitrate	= dconfig->scfg_Param.encoder_audio_bitrate;
-	int	sys_rate	= MUX_RATE( vn_calc( video_bitrate, 30 ), audio_bitrate,
-					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
+
+	int	framerate = get_frame_rate( dconfig->localstatus.encoder_video_resolution );
+	int	f_rate;
+	if ( framerate < 0 )
+		f_rate = 30;
+	else
+		f_rate = framerate;
+
+	int sys_rate = MUX_RATE( vn_calc( video_bitrate, f_rate ), an_calc( audio_bitrate, 48000 ),
+				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
-//	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
+/*	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf ); */
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2126,7 +2229,7 @@ void v57650i_mod( int fd )
 	int v_pid = atoi( (const char *) dconfig->scfg_Param.encoder_video_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_pid, 2 ), GET_HEX( v_pid, 1 ) );
 	uart_send( fd, __buf );
-//	DEBUG( "encoder_video_pid =%04x   l=%02x  h=%02x  %s\n", v_pid, GET_HEX( v_pid, 1 ), GET_HEX( v_pid, 2 ), __buf );
+/*	DEBUG( "encoder_video_pid =%04x   l=%02x  h=%02x  %s\n", v_pid, GET_HEX( v_pid, 1 ), GET_HEX( v_pid, 2 ), __buf ); */
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2150,7 +2253,7 @@ void v57650i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	//DEBUG( "a_pid =%d ", a_pid );
+	/* DEBUG( "a_pid =%d ", a_pid ); */
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -2177,7 +2280,7 @@ void v57650i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-//	DEBUG( "pmt_pid =%d ", pmt_pid );
+/*	DEBUG( "pmt_pid =%d ", pmt_pid ); */
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -2319,7 +2422,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( rate_mode, 2 ), GET_HEX( rate_mode, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-//	DEBUG( "rate mode =%s ", __buf );
+/*	DEBUG( "rate mode =%s ", __buf ); */
 	buf = "WA01406";
 	uart_send( fd, buf );
 	usleep( 2000 );
@@ -2345,7 +2448,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-//	DEBUG( "video_bitrate =%s ", __buf );
+/*	DEBUG( "video_bitrate =%s ", __buf ); */
 
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2454,7 +2557,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-//	DEBUG( "v_profile =%s ", __buf );
+/*	DEBUG( "v_profile =%s ", __buf ); */
 
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2481,7 +2584,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_level, 2 ), GET_HEX( v_level, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-	//DEBUG( "v_level =%s ", __buf );
+	/* DEBUG( "v_level =%s ", __buf ); */
 
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2876,8 +2979,16 @@ void v48050i_mod( int fd )
 
 	int	video_bitrate	= dconfig->scfg_Param.encoder_video_bitrate;
 	int	audio_bitrate	= dconfig->scfg_Param.encoder_audio_bitrate;
-	int	sys_rate	= MUX_RATE( vn_calc( video_bitrate, 30 ), audio_bitrate,
-					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
+
+	int	framerate = get_frame_rate( dconfig->localstatus.encoder_video_resolution );
+	int	f_rate;
+	if ( framerate < 0 )
+		f_rate = 30;
+	else
+		f_rate = framerate;
+
+	int sys_rate = MUX_RATE( vn_calc( video_bitrate, f_rate ), an_calc( audio_bitrate, 48000 ),
+				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
 	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
@@ -3847,8 +3958,16 @@ void v48060i_mod( int fd )
 
 	int	video_bitrate	= dconfig->scfg_Param.encoder_video_bitrate;
 	int	audio_bitrate	= dconfig->scfg_Param.encoder_audio_bitrate;
-	int	sys_rate	= MUX_RATE( vn_calc( video_bitrate, 30 ), audio_bitrate,
-					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
+
+	int	framerate = get_frame_rate( dconfig->localstatus.encoder_video_resolution );
+	int	f_rate;
+	if ( framerate < 0 )
+		f_rate = 30;
+	else
+		f_rate = framerate;
+
+	int sys_rate = MUX_RATE( vn_calc( video_bitrate, f_rate ), an_calc( audio_bitrate, 48000 ),
+				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
 	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
@@ -4694,8 +4813,16 @@ void v108060i_mod( int fd )
 
 	int	video_bitrate	= dconfig->scfg_Param.encoder_video_bitrate;
 	int	audio_bitrate	= dconfig->scfg_Param.encoder_audio_bitrate;
-	int	sys_rate	= MUX_RATE( vn_calc( video_bitrate, 30 ), audio_bitrate,
-					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
+
+	int	framerate = get_frame_rate( dconfig->localstatus.encoder_video_resolution );
+	int	f_rate;
+	if ( framerate < 0 )
+		f_rate = 30;
+	else
+		f_rate = framerate;
+
+	int sys_rate = MUX_RATE( vn_calc( video_bitrate, f_rate ), an_calc( audio_bitrate, 48000 ),
+				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
 	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
@@ -5568,8 +5695,16 @@ void v108050i_mod( int fd )
 
 	int	video_bitrate	= dconfig->scfg_Param.encoder_video_bitrate;
 	int	audio_bitrate	= dconfig->scfg_Param.encoder_audio_bitrate;
-	int	sys_rate	= MUX_RATE( vn_calc( video_bitrate, 30 ), audio_bitrate,
-					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
+
+	int	framerate = get_frame_rate( dconfig->localstatus.encoder_video_resolution );
+	int	f_rate;
+	if ( framerate < 0 )
+		f_rate = 30;
+	else
+		f_rate = framerate;
+
+	int sys_rate = MUX_RATE( vn_calc( video_bitrate, f_rate ), an_calc( audio_bitrate, 48000 ),
+				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
 	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
@@ -6447,8 +6582,16 @@ void v108050p_mod( int fd )
 
 	int	video_bitrate	= dconfig->scfg_Param.encoder_video_bitrate;
 	int	audio_bitrate	= dconfig->scfg_Param.encoder_audio_bitrate;
-	int	sys_rate	= MUX_RATE( vn_calc( video_bitrate, 30 ), audio_bitrate,
-					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
+
+	int	framerate = get_frame_rate( dconfig->localstatus.encoder_video_resolution );
+	int	f_rate;
+	if ( framerate < 0 )
+		f_rate = 30;
+	else
+		f_rate = framerate;
+
+	int sys_rate = MUX_RATE( vn_calc( video_bitrate, f_rate ), an_calc( audio_bitrate, 48000 ),
+				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
 	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
@@ -7374,8 +7517,16 @@ void v108060p_mod( int fd )
 
 	int	video_bitrate	= dconfig->scfg_Param.encoder_video_bitrate;
 	int	audio_bitrate	= dconfig->scfg_Param.encoder_audio_bitrate;
-	int	sys_rate	= MUX_RATE( vn_calc( video_bitrate, 30 ), audio_bitrate,
-					    sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
+
+	int	framerate = get_frame_rate( dconfig->localstatus.encoder_video_resolution );
+	int	f_rate;
+	if ( framerate < 0 )
+		f_rate = 30;
+	else
+		f_rate = framerate;
+
+	int sys_rate = MUX_RATE( vn_calc( video_bitrate, f_rate ), an_calc( audio_bitrate, 48000 ),
+				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
 	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
@@ -9943,7 +10094,7 @@ void v57650p_mod( int fd )
 
 void ret_opt( int fd )
 {
-//	DEBUG( "ret_opt.." );
+/*	DEBUG( "ret_opt.." ); */
 	char		*buf = NULL;
 	struct timeval	tpstart;
 

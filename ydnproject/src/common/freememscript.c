@@ -193,7 +193,7 @@ void sys_ect_conf( void )
 		fprintf( file, "# PID configuration\n\n" );
 		fprintf( file, "PMTPID 100\n\n" );
 		fprintf( file, "PRCPID 103\n\n" );
-		fprintf( file, "VideoPID 101\n\n" );
+		fprintf( file, "Video_PID 101\n\n" );
 		fprintf( file, "AudioPID 102\n\n" );
 		fprintf( file, "ProgrNmu 101\n\n" ); /* NETWORKID */
 		fprintf( file, "NETWORKID 1\n\n" );
@@ -205,7 +205,7 @@ void sys_ect_conf( void )
 		fprintf( file, "NETWORKNUMB 31\n\n" );
 		fprintf( file, "EITISERTENABLE Enable\n\n" );
 		fprintf( file, "NITISERTENABLE Enable\n\n" );
-		fprintf( file, "RFENABLE Denable\n\n" );
+		fprintf( file, "RFENABLE Enable\n\n" );
 		fprintf( file, "LockPwdStu Denable\n\n" );
 		fprintf( file, "ProgramOutput Denable\n\n" );
 		fprintf( file, "NITLCNMOD European_Cfg\n\n" );

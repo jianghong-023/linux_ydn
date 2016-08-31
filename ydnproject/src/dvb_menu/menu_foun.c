@@ -707,7 +707,7 @@ uint8_t video_bitrate()
 
 
 	int get_value = dconfig->scfg_Param.encoder_video_bitrate;
-	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 30000, 0, INPUT_DIGIT_STATUS, input_lenth, &text_videotare_save );
+	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 30000, 1000, INPUT_DIGIT_STATUS, input_lenth, &text_videotare_save );
 
 	return(0);
 }
@@ -1072,7 +1072,7 @@ static void mod_bitraet()
 	close_fd( fd );
 	float maxbitrate = 9.36;
 	sprintf( ch, "Bitrate(Act/Max)" );
-	sprintf( ch1, " %.3fM/%.3fM", actbitrate / 100, maxbitrate );
+	sprintf( ch1, " %.3fM/%.3fM ", actbitrate / 100, maxbitrate );
 	lcd_Write_String( 0, ch );
 	lcd_Write_String( 1, ch1 );
 }
@@ -1492,7 +1492,7 @@ static void chech_lock()
 	}
 
 
-	DEBUG( "menu_item_lenth : %d  count : %d ", menu_item_lenth, count );
+//	DEBUG( "menu_item_lenth : %d  count : %d ", menu_item_lenth, count );
 
 	if ( count >= menu_item_lenth )
 		count = 0;
@@ -2597,7 +2597,7 @@ void text_digvpid_save( char *orgbuf, char *repbuf )
 	if ( orgbuf != NULL && repbuf != NULL )
 	{
 		DEBUG( "orgbuf =%s     repbuf =%s \n", orgbuf, repbuf );
-		config_set_config( SYS_ETC_CONF, orgbuf, (uint8_t *) repbuf, "VideoPID" );
+		config_set_config( SYS_ETC_CONF, orgbuf, (uint8_t *) repbuf, "Video_PID" );
 	}
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
