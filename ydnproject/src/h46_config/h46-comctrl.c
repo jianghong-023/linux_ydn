@@ -128,6 +128,7 @@ int uart_open(int fd,int comport)
 }
 
 // rcv
+#include<debug.h>
 int uart_rcv_ok(int fd)
 {
 
@@ -141,6 +142,7 @@ int uart_rcv_ok(int fd)
 	if(rcv_buf == 75) {
 		return 1;
 	} else if(rcv_buf == 71) {
+		DEBUG("uart_rcv_ok error");
 		return 2;
 	}
 

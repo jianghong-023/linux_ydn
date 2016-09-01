@@ -193,7 +193,7 @@ void sys_ect_conf( void )
 		fprintf( file, "# PID configuration\n\n" );
 		fprintf( file, "PMTPID 100\n\n" );
 		fprintf( file, "PRCPID 103\n\n" );
-		fprintf( file, "Video_PID 101\n\n" );
+		fprintf( file, "VidPID 101\n\n" );
 		fprintf( file, "AudioPID 102\n\n" );
 		fprintf( file, "ProgrNmu 101\n\n" ); /* NETWORKID */
 		fprintf( file, "NETWORKID 1\n\n" );

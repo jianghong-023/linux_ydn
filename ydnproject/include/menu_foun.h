@@ -14,6 +14,15 @@ void gpiocfg( struct h64_gpio_et_cfg_t *pcfg );
 void gpio_mask( uint8_t setval );
 
 
+void set_lock_menu_exit( int value );
+
+
+
+int get_unlock_menu_exit( void );
+
+
+
+
 void h46cfg( struct h64_gpio_et_cfg_t *pcfg );
 
 

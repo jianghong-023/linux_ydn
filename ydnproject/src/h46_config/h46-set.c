@@ -29,21 +29,15 @@ static const struct {
 } frame_rate[] = {
 	/*50hZ (17~31,37~39) */
 	{ "720x576 50p",   50 },
-	{ "720x576 50p",   50 },
 	{ "1280x720 50p",  50 },
+	{ "1280x720 50i",  25 },
 	{ "1920x1080 50i", 25 },
 	{ "720x576 50i",   25 },
-	{ "720x576 50i",   25 },
-	{ "720x288 50p",   50 },
 	{ "720x288 50p",   50 },
 	{ "2880x576 50i",  25 },
-	{ "2880x576 50i",  25 },
 	{ "2880x288 50p",  50 },
-	{ "2880x288 50p",  50 },
-	{ "1440x576 50p",  50 },
 	{ "1440x576 50p",  50 },
 	{ "1920x1080 50p", 50 },
-	{ "2880x576 50p",  50 },
 	{ "2880x576 50p",  50 },
 	{ "1920x1080 50i", 25 },
 /* 59.94Hz (1~16,35,36) */
@@ -51,21 +45,17 @@ static const struct {
 /* 60Hz3 (1~16,35,36) */
 	{ "640x480 60p",   60 },
 	{ "720x480 60p",   60 },
-	{ "720x480 60p",   60 },
 	{ "2880x240 60p",  60 },
 	{ "1280x720 60p",  60 },
+	{ "1280x720 60i",  25 },
 	{ "1440x480 60p",  60 },
 	{ "1920x1080 60i", 30 },
-	{ "720x480 60i",   30 },
-	{ "720x480 60i",   30 },
+	{ "720x480 60i",   30 },/*  */
 	{ "720x240 60p",   60 },
-	{ "720x240 60p",   60 },
-	{ "2880x480 60i",  30 },
 	{ "2880x480 60i",  30 },
 	{ "2880x240 60p",  60 },
 	{ "1440x480 60p",  60 },
 	{ "1920x1080 60p", 60 },
-	{ "2880x480 60p",  60 },
 	{ "2880x480 60p",  60 },
 
 
@@ -450,6 +440,11 @@ void v72060p_mod( int fd )
 	config_read( get_profile()->script_configfile );
 	s_config *dconfig = config_get_config();
 
+	if ( !dconfig )
+	{
+		DEBUG( "h46 config error" );
+		return;
+	}
 	DEBUG( "v72060p_mod.." );
 	h64_common_set( fd );
 	__v72060p__( fd );
@@ -881,9 +876,12 @@ void v72060p_mod( int fd )
 		;
 	}
 /*	buf = "WD1F40";	//VBR:V_AVE_BITRATE=8000kbps */
-	buf = "WD0FA0"; /* VBR:V_AVE_BITRATE=4000kbps */
+/*	buf = "WD0FA0"; / * VBR:V_AVE_BITRATE=4000kbps * / */
 /*	buf = "WD0000";	//CBR:V_AVE_BITRATE=0000kbps */
-	uart_send( fd, buf );
+/*	uart_send( fd, buf ); */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_bitrate * 2 / 3, 2 ), GET_HEX( v_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -954,8 +952,13 @@ void v72060p_mod( int fd )
 
 
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
-	buf = "WD0BB8"; /* V_MIN_BITRATE=3000kbps */
-	uart_send( fd, buf );
+/*
+ * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
+ * uart_send( fd, buf );
+ */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_bitrate * 1 / 2, 2 ), GET_HEX( v_bitrate * 1 / 2, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -1029,8 +1032,12 @@ void v72060p_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
-	buf = "WD1770"; /* V_MAX_BITRATE=6000kbps */
-	uart_send( fd, buf );
+	/* buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * / */
+
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_bitrate, 2 ), GET_HEX( v_bitrate, 1 ) );
+	uart_send( fd, __buf );
+
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -1229,6 +1236,12 @@ void v72050p_mod( int fd )
 	/* 文件配置 */
 	config_read( get_profile()->script_configfile );
 	s_config *dconfig = config_get_config();
+
+	if ( !dconfig )
+	{
+		DEBUG( "h46 config error" );
+		return;
+	}
 
 	h64_common_set( fd );
 	__v72050p__( fd );
@@ -1660,9 +1673,12 @@ void v72050p_mod( int fd )
 		;
 	}
 /*	buf = "WD1F40";	//VBR:V_AVE_BITRATE=8000kbps */
-	buf = "WD0FA0"; /* VBR:V_AVE_BITRATE=4000kbps */
+/*	buf = "WD0FA0"; / * VBR:V_AVE_BITRATE=4000kbps * / */
 /*	buf = "WD0000";	//CBR:V_AVE_BITRATE=0000kbps */
-	uart_send( fd, buf );
+/*	uart_send( fd, buf ); */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 2 / 3, 2 ), GET_HEX( video_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -1731,8 +1747,13 @@ void v72050p_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
-	buf = "WD0BB8"; /* V_MIN_BITRATE=3000kbps */
-	uart_send( fd, buf );
+/*
+ * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
+ * uart_send( fd, buf );
+ */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 1 / 2, 2 ), GET_HEX( video_bitrate * 1 / 2, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -1806,8 +1827,14 @@ void v72050p_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
-	buf = "WD1770"; /* V_MAX_BITRATE=6000kbps */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
+
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2023,6 +2050,12 @@ void v57650i_mod( int fd )
 	config_read( get_profile()->script_configfile );
 	s_config *dconfig = config_get_config();
 
+	if ( !dconfig )
+	{
+		DEBUG( "h46 config error" );
+		return;
+	}
+
 	h64_common_set( fd );
 	other_pi( fd );
 	char		*buf = NULL;
@@ -2133,7 +2166,7 @@ void v57650i_mod( int fd )
 				 sn_calc( CYCOFPAT_MS ), sn_calc( CYCOFPMT_MS ), sn_calc( CYCOFSIT_MS ), sn_calc( CYCOFPCR_MS ) );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( sys_rate, 2 ), GET_HEX( sys_rate, 1 ) );
 	uart_send( fd, __buf );
-/*	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf ); */
+	DEBUG( "MUX_RATE =%04x   l=%02x  h=%02x  %s\n", sys_rate, GET_HEX( sys_rate, 1 ), GET_HEX( sys_rate, 2 ), __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2229,7 +2262,7 @@ void v57650i_mod( int fd )
 	int v_pid = atoi( (const char *) dconfig->scfg_Param.encoder_video_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_pid, 2 ), GET_HEX( v_pid, 1 ) );
 	uart_send( fd, __buf );
-/*	DEBUG( "encoder_video_pid =%04x   l=%02x  h=%02x  %s\n", v_pid, GET_HEX( v_pid, 1 ), GET_HEX( v_pid, 2 ), __buf ); */
+	DEBUG( "encoder_video_pid =%04x   l=%02x  h=%02x  %s\n", v_pid, GET_HEX( v_pid, 1 ), GET_HEX( v_pid, 2 ), __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2253,7 +2286,7 @@ void v57650i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int a_pid = atoi( (const char *) dconfig->scfg_Param.encoder_audio_pid );
-	/* DEBUG( "a_pid =%d ", a_pid ); */
+	DEBUG( "a_pid =%d ", a_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( a_pid, 2 ), GET_HEX( a_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -2280,7 +2313,7 @@ void v57650i_mod( int fd )
 	 */
 	memset( __buf, 0, 14 );
 	int pmt_pid = atoi( (const char *) dconfig->scfg_Param.encoder_pmt_pid );
-/*	DEBUG( "pmt_pid =%d ", pmt_pid ); */
+	DEBUG( "pmt_pid =%d ", pmt_pid );
 	sprintf( __buf, "WD%02x%02x", GET_HEX( pmt_pid, 2 ), GET_HEX( pmt_pid, 1 ) );
 	uart_send( fd, __buf );
 
@@ -2422,7 +2455,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( rate_mode, 2 ), GET_HEX( rate_mode, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-/*	DEBUG( "rate mode =%s ", __buf ); */
+	DEBUG( "rate mode =%s ", __buf );
 	buf = "WA01406";
 	uart_send( fd, buf );
 	usleep( 2000 );
@@ -2448,7 +2481,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-/*	DEBUG( "video_bitrate =%s ", __buf ); */
+	DEBUG( "video_bitrate =%s ", __buf );
 
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2465,9 +2498,12 @@ void v57650i_mod( int fd )
 		;
 	}
 /*	buf = "WD1F40";	//VBR:V_AVE_BITRATE=8000kbps */
-	buf = "WD0FA0"; /* VBR:V_AVE_BITRATE=4000kbps */
+/*	buf = "WD0FA0"; / * VBR:V_AVE_BITRATE=4000kbps * / */
 /*	buf = "WD0000";	//CBR:V_AVE_BITRATE=0000kbps */
-	uart_send( fd, buf );
+	/* uart_send( fd, buf ); */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 2 / 3, 2 ), GET_HEX( video_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2519,8 +2555,13 @@ void v57650i_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
-	buf = "WD0BB8"; /* V_MIN_BITRATE=3000kbps */
-	uart_send( fd, buf );
+/*
+ * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
+ * /	uart_send( fd, buf );
+ */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 1 / 2, 2 ), GET_HEX( video_bitrate * 1 / 2, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2557,7 +2598,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-/*	DEBUG( "v_profile =%s ", __buf ); */
+	DEBUG( "v_profile =%s ", __buf );
 
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2584,7 +2625,7 @@ void v57650i_mod( int fd )
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_level, 2 ), GET_HEX( v_level, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
-	/* DEBUG( "v_level =%s ", __buf ); */
+	DEBUG( "v_level =%s ", __buf );
 
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2601,8 +2642,14 @@ void v57650i_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
-	buf = "WD1770"; /* V_MAX_BITRATE=6000kbps */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
+
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -2885,6 +2932,12 @@ void v48050i_mod( int fd )
 	config_read( get_profile()->script_configfile );
 	s_config *dconfig = config_get_config();
 
+	if ( !dconfig )
+	{
+		DEBUG( "h46 config error" );
+		return;
+	}
+
 	DEBUG( "v48050i_mod.." );
 	h64_common_set( fd );
 	other_pi( fd );
@@ -3054,8 +3107,13 @@ void v48050i_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0000"; /* V_AVE_BITRATE */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD0000"; / * V_AVE_BITRATE * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 2 / 3, 2 ), GET_HEX( video_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -3112,8 +3170,13 @@ void v48050i_mod( int fd )
 	{
 		;
 	}
-	buf = "WD1F40"; /* V_MAX_BITRATE */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD1F40"; / * V_MAX_BITRATE * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -3866,6 +3929,12 @@ void v48060i_mod( int fd )
 	config_read( get_profile()->script_configfile );
 	s_config *dconfig = config_get_config();
 
+	if ( !dconfig )
+	{
+		DEBUG( "h46 config error" );
+		return;
+	}
+
 	h64_common_set( fd );
 	char __buf[14] = { 0 };
 	other_pi( fd );
@@ -4303,9 +4372,12 @@ void v48060i_mod( int fd )
 		;
 	}
 /*	buf = "WD1F40";	//VBR:V_AVE_BITRATE=8000kbps */
-	buf = "WD0FA0"; /* VBR:V_AVE_BITRATE=4000kbps */
+/*	buf = "WD0FA0"; / * VBR:V_AVE_BITRATE=4000kbps * / */
 /*	buf = "WD0000";	//CBR:V_AVE_BITRATE=0000kbps */
-	uart_send( fd, buf );
+	/* uart_send( fd, buf ); */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 2 / 3, 2 ), GET_HEX( video_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -4356,8 +4428,13 @@ void v48060i_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
-	buf = "WD0BB8"; /* V_MIN_BITRATE=3000kbps */
-	uart_send( fd, buf );
+/*
+ * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
+ * uart_send( fd, buf );
+ */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 1 / 2, 2 ), GET_HEX( video_bitrate * 1 / 2, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -4432,8 +4509,13 @@ void v48060i_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
-	buf = "WD1770"; /* V_MAX_BITRATE=6000kbps */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -4716,6 +4798,12 @@ void v108060i_mod( int fd )
 	/* 文件配置 */
 	config_read( get_profile()->script_configfile );
 	s_config *dconfig = config_get_config();
+
+	if ( !dconfig )
+	{
+		DEBUG( "h46 config error" );
+		return;
+	}
 
 	DEBUG( "v108060i_mod.." );
 	h64_common_set( fd );
@@ -5156,9 +5244,12 @@ void v108060i_mod( int fd )
 		;
 	}
 /*	buf = "WD1F40";	//VBR:V_AVE_BITRATE=8000kbps */
-	buf = "WD0FA0"; /* VBR:V_AVE_BITRATE=4000kbps */
+/*	buf = "WD0FA0"; / * VBR:V_AVE_BITRATE=4000kbps * / */
 /*	buf = "WD0000";	//CBR:V_AVE_BITRATE=0000kbps */
-	uart_send( fd, buf );
+/*	uart_send( fd, buf ); */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 2 / 3, 2 ), GET_HEX( video_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -5227,8 +5318,13 @@ void v108060i_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
-	buf = "WD0BB8"; /* V_MIN_BITRATE=3000kbps */
-	uart_send( fd, buf );
+/*
+ * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
+ * uart_send( fd, buf );
+ */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 1 / 2, 2 ), GET_HEX( video_bitrate * 1 / 2, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -5303,8 +5399,13 @@ void v108060i_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
-	buf = "WD1770"; /* V_MAX_BITRATE=6000kbps */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -5597,6 +5698,12 @@ void v108050i_mod( int fd )
 	/* 文件配置 */
 	config_read( get_profile()->script_configfile );
 	s_config *dconfig = config_get_config();
+
+	if ( !dconfig )
+	{
+		DEBUG( "h46 config error" );
+		return;
+	}
 
 	DEBUG( "v108050i_mod.." );
 	h64_common_set( fd );
@@ -6042,9 +6149,12 @@ void v108050i_mod( int fd )
 		;
 	}
 /*	buf = "WD1F40";	//VBR:V_AVE_BITRATE=8000kbps */
-	buf = "WD0FA0"; /* VBR:V_AVE_BITRATE=4000kbps */
+/*	buf = "WD0FA0"; / * VBR:V_AVE_BITRATE=4000kbps * / */
 /*	buf = "WD0000";	//CBR:V_AVE_BITRATE=0000kbps */
-	uart_send( fd, buf );
+/*	uart_send( fd, buf ); */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 2 / 3, 2 ), GET_HEX( video_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -6113,8 +6223,13 @@ void v108050i_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
-	buf = "WD0BB8"; /* V_MIN_BITRATE=3000kbps */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 1 / 2, 2 ), GET_HEX( video_bitrate * 1 / 2, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -6190,8 +6305,13 @@ void v108050i_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
-	buf = "WD1770"; /* V_MAX_BITRATE=6000kbps */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -6486,6 +6606,12 @@ void v108050p_mod( int fd )
 	/* 文件配置 */
 	config_read( get_profile()->script_configfile );
 	s_config *dconfig = config_get_config();
+
+	if ( !dconfig )
+	{
+		DEBUG( "h46 config error" );
+		return;
+	}
 
 	h64_common_set( fd );
 	other_pi( fd );
@@ -6925,9 +7051,12 @@ void v108050p_mod( int fd )
 		;
 	}
 /*	buf = "WD1F40";	//VBR:V_AVE_BITRATE=8000kbps */
-	buf = "WD0FA0"; /* VBR:V_AVE_BITRATE=4000kbps */
+/*	buf = "WD0FA0"; / * VBR:V_AVE_BITRATE=4000kbps * / */
 /*	buf = "WD0000";	//CBR:V_AVE_BITRATE=0000kbps */
-	uart_send( fd, buf );
+/*	uart_send( fd, buf ); */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 2 / 3, 2 ), GET_HEX( video_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -6999,8 +7128,13 @@ void v108050p_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
-	buf = "WD0BB8"; /* V_MIN_BITRATE=3000kbps */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 1 / 2, 2 ), GET_HEX( video_bitrate * 1 / 2, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -7075,8 +7209,13 @@ void v108050p_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
-	buf = "WD1770"; /* V_MAX_BITRATE=6000kbps */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -7423,8 +7562,15 @@ void v108060p_mod( int fd )
 
 	/* 文件配置 */
 	config_read( get_profile()->script_configfile );
-	s_config	*dconfig	= config_get_config();
-	char		__buf[14]	= { 0 };
+	s_config *dconfig = config_get_config();
+
+	if ( !dconfig )
+	{
+		DEBUG( "h46 config error" );
+		return;
+	}
+
+	char __buf[14] = { 0 };
 	h64_common_set( fd );
 	other_pi( fd );
 	/* v108060p */
@@ -7861,9 +8007,12 @@ void v108060p_mod( int fd )
 		;
 	}
 /*	buf = "WD1F40";	//VBR:V_AVE_BITRATE=8000kbps */
-	buf = "WD0FA0"; /* VBR:V_AVE_BITRATE=4000kbps */
+/*	buf = "WD0FA0"; / * VBR:V_AVE_BITRATE=4000kbps * / */
 /*	buf = "WD0000";	//CBR:V_AVE_BITRATE=0000kbps */
-	uart_send( fd, buf );
+	/* uart_send( fd, buf ); */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 2 / 3, 2 ), GET_HEX( video_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -7934,8 +8083,13 @@ void v108060p_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
-	buf = "WD0BB8"; /* V_MIN_BITRATE=3000kbps */
-	uart_send( fd, buf );
+/*
+ * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
+ * uart_send( fd, buf );
+ */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 1 / 2, 2 ), GET_HEX( video_bitrate * 1 / 2, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -8011,8 +8165,13 @@ void v108060p_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
-	buf = "WD1770"; /* V_MAX_BITRATE=6000kbps */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -8363,8 +8522,11 @@ void v108030p_mod( int fd )
 	 */
 
 	DEBUG( "v108030p_mod.." );
+	config_read( get_profile()->script_configfile );
+	s_config *dconfig = config_get_config();
 	h64_common_set( fd );
 	other_pi( fd );
+	char __buf[14] = { 0 };
 	/* v108030p */
 	char		*buf = NULL;
 	struct timeval	tpstart;
@@ -8562,8 +8724,14 @@ void v108030p_mod( int fd )
 	{
 		;
 	}
-	buf = "WD1F40"; /* V_MAX_BITRATE */
-	uart_send( fd, buf );
+	int video_bitrate = dconfig->scfg_Param.encoder_video_bitrate;
+	/*
+	 * buf = "WD1F40"; / * V_MAX_BITRATE * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -9166,9 +9334,12 @@ void v57650p_mod( int fd )
 	 */
 
 	DEBUG( "v57650p_mod.." );
+	config_read( get_profile()->script_configfile );
+	s_config *dconfig = config_get_config();
 	h64_common_set( fd );
 	/* v57650p */
-	char		*buf = NULL;
+	char		*buf		= NULL;
+	char		__buf[14]	= { 0 };
 	struct timeval	tpstart;
 	buf = "WA01000";
 	uart_send( fd, buf );
@@ -9305,8 +9476,14 @@ void v57650p_mod( int fd )
 	{
 		;
 	}
-	buf = "WD0000"; /* V_AVE_BITRATE */
-	uart_send( fd, buf );
+	int video_bitrate = dconfig->scfg_Param.encoder_video_bitrate;
+	/*
+	 * buf = "WD0000"; / * V_AVE_BITRATE * /
+	 * uart_send( fd, buf );
+	 */
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate * 2 / 3, 2 ), GET_HEX( video_bitrate * 2 / 3, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -9339,8 +9516,14 @@ void v57650p_mod( int fd )
 	{
 		;
 	}
-	buf = "WD1F40"; /* V_MAX_BITRATE */
-	uart_send( fd, buf );
+	/*
+	 * buf = "WD1F40"; / * V_MAX_BITRATE * /
+	 * uart_send( fd, buf );
+	 */
+
+	memset( __buf, 0, 14 );
+	sprintf( __buf, "WD%02x%02x", GET_HEX( video_bitrate, 2 ), GET_HEX( video_bitrate, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )

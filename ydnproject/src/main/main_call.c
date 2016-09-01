@@ -30,7 +30,7 @@ void input_mod_gpio( uint8_t i_mod );
 static int adf4350_configuration( void );
 
 
-static int progr_bar;
+static volatile  int progr_bar;
 
 void set_progr_bar( int value )
 {
@@ -290,8 +290,16 @@ int ad9789_configuration()
 
 int peripheral_dev_config( struct dvb_peripheral *devconfig )
 {
+	if(get_unlock_menu_exit())
+		return 0;
+	
+	set_lock_menu_exit( 1 );
+	interrupt_signals_mask(1);
+	
 	if ( devconfig )
 	{
+		
+		
 		struct dvb_peripheral *config = devconfig;
 
 		if ( config )
@@ -343,9 +351,14 @@ int peripheral_dev_config( struct dvb_peripheral *devconfig )
 			usleep( 4000 );
 			/* init */
 			init_bus();
-			progr_bar = 0x40;
+			//progr_bar = 0x40;
+			set_progr_bar(0x40);
 		}
+
+		
 	}
+	interrupt_signals_mask(0);
+	set_lock_menu_exit( 0 );
 
 	return(0);
 }

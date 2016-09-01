@@ -25,6 +25,10 @@
 #define PAL_50_ROW	(0x07)
 
 
+#define VIDEO_LOCK (0X01)
+#define VIDEO_UNLOCK (0X02)
+
+
 /* 系统配置 */
 #define STRINGS			"freemem.sh"
 #define RULER			"/usr/sbin/"STRINGS
@@ -80,7 +84,7 @@
 #define  FILE_Y (1)
 #define  FILE_N (0)
 
-#define DTS_STREAM_TIME (12000)
+#define DTS_STREAM_TIME (37000)
 
 /*
  * 带宽

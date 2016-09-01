@@ -106,6 +106,37 @@ static void time_handler( int s )
 }
 
 
+void interrupt_signals_mask( int opcode )
+{
+	sigset_t sig;
+	sigemptyset( &sig );
+	sigaddset( &sig, SIGIO );
+
+
+	switch ( opcode )
+	{
+	case 1:
+
+		if ( sigprocmask( SIG_BLOCK, &sig, NULL ) == -1 )/* ÆÁ±Î¸ÃÐÅºÅ */
+		{
+			perror( "fail to set signal-mask" );
+			return;
+		}
+		DEBUG("close signal");
+		break;
+	case 0:
+
+		if ( sigprocmask( SIG_UNBLOCK, &sig, NULL ) == -1 )/* »Ö¸´ÆÁ±ÎµÄÐÅºÅ */
+		{
+			perror( "fail to set signal-mask" );
+			return;
+		}
+		DEBUG("revive signal");
+		break;
+	}
+}
+
+
 static void init_signals( void )
 {
 	struct sigaction sig;

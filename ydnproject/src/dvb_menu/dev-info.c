@@ -7,7 +7,7 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <pthread.h>
-
+#include <menu_foun.h>
 #include <dev-info.h>
 #include <key-ctl.h>
 #include <cy22393_config.h>
@@ -1331,7 +1331,14 @@ struct dvb_peripheral hdmi_input_lowfieldrate_mod[3] = {
 
 int read_vic()
 {
+
+	
 	int	r_ratio;
+
+
+	if(get_unlock_menu_exit())
+		return 0;
+	
 	int	fd = adv7842_open();
 
 	/* PRIM_MODE */
@@ -1374,16 +1381,24 @@ int read_vic()
 
 int hdmi_detection(  int r_ratio )
 {
-	int rest = -1, item, i;
+	int rest = -1,  i;
+	static int item;
 
+#if 1
 	static int bak_r_opcode = 0;
+
+	
 
 	if(bak_r_opcode == r_ratio)
 	{
+		//DEBUG("r_ratio :%d",r_ratio);
 		return(r_ratio);
 	}else if(bak_r_opcode != r_ratio)
 		bak_r_opcode = r_ratio;
-	
+
+	//DEBUG("r_ratio :%d",r_ratio);
+#endif
+
 	memset( config.localstatus.encoder_video_resolution, ' ', 16 );
 	memset( config.localstatus.encoder_video_shrot_resolution, ' ', 16 );
 
@@ -1748,7 +1763,7 @@ void hdmi_gpio_dfg( void )
 void ypbpr_cvbs_cfg()
 {
 	/* gpio */
-
+	DEBUG("----------------------ypbpr_cvbs gpio");
 	input_mod_gpio( CVBS | nRST_H46_HI );
 	input_mod_gpio( CVBS | nRST_H46_LO );
 	usleep( 200000 );
@@ -2145,6 +2160,8 @@ int pare_YPbPr_HDMI()
 
 	result = -1;
 
+	if(get_unlock_menu_exit())
+		return 0;
 
 	fd = adv7842_open();
 	if ( fd < 0 )

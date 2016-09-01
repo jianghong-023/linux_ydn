@@ -28,7 +28,7 @@
 #define STOP_OP		0
 #define STAR_OP		1
 #define TMIEROUT	800000 * 9
-#define MAX_FREE	(2048)
+#define MAX_FREE	(64)
 #define MYTPF_MAX	100
 #define PATHLENGTH	150
 #define NAMESIZE	30
@@ -777,6 +777,11 @@ static int  creat_job_thread( void *init_b )
 	wait_stop = 0;
 	config_read( get_profile()->script_configfile );
 	s_config * dconfig = config_t();
+
+	if(!dconfig){
+		DEBUG("usb config error");
+		return -1;
+	}
 
 	ts_lenth	= dconfig->configParam.usb_tsfilesize / 2; /* by jh 2016-8-17 */
 	ts_add_toal	= 0.0;

@@ -268,7 +268,7 @@ void common_set( int fd /* ,int ypbpr */ )
  * DEBUG("----00--\n");
  */
 
-	set_i2c_register( fd, 0x20, 0xFF, 0x80 );/* 软件复位 */
+	//set_i2c_register( fd, 0x20, 0xFF, 0x80 );/* 软件复位 */
 
 /* DEBUG("----00--\n"); */
 

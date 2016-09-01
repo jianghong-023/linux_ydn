@@ -55,14 +55,30 @@ extern void gpio_mask( uint8_t setval );
 
 menu_return_arr_t menu_return_arr[10];
 
-static time_t	lasttime;
-static int	start_machine, progr_bar_flag = 0;
+static time_t		lasttime;
+static int		start_machine, progr_bar_flag = 0;
+static volatile int	menu_exit;
+
+
+void set_lock_menu_exit( int value )
+{
+	menu_exit = value;
+}
+
+
+int get_unlock_menu_exit( void )
+{
+	return(menu_exit);
+}
 
 
 uint8_t scan_key_resvale( uint8_t choose );
 
 
 static void sighandler_str( int sgn );
+
+
+void Change_Menu( signed char keySigNum );
 
 
 static void monitor_opt( int coder, int flags );
@@ -1368,11 +1384,13 @@ static char * display_input( double cfg_data, char * org_str, int *lenth )
 			discontrl.curos_stat = CURSOR_OFF;                      /* 状态锁定 */
 		}
 
+		discontrl.changemenuflag = ~CHAR_INPUT_ON;
+
 		if ( bakarr[0] == 48 )
 		{
 			int n = 0;
 
-			while ( bakarr[n] == 48 )                               /* 过滤0 */
+			while ( bakarr[n] == 48 ) /* 过滤0 */
 			{
 				n++;
 			}
@@ -1397,7 +1415,6 @@ static char * display_input( double cfg_data, char * org_str, int *lenth )
 			get_input_buffer_str( orgbff, re_orfbuf, *lenth );
 			orgbff = strdup( discontrl.cechebuf );
 		}
-		discontrl.changemenuflag = ~CHAR_INPUT_ON;
 
 		return(re_orfbuf);
 	}
@@ -2429,6 +2446,8 @@ static void sys_start_timer( void )
 		if ( start_time_out( tpstart ) >= 4000 )
 		{
 			set_progr_bar( 0x40 );
+			set_lock_menu_exit( 0 );
+			interrupt_signals_mask( 0 );
 			break;
 		}
 	}
@@ -2459,8 +2478,29 @@ static void close_info( void )
 }
 
 
-/* 按键检测 */
 void ChangeMenu( int keySigNum )
+{
+	signed char keynumber;
+	/* keynumber = (signed char)keySigNum; */
+	read( discontrl.keyfd, &keynumber, 1 );
+
+
+	/* DEBUG("args...keySigNum:%d    lock :%d",keynumber,get_unlock_menu_exit()); */
+	/* 设置菜单时不应该有返回处理 */
+	if ( get_unlock_menu_exit() )
+	{
+		if ( (keynumber & 0x7F) == esc || (keynumber & 0x7F) < 0 )
+		{
+			/* DEBUG( "args...keySigNum:%d    lock :%d", keynumber, get_unlock_menu_exit() ); */
+			return;
+		}
+	}  else
+		Change_Menu( keynumber );
+}
+
+
+/* 按键检测 */
+void Change_Menu( signed char keySigNum )
 {
 	signed char	keynumber;
 	static int	lock_count	= 0;
@@ -2485,9 +2525,17 @@ void ChangeMenu( int keySigNum )
 
 /* 密码， */
 	if ( dconfig->scfg_Param.system_pwd_count == 1 )
-		keynumber = (char ) keySigNum;
-	else
-		read( discontrl.keyfd, &keynumber, 1 );
+		keynumber = keySigNum;
+
+
+	/*
+	 * else
+	 * read( discontrl.keyfd, &keynumber, 1 );
+	 */
+
+	keynumber = keySigNum;
+
+	/* DEBUG( "---------args...keySigNum:%d    lock :%d", keynumber, get_unlock_menu_exit() ); */
 
 /* 开机启动时生效 */
 	if ( start_machine == 1 )

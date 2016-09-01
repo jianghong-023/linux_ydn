@@ -707,7 +707,7 @@ uint8_t video_bitrate()
 
 
 	int get_value = dconfig->scfg_Param.encoder_video_bitrate;
-	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 30000, 1000, INPUT_DIGIT_STATUS, input_lenth, &text_videotare_save );
+	cfg_discontrl( get_value, DIGIT_STATUS, CURSOR_ON, 29500, 500, INPUT_DIGIT_STATUS, input_lenth, &text_videotare_save );
 
 	return(0);
 }
@@ -2597,7 +2597,7 @@ void text_digvpid_save( char *orgbuf, char *repbuf )
 	if ( orgbuf != NULL && repbuf != NULL )
 	{
 		DEBUG( "orgbuf =%s     repbuf =%s \n", orgbuf, repbuf );
-		config_set_config( SYS_ETC_CONF, orgbuf, (uint8_t *) repbuf, "Video_PID" );
+		config_set_config( SYS_ETC_CONF, orgbuf, (uint8_t *) repbuf, "VidPID" );
 	}
 	config_read( get_profile()->script_configfile );
 	pr_cfg();
