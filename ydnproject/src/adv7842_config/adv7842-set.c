@@ -16,10 +16,12 @@
  * into the enabled state.
  *
  */
-//static void cp_CSC_enable( int fd )
-//{
-//	set_i2c_register( fd, 0x22, 0x69, 0x01 );
-//}
+/*
+ * static void cp_CSC_enable( int fd )
+ * {
+ * set_i2c_register( fd, 0x22, 0x69, 0x01 );
+ * }
+ */
 
 
 /*
@@ -35,20 +37,22 @@
 void sdp_brightness_set( int fd )
 {
 	s_config	*dconfig = config_get_config(); /*  */
-	uint16_t	tmpbright;
-	uint16_t	bright;
-	tmpbright = dconfig->scfg_Param.encoder_video_brightness;
+	int16_t	tmpbright;
+	int32_t	bright;
+	tmpbright = dconfig->scfg_Param.encoder_video_brightness & 0xFF;
+	//DEBUG("tmpbright :%d 1: %x  2:%x  3:%x  4:%x ",tmpbright,GET_HEX( 0x23456789, 1 ) ,GET_HEX( 0x23456789, 2 ),GET_HEX( 0x23456789, 3 ) ,GET_HEX( 0x23456789, 4 ) );
+	
 
-	if ( (0 <= tmpbright) && (tmpbright <= 128) )
-		bright = 511 - 383 - tmpbright;
-	else if ( (128 < tmpbright) && (tmpbright <= 255) )
+	if ( (0 <= tmpbright) && (tmpbright <= 127) )
+		bright = 511 - 384 - tmpbright;
+	else if ( (127 < tmpbright) && (tmpbright <= 255) )
 		bright = tmpbright - 512 - 255;
+		bright <<= 2;
+	set_i2c_register( fd, 0x48, 0x14,((bright >> 2) & 0x3F)>>2  );
+	set_i2c_register( fd, 0x48, 0x17, ( (0x3 & bright ) ) );
 
-	set_i2c_register( fd, 0x45, 0x14, GET_HEX( bright, 1 ) );
-	set_i2c_register( fd, 0x45, 0x17, ( (0xc & GET_HEX( bright, 2 ) ) << 2) );
-
-	DEBUG( "brightness 0x14[7:0] = 0x%02x", GET_HEX( bright, 1 ) );
-	DEBUG( "brightness 0x17[3:2] = 0x%02x", ( (GET_HEX( bright, 2 ) ) << 2) );
+	DEBUG( "brightness 0x14[7:0] = 0x%x  %d bright:%x ", ((bright >> 2) & 0x3F)>>2 ,tmpbright,bright);
+	DEBUG( "brightness 0x17[3:2] = 0x%x", ( (0x3 & bright )) );
 }
 
 
@@ -76,12 +80,14 @@ void sdp_hue_set( int fd )
 		hue = 511 - 384 - tmphue;
 	else if ( (tmphue < 0) && (tmphue >= -127) )
 		hue = tmphue - 384;
+	
+		hue <<= 2;
+		
+	set_i2c_register( fd, 0x48, 0x16, ((hue >> 2)&0x3F)>>2 );
+	set_i2c_register( fd, 0x48, 0x17, ( (((hue >> 2)&0x3F) &0x3) << 6));
 
-	set_i2c_register( fd, 0x45, 0x16, GET_HEX( hue, 1 ) );
-	set_i2c_register( fd, 0x45, 0x17, ( (0xc & GET_HEX( hue, 2 ) ) << 6) );
-
-	DEBUG( "n_hue 0x16[7:0] = 0x%02x", GET_HEX( hue, 1 ) );
-	DEBUG( "n_hue 0x17[7:6] = 0x%02x", ( (GET_HEX( hue, 2 ) ) << 6) );
+	DEBUG( "n_hue 0x16[7:0] = 0x%02x  %x ",  ((hue >> 2)&0x3F)>>2 ,hue);
+	DEBUG( "n_hue 0x17[7:6] = 0x%02x", ( (((hue >> 2)&0x3F) &0x3) << 6) );
 }
 
 
@@ -112,8 +118,8 @@ void sdp_saturation_set( int fd )
 		saturation = tmpsaturation - 1023 - 255;
 
 
-	set_i2c_register( fd, 0x45, 0x15, GET_HEX( saturation, 1 ) );
-	set_i2c_register( fd, 0x45, 0x17, ( (0x3 & GET_HEX( saturation, 2 ) ) << 4) );
+	set_i2c_register( fd, 0x48, 0x15, GET_HEX( saturation, 1 ) );
+	set_i2c_register( fd, 0x48, 0x17, ( (0x3 & GET_HEX( saturation, 2 ) ) << 4) );
 
 	DEBUG( "saturation 0x15[7:0] = 0x%02x", GET_HEX( saturation, 1 ) );
 	DEBUG( "saturation 0x17[5:4] = 0x%02x", ( (0x3 & GET_HEX( saturation, 2 ) ) << 4) );
@@ -139,17 +145,19 @@ void sdp_contrast_set( int fd )
 	uint16_t	tmpcontr;
 	uint16_t	contr;
 	s_config	*dconfig = config_get_config(); /*  */
-	tmpcontr = dconfig->scfg_Param.encoder_video_contrast;
-	if ( (0 <= tmpcontr) && (tmpcontr <= 128) )
-		contr = 512 - 384 - tmpcontr;
-	else if ( (128 < tmpcontr) && (tmpcontr <= 255) )
-		contr = tmpcontr - 1023 - 255;
+	tmpcontr = (dconfig->scfg_Param.encoder_video_contrast & 0x3FF) << 2;
 
-	set_i2c_register( fd, 0x45, 0x13, GET_HEX( contr, 1 ) );
-	set_i2c_register( fd, 0x45, 0x17, ( (0x3 & GET_HEX( contr, 2 ) ) << 0) );
+	
+	//if ( (0 <= tmpcontr) && (tmpcontr <= 128) )
+	//	contr = 512 - 384 - tmpcontr;
+	//else if ( (128 < tmpcontr) && (tmpcontr <= 255) )
+	//	contr = tmpcontr - 1023 - 255;
 
-	DEBUG( "contrast 0x13[7:0] = 0x%02x", GET_HEX( contr, 1 ) );
-	DEBUG( "contrast 0x17[1:0] = 0x%02x", ( (GET_HEX( contr, 2 ) ) << 0) );
+	set_i2c_register( fd, 0x48, 0x13, (tmpcontr  >> 2) & 0x3F );
+	set_i2c_register( fd, 0x48, 0x17, ( (0x3 & tmpcontr )) );
+
+	DEBUG( "contrast 0x13[7:0] = 0x%02x   %d", tmpcontr  >> 2 ,tmpcontr);
+	DEBUG( "contrast 0x17[1:0] = 0x%02x", ( 0x3 & tmpcontr) );
 }
 
 
@@ -249,6 +257,43 @@ void cp_hue_cfg( int fd )
 }
 
 
+void init_adv7842( int fd )
+{
+	/*
+	 * 40 FF 80 ; I2C reset
+	 * 40 F1 90 ; SDP map
+	 * 40 F2 94 ; SDPIO map
+	 * 40 F3 84 ; AVLINK
+	 * 40 F4 80 ; CEC
+	 * 40 F5 7C ; INFOFRAME
+	 * 40 F8 4C ; AFE
+	 * 40 F9 64 ; KSV
+	 * 40 FA 6C ; EDID
+	 * 40 FB 68 ; HDMI
+	 * 40 FD 44 ; CP
+	 * 40 FE 48 ; VDP
+	 * ** slave address=0x40 *********************** //
+	 * DEBUG("----00--\n");
+	 */
+
+	/* set_i2c_register( fd, 0x20, 0xFF, 0x80 );/ * 软件复位 * / */
+
+/* DEBUG("----00--\n"); */
+
+	set_i2c_register( fd, 0x20, 0xF1, 0x90 );
+	set_i2c_register( fd, 0x20, 0xF2, 0x94 );
+	set_i2c_register( fd, 0x20, 0xF3, 0x84 );
+	set_i2c_register( fd, 0x20, 0xF4, 0x80 );
+	set_i2c_register( fd, 0x20, 0xF5, 0x7C );
+	set_i2c_register( fd, 0x20, 0xF8, 0x4C );
+	set_i2c_register( fd, 0x20, 0xF9, 0x64 );
+	set_i2c_register( fd, 0x20, 0xFA, 0x6C );
+	set_i2c_register( fd, 0x20, 0xFB, 0x68 );
+	set_i2c_register( fd, 0x20, 0xFD, 0x44 );
+	set_i2c_register( fd, 0x20, 0xFE, 0x48 );
+}
+
+
 void common_set( int fd /* ,int ypbpr */ )
 {
 /*
@@ -268,21 +313,23 @@ void common_set( int fd /* ,int ypbpr */ )
  * DEBUG("----00--\n");
  */
 
-	//set_i2c_register( fd, 0x20, 0xFF, 0x80 );/* 软件复位 */
+	/* set_i2c_register( fd, 0x20, 0xFF, 0x80 );/ * 软件复位 * / */
 
 /* DEBUG("----00--\n"); */
 
-	set_i2c_register( fd, 0x20, 0xF1, 0x90 );
-	set_i2c_register( fd, 0x20, 0xF2, 0x94 );
-	set_i2c_register( fd, 0x20, 0xF3, 0x84 );
-	set_i2c_register( fd, 0x20, 0xF4, 0x80 );
-	set_i2c_register( fd, 0x20, 0xF5, 0x7C );
-	set_i2c_register( fd, 0x20, 0xF8, 0x4C );
-	set_i2c_register( fd, 0x20, 0xF9, 0x64 );
-	set_i2c_register( fd, 0x20, 0xFA, 0x6C );
-	set_i2c_register( fd, 0x20, 0xFB, 0x68 );
-	set_i2c_register( fd, 0x20, 0xFD, 0x44 );
-	set_i2c_register( fd, 0x20, 0xFE, 0x48 );
+/*
+ * set_i2c_register( fd, 0x20, 0xF1, 0x90 );
+ * set_i2c_register( fd, 0x20, 0xF2, 0x94 );
+ * set_i2c_register( fd, 0x20, 0xF3, 0x84 );
+ * set_i2c_register( fd, 0x20, 0xF4, 0x80 );
+ * set_i2c_register( fd, 0x20, 0xF5, 0x7C );
+ * set_i2c_register( fd, 0x20, 0xF8, 0x4C );
+ * set_i2c_register( fd, 0x20, 0xF9, 0x64 );
+ * set_i2c_register( fd, 0x20, 0xFA, 0x6C );
+ * set_i2c_register( fd, 0x20, 0xFB, 0x68 );
+ * set_i2c_register( fd, 0x20, 0xFD, 0x44 );
+ * set_i2c_register( fd, 0x20, 0xFE, 0x48 );
+ */
 
 
 /*

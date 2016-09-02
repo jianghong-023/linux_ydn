@@ -179,7 +179,8 @@ struct dvb_peripheral {
 	int	i2c_1ordernumber;
 
 	int	(*open_clockdev)( void );
-	int	(*open_freqdev)( void );
+	//int	(*open_freqdev)( void );
+	int    open_freqdev;
 	int	(*open_uartdev)( void );
 
 	void	(*clockset)( int clockfd, unsigned int slave_addr );    /* 22393 */
@@ -242,7 +243,7 @@ void usercode_mod( int modcod, int ypbpr_cvbs, int );
 void adv_defualt_set();
 
 
-int read_vic();
+int read_vic(int );
 
 
 int cy22393_open();
@@ -252,10 +253,10 @@ int adv7842_open();
 
 
 /* 分量 */
-int pare_YPbPr_HDMI();
+int pare_YPbPr_HDMI(int);
 
 
-int pare_cvbs();
+int pare_cvbs(int );
 
 
 void ypbpr_cvbs_cfg();

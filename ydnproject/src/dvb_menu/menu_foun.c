@@ -250,7 +250,7 @@ uint8_t key_lock()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_lck_state );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"Yes",
 		"No ",
@@ -457,7 +457,7 @@ uint8_t videonorm()
 	get_cfg_menu_item( dconfig->scfg_Param.encoder_video_norm_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"AUTO     ",
 		"PAL-BGHID",
@@ -481,7 +481,7 @@ uint8_t factory_reset()
 	/* ??¡À?LCD2?¦Ì£¤1|?¨¹ */
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"restart OS",
 	};
@@ -500,7 +500,7 @@ uint8_t h264_level()
 	get_cfg_menu_item( dconfig->scfg_Param.encoder_video_level_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"Level   4",
 		"Level 4.1",
@@ -508,6 +508,7 @@ uint8_t h264_level()
 		"Level   3",
 		"Level 3.1",
 		"Level 3.2",
+		"Default  ",
 	};
 
 	int menu_item_lenth = sizeof(Bandwidth) / sizeof(Bandwidth[0]);
@@ -523,7 +524,7 @@ uint8_t lcd_timeout()
 	get_cfg_menu_item( dconfig->scfg_Param.system_lcd_time_out_name );
 	init_cache();
 
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"5s  ",
 		"10s ",
@@ -547,7 +548,7 @@ uint8_t play_mod()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_usb_play_mod );
 	init_cache();
 
-	discontrl.write_char_dig_status = 0x03;
+	discontrl.write_char_dig_status = MENU_STATUS;
 	static char *Bandwidth[] = {
 		"Single file",
 		"Single loop",
@@ -567,7 +568,7 @@ uint8_t record_save_mod()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_usb_record_save_mod );
 	init_cache();
 
-	discontrl.write_char_dig_status = 0x03;
+	discontrl.write_char_dig_status = MENU_STATUS;
 	static char *Bandwidth[] = {
 		"Single file   ",
 		"Segmented file",
@@ -589,7 +590,7 @@ uint8_t nit_lcn_mod_cfg()
 	get_cfg_menu_item( dconfig->scfg_Param.stream_nit_lcn_mode_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"European ",
 		"NorDig V1",
@@ -607,14 +608,15 @@ uint8_t h264_profile_cfg()
 {
 	/* ??¡À?LCD2?¦Ì£¤1|?¨¹ */
 	s_config *dconfig = config_t();
-	get_cfg_menu_item( dconfig->scfg_Param.encoder_video_level_name );
+	get_cfg_menu_item( dconfig->scfg_Param.encoder_video_profile_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"High Profile",
 		"Main Profile",
-		"Base Profile"
+		"Base Profile",
+		"Default       ",
 	};
 
 
@@ -631,7 +633,7 @@ uint8_t audio_bitrate()
 	get_cfg_menu_item( dconfig->scfg_Param.encoder_audio_bitrate_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"64  kbps",
 		"96  kbps",
@@ -659,7 +661,7 @@ uint8_t audio_format()
 	get_cfg_menu_item( dconfig->scfg_Param.encoder_audio_format_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"MPEG-2    ",
 		"MPEG-2 AAC",
@@ -680,7 +682,7 @@ uint8_t  video_rate_mode()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.encoder_video_ratemode );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"CBR",
 		"VBR",
@@ -843,7 +845,7 @@ uint8_t eit_insert_Cfg()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_eit_insert );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"Yes",
 		"No ",
@@ -862,7 +864,7 @@ uint8_t nit_insert_Cfg()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_nit_insert );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"Yes",
 		"No ",
@@ -881,7 +883,7 @@ uint8_t eauto_wr_usb_Cfg()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_usb_record_auto );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"Yes",
 		"No ",
@@ -900,7 +902,7 @@ uint8_t usb_rec_enable()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.stream_usb_enable );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;
+	discontrl.write_char_dig_status = MENU_STATUS;
 	int ret = usb_probe();
 	if ( ret < 0 )
 	{
@@ -929,7 +931,7 @@ uint8_t program_ouput()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.encoder_program_output );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"Enable ",
 		"Disable",
@@ -1443,7 +1445,7 @@ uint8_t Constell_cfg()
 	get_cfg_menu_item( dconfig->scfg_Param.modulelate_mode_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"64 QAM",
 		"QPSK  ",
@@ -1895,7 +1897,7 @@ uint8_t Bandwidth_Cfg()
 	get_cfg_menu_item( dconfig->scfg_Param.channel_width_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"8MHz",
 		"7MHz",
@@ -1917,7 +1919,7 @@ uint8_t fft_NK_cfg()
 	get_cfg_menu_item( dconfig->scfg_Param.fft_mode_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"FFT 2K",
 		"FFT 8K",
@@ -1936,7 +1938,7 @@ uint8_t rf_out()
 	get_cfg_menu_item( (char *) dconfig->scfg_Param.modulator_rf_on_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"Yes",
 		"No ",
@@ -1958,7 +1960,7 @@ uint8_t coderate_cfg( void )
 	get_cfg_menu_item( dconfig->scfg_Param.encode_rate_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"1/2",
 		"2/3",
@@ -1981,7 +1983,7 @@ uint8_t guardIntv_dalay_cfg( void )
 	get_cfg_menu_item( dconfig->scfg_Param.deltal_name );
 	init_cache();
 	/* 2a¨º?¨°???¡Á?¡¤?¨º?¨¨?1|?¨¹ */
-	discontrl.write_char_dig_status = 0x03;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
+	discontrl.write_char_dig_status = MENU_STATUS;/* 0x01 ?a¨ºy?¦Ì¡Á¡ä¨¬?¡ê?0x02?a¡Á?¡¤?¡Á¡ä¨¬? ,0x03?a2?¦Ì£¤???? */
 	static char *Bandwidth[] = {
 		"1/32",
 		"1/16",
@@ -2730,7 +2732,8 @@ void text_videobright_save( char *orgbuf, char *repbuf )
 		DEBUG( "orgbuf =%s     repbuf =%s \n", orgbuf, repbuf );
 		config_set_config( SYS_ETC_CONF, orgbuf, (uint8_t *) repbuf, "Brightness" );
 	}
-
+	config_read( get_profile()->script_configfile );
+	
 	discontrl.pid_status = 0x01; /* ?a?? ????¡Á¡ä¨¬? */
 }
 
@@ -3174,6 +3177,9 @@ int comm_h264profile( char *buffer )
 		} else if ( strncmp( "Base Profile", buffer, strlen( buffer ) ) == 0 )
 		{
 			orgbuf = "BASE_CFG";
+		}else if ( strncmp( "Default       ", buffer, strlen( buffer ) ) == 0 )
+		{
+			orgbuf = "DEFAULT_CFG";
 		}
 
 		sprintf( tmp_buf, "%s", dconfig->scfg_Param.encoder_video_profile_name );
@@ -3227,35 +3233,41 @@ int comm_videonorm( char *buffer )
 	return(0);
 }
 
-
+	
 int comm_h264level( char *buffer )
 {
 	char	tmp_buf[18];
 	char	*orgbuf;
 
+DEBUG("l :%s",buffer);
 	if ( buffer == NULL )
 		return(-1);
-	else {
+	else{
+
 		s_config *dconfig = config_t(); /*  */
 		if ( strncmp( "Level   4", buffer, strlen( buffer ) ) == 0 )
 		{
-			orgbuf = "LEVEL4";
+			orgbuf =  "Level4";
 		} else if ( strncmp( "Level 4.1", buffer, strlen( buffer ) ) == 0 )
 		{
-			orgbuf = "LEVEL4_1";
-		} else if ( strncmp( "Level 4.2", buffer, strlen( buffer ) ) == 0 )
+			orgbuf = "Level4_1";
+		} else if ( strncmp("Level 4.2", buffer, strlen( buffer ) ) == 0 )
 		{
-			orgbuf = "LEVEL4_2";
+			orgbuf = "Level4_2";
 		} else if ( strncmp( "Level   3", buffer, strlen( buffer ) ) == 0 )
 		{
-			orgbuf = "LEVEL3";
+			orgbuf = "Level3";
 		} else if ( strncmp( "Level 3.1", buffer, strlen( buffer ) ) == 0 )
 		{
-			orgbuf = "LEVEL3_1";
+			orgbuf =  "Level3_1";
 		} else if ( strncmp( "Level 3.2", buffer, strlen( buffer ) ) == 0 )
 		{
-			orgbuf = "LEVEL3_2";
+			orgbuf = "Level3_2";
+		} else if ( strncmp( "Default  ", buffer, strlen( buffer ) ) == 0 )
+		{
+			orgbuf = "Leveldefu";
 		}
+		
 
 
 		sprintf( tmp_buf, "%s", dconfig->scfg_Param.encoder_video_level_name );

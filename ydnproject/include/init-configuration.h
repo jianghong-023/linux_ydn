@@ -138,4 +138,10 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 int set_nit_table_parm();
 
 
+void set_vic_code( int code );
+
+
+int get_vic_code( void );
+
+
 #endif

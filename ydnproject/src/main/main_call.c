@@ -30,7 +30,9 @@ void input_mod_gpio( uint8_t i_mod );
 static int adf4350_configuration( void );
 
 
-static volatile  int progr_bar;
+static volatile int progr_bar;
+
+extern int get__file_fd( void );
 
 void set_progr_bar( int value )
 {
@@ -111,7 +113,7 @@ static float powrt_calc( uint8_t channel_width, signed char level, float fre_q )
 	default: rf_power_init		= rf_power_init;
 	}
 
-//	DEBUG( "freq=%d ", freq );
+/*	DEBUG( "freq=%d ", freq ); */
 
 	if ( freq >= 30 && freq <= 60 )
 		rf_power_init = rf_power_init / pow( pow( 10, 0.05 ), 1.2 ) / pow( pow( 10, 0.05 ), 0.3 / (60 - 30) * (60 - freq) );
@@ -126,7 +128,7 @@ static float powrt_calc( uint8_t channel_width, signed char level, float fre_q )
 	else if ( freq > 470 && freq <= 500 )
 	{
 		rf_power_init = rf_power_init / pow( pow( 10, 0.05 ), 0.3 / (500 - 470) * (500 - freq) );
-		//DEBUG( "rf_power_init = %f ", rf_power_init );
+		/* DEBUG( "rf_power_init = %f ", rf_power_init ); */
 	}else if ( freq > 500 && freq <= 550 )
 	{
 		rf_power_init = rf_power_init * pow( pow( 10, 0.05 ), 1.0 / (550 - 500) * (freq - 500) );
@@ -290,16 +292,14 @@ int ad9789_configuration()
 
 int peripheral_dev_config( struct dvb_peripheral *devconfig )
 {
-	if(get_unlock_menu_exit())
-		return 0;
-	
+	if ( get_unlock_menu_exit() )
+		return(0);
+
 	set_lock_menu_exit( 1 );
-	interrupt_signals_mask(1);
-	
+	interrupt_signals_mask( 1 );
+
 	if ( devconfig )
 	{
-		
-		
 		struct dvb_peripheral *config = devconfig;
 
 		if ( config )
@@ -316,13 +316,24 @@ int peripheral_dev_config( struct dvb_peripheral *devconfig )
 
 			nano_sleep( 1, 0 );
 
-			if ( (config->pixefreq) && (config->open_freqdev) )
+			/*
+			 * if ( (config->pixefreq) && (config->open_freqdev) )
+			 * {
+			 * config->pixefreq( devfrefd = config->open_freqdev() );
+			 * } else
+			 */
+
+			/*
+			 * DEBUG( "peripheral_dev_config fail...%d", devfrefd );
+			 * close( devfrefd );
+			 */
+
+			if ( config->pixefreq )
 			{
-				config->pixefreq( devfrefd = config->open_freqdev() );
+				config->pixefreq( get__file_fd() );
 			} else
 				DEBUG( "peripheral_dev_config fail...%d", devfrefd );
 
-			close( devfrefd );
 
 			nano_sleep( 1, 0 );
 
@@ -333,7 +344,7 @@ int peripheral_dev_config( struct dvb_peripheral *devconfig )
 				DEBUG( "peripheral_dev_config fail...%d", devmofd );
 
 			close( devmofd );
-//			DEBUG( "peripheral_dev_config end..." );
+/*			DEBUG( "peripheral_dev_config end..." ); */
 #endif
 
 			/* adf4350 and ad9789 */
@@ -351,13 +362,11 @@ int peripheral_dev_config( struct dvb_peripheral *devconfig )
 			usleep( 4000 );
 			/* init */
 			init_bus();
-			//progr_bar = 0x40;
-			set_progr_bar(0x40);
+			/* progr_bar = 0x40; */
+			set_progr_bar( 0x40 );
 		}
-
-		
 	}
-	interrupt_signals_mask(0);
+	interrupt_signals_mask( 0 );
 	set_lock_menu_exit( 0 );
 
 	return(0);

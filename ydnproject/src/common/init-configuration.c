@@ -19,6 +19,20 @@ static int parse_boolean_value( char *line );
 static int get_nit_table_parm();
 
 
+static volatile int vic_code;
+
+void set_vic_code( int code )
+{
+	vic_code = code;
+}
+
+
+int get_vic_code( void )
+{
+	return(vic_code);
+}
+
+
 static const struct {
 	const char	*name;
 	OpCodes		opcode;
@@ -137,10 +151,12 @@ cgf_stor_data stor_data[] = {
 /* h.264运行速率 */
 	{ "CBR",	       0x0030	       },
 	{ "VBR",	       0x0031	       },
+	{"DEFAULT_CFG",	0x0000},
 	{ "HIGH_CFG",	       0x0001	       },
 	{ "MAIN_CFG",	       0x0002	       },
 	{ "BASE_CFG",	       0x0003	       },
-
+	
+	{ "Leveldefu", 0x0000},
 	{ "Level4",	       0x0028	       },
 	{ "Level4_1",	       0x0029	       },
 	{ "Level4_2",	       0x002A	       },
@@ -579,12 +595,12 @@ int config_read( const char *filename )
 
 				case oTsFileName:
 					memset( config.configParam.usb_tsfilename, 0, 17 );
-					strncpy( config.configParam.usb_tsfilename, p1, strlen( p1 )+1 );
+					strncpy( config.configParam.usb_tsfilename, p1, strlen( p1 ) + 1 );
 					ret = 0;
 					break;
 				case oNetWorkName:
 					memset( config.scfg_Param.stream_nit_network_name, 0, 16 );
-					strncpy( (char *) config.scfg_Param.stream_nit_network_name, p1, strlen( p1 )+1 );
+					strncpy( (char *) config.scfg_Param.stream_nit_network_name, p1, strlen( p1 ) + 1 );
 					ret = 0;
 					break;
 				case oTsFileSize:
@@ -737,6 +753,7 @@ int config_read( const char *filename )
 					if ( name )
 					{
 						config.scfg_Param.encoder_video_level_name	= safe_strdup( name );
+						
 						config.scfg_Param.encoder_video_level		= store_parse_token( p1 );
 						ret						= 0;
 					}
@@ -824,6 +841,7 @@ int config_read( const char *filename )
 				case oBrightness:
 				{
 					config.scfg_Param.encoder_video_brightness	= (short) atoi( safe_strdup( p1 ) );
+					DEBUG("br :%d ",config.scfg_Param.encoder_video_brightness	);
 					ret						= 0;
 				}
 				break;
@@ -932,7 +950,7 @@ s_config *config_get_config()
 
 void config_init( void )
 {
-	strncpy( config.configParam.usb_tsfilename, TSFILENAME, strlen(TSFILENAME)+1 );
+	strncpy( config.configParam.usb_tsfilename, TSFILENAME, strlen( TSFILENAME ) + 1 );
 	config.configParam.usb_tsfilesize = TSFILESIZE;
 
 	/* 码率，带宽等默认设置 */
@@ -955,8 +973,8 @@ void config_init( void )
 	config.localstatus.encoder_video_input_lock = VIDEO_INPUT_UNLOCK;
 	memset( (char *) config.localstatus.encoder_video_resolution, ' ', 16 );
 	memset( (char *) config.localstatus.encoder_video_shrot_resolution, ' ', 16 );
-	memcpy( config.localstatus.encoder_video_shrot_resolution, "unknown", strlen("unknown") );
-	memcpy( config.localstatus.encoder_video_resolution, "unknown", strlen("unknown") );
+	memcpy( config.localstatus.encoder_video_shrot_resolution, "unknown", strlen( "unknown" ) );
+	memcpy( config.localstatus.encoder_video_resolution, "unknown", strlen( "unknown" ) );
 	config.localstatus.encoder_video_ident = ENCODE_IDENT_UNKONOWN;
 
 	config.scfg_Param.encoder_video_bitrate = VIDEO_BITRATE;
@@ -1271,7 +1289,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				break;
 				case oModcode: {
-					if ( strncmp( firset_str, "videomod", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "videomod", strlen( firset_str ) ) == 0 )
 					{
 						char *name;
 						name = get_parse_str( replace_str );
@@ -1307,7 +1325,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				break;
 				case oNetWorkName: {
-					if ( strncmp( firset_str, "NetWorkName", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "NetWorkName", strlen( firset_str ) ) == 0 )
 					{
 						char file_name[12];
 						if ( CONFFILELEN <= strlen( (char *) replace_str ) )
@@ -1327,7 +1345,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oTsFileSize: {
 					char file_name[12];
-					if ( strncmp( firset_str, "tsfilesize", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "tsfilesize", strlen( firset_str ) ) == 0 )
 					{
 						if ( 7 <= strlen( (char *) replace_str ) )
 						{
@@ -1348,7 +1366,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oWriteRecord: {
 					char file_name[12];
-					if ( strncmp( firset_str, "WriteRecord", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "WriteRecord", strlen( firset_str ) ) == 0 )
 					{
 						if ( 4 <= strlen( (char *) replace_str ) )
 						{
@@ -1369,7 +1387,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oAd9789config: {
 					char file_name[12];
-					if ( strncmp( firset_str, "AD9789CFG", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "AD9789CFG", strlen( firset_str ) ) == 0 )
 					{
 						if ( 8 <= strlen( (char *) replace_str ) )
 						{
@@ -1388,7 +1406,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oRFLevel: {
 					char file_name[12];
-					if ( strncmp( firset_str, "RFLevel", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "RFLevel", strlen( firset_str ) ) == 0 )
 					{
 						if ( 8 <= strlen( (char *) replace_str ) )
 						{
@@ -1408,7 +1426,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				case oPMTPID: {
 					char file_name[12];
 
-					if ( strncmp( firset_str, "PMTPID", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "PMTPID", strlen( firset_str ) ) == 0 )
 					{
 						int	trl_val = atoi( (char *) replace_str );
 						char	buf[5]	= { 0 };
@@ -1425,7 +1443,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oPRCPID: {
 					char file_name[12];
-					if ( strncmp( firset_str, "PRCPID", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "PRCPID", strlen( firset_str ) ) == 0 )
 					{
 						int trl_val = atoi( (char *) replace_str );
 
@@ -1443,7 +1461,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				case oVideo_PID: { /* oProgrNmu */
 					char	file_name[12];
 					char	*str = "VidPID";
-					if ( strncmp( firset_str, str, strlen(str) ) == 0 )
+					if ( strncmp( firset_str, str, strlen( str ) ) == 0 )
 					{
 						int	trl_val = atoi( (char *) replace_str );
 						char	buf[5]	= { 0 };
@@ -1460,7 +1478,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oAudioPID: {
 					char file_name[12];
-					if ( strncmp( firset_str, "AudioPID", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "AudioPID", strlen( firset_str ) ) == 0 )
 					{
 						int	trl_val = atoi( (char *) replace_str );
 						char	buf[5]	= { 0 };
@@ -1478,7 +1496,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oAudioFormat: {
 					char file_name[12];
-					if ( strncmp( firset_str, "AudioFormat", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "AudioFormat", strlen( firset_str ) ) == 0 )
 					{
 						sprintf( file_name, "%s", replace_str );
 						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
@@ -1492,7 +1510,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oProgrNmu: { /*  */
 					char file_name[12];
-					if ( strncmp( firset_str, "ProgrNmu", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "ProgrNmu", strlen( firset_str ) ) == 0 )
 					{
 						int	trl_val = atoi( (char *) replace_str );
 						char	buf[5]	= { 0 };
@@ -1510,7 +1528,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oNETWORKID: { /* oNETWORKNUMB */
 					char file_name[12];
-					if ( strncmp( firset_str, "NETWORKID", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "NETWORKID", strlen( firset_str ) ) == 0 )
 					{
 						int	trl_val = atoi( (char *) replace_str );
 						char	buf[5]	= { 0 };
@@ -1527,7 +1545,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oNETWORKNUMB: { /* oNETWORKNUMB */
 					char file_name[12];
-					if ( strncmp( firset_str, "NETWORKNUMB", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "NETWORKNUMB", strlen( firset_str ) ) == 0 )
 					{
 						int	trl_val = atoi( (char *) replace_str );
 						char	buf[5]	= { 0 };
@@ -1545,7 +1563,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oEITISERTENABLE: { /* oProgramOutputEnable */
 					char file_name[12];
-					if ( strncmp( firset_str, "EITISERTENABLE", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "EITISERTENABLE", strlen( firset_str ) ) == 0 )
 					{
 						sprintf( file_name, "%s", replace_str );
 						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
@@ -1559,7 +1577,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oNITISERTENABLE: { /* oProgramOutputEnable */
 					char file_name[12];
-					if ( strncmp( firset_str, "NITISERTENABLE", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "NITISERTENABLE", strlen( firset_str ) ) == 0 )
 					{
 						sprintf( file_name, "%s", replace_str );
 						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
@@ -1573,7 +1591,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oAutoModle: {
 					char file_name[12];
-					if ( strncmp( firset_str, "AutoModle", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "AutoModle", strlen( firset_str ) ) == 0 )
 					{
 						sprintf( file_name, "%s", replace_str );
 						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
@@ -1601,7 +1619,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oRFENABLE: { /* oProgramOutputEnable */
 					char file_name[12];
-					if ( strncmp( firset_str, "RFENABLE", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "RFENABLE", strlen( firset_str ) ) == 0 )
 					{
 						sprintf( file_name, "%s", replace_str );
 						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
@@ -1615,7 +1633,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oProgramOutput: { /*  */
 					char file_name[12];
-					if ( strncmp( firset_str, "ProgramOutput", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "ProgramOutput", strlen( firset_str ) ) == 0 )
 					{
 						sprintf( file_name, "%s", replace_str );
 						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
@@ -1629,7 +1647,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oProgramName: {
 					char file_name[12];
-					if ( strncmp( firset_str, "ProgramName", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "ProgramName", strlen( firset_str ) ) == 0 )
 					{
 						sprintf( file_name, "%s", replace_str );
 						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
@@ -1642,7 +1660,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oServiceName: {
 					char file_name[12];
-					if ( strncmp( firset_str, "ServiceName", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "ServiceName", strlen( firset_str ) ) == 0 )
 					{
 						sprintf( file_name, "%s", replace_str );
 						sprintf( tmpline, "sysconfig.sh %s %s %d", p1, file_name, linenum );
@@ -1656,7 +1674,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				case oRateMode:
 				{
 					char *name;
-					if ( strncmp( firset_str, "RateMode", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "RateMode", strlen( firset_str ) ) == 0 )
 					{
 						name = get_parse_str( replace_str );
 						if ( name )
@@ -1674,7 +1692,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				case oVideoBitrate:
 				{
 					char file_name[12];
-					if ( strncmp( firset_str, "VideoBitrate", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "VideoBitrate", strlen( firset_str ) ) == 0 )
 					{
 						int	trl_val = atoi( (char *) replace_str );
 						char	buf[5]	= { 0 };
@@ -1692,7 +1710,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oProfileConfig:
 				{
-					if ( strncmp( firset_str, "ProfileConfig", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "ProfileConfig", strlen( firset_str ) ) == 0 )
 					{
 						char *name;
 						name = get_parse_str( replace_str );
@@ -1710,7 +1728,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oLevelConfig:
 				{
-					if ( strncmp( firset_str, "LevelConfig", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "LevelConfig", strlen( firset_str ) ) == 0 )
 					{
 						char *name;
 						name = get_parse_str( replace_str );
@@ -1728,7 +1746,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oLcdTime:
 				{
-					if ( strncmp( firset_str, "LcdTime", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "LcdTime", strlen( firset_str ) ) == 0 )
 					{
 						char *name;
 						name = get_parse_str( replace_str );
@@ -1746,7 +1764,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oPlayMode:
 				{
-					if ( strncmp( firset_str, "PlayModle", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "PlayModle", strlen( firset_str ) ) == 0 )
 					{
 						char *name;
 						name = get_parse_str( replace_str );
@@ -1766,7 +1784,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oRecordModle:
 				{
-					if ( strncmp( firset_str, "RecordModle", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "RecordModle", strlen( firset_str ) ) == 0 )
 					{
 						char *name;
 						name = get_parse_str( replace_str );
@@ -1786,13 +1804,13 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 
 				case oVideoNorm:
 				{
-					if ( strncmp( firset_str, "VideoNorm", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "VideoNorm", strlen( firset_str ) ) == 0 )
 					{
 						char *name;
 						name = get_parse_str( replace_str );
 						if ( name )
 						{
-							config.scfg_Param.encoder_video_level_name = safe_strdup( name );
+							config.scfg_Param.encoder_video_norm_name = safe_strdup( name );
 							sprintf( tmpline, "sysconfig.sh %s %s %d", p1, name, linenum );
 
 							result = system( tmpline );
@@ -1804,7 +1822,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 				case oNITLCNMOD:
 				{
-					if ( strncmp( firset_str, "NITLCNMOD", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "NITLCNMOD", strlen( firset_str ) ) == 0 )
 					{
 						char *name;
 						name = get_parse_str( replace_str );
@@ -1823,7 +1841,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				case oBrightness:
 				{
 					char file_name[12];
-					if ( strncmp( firset_str, "Brightness", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "Brightness", strlen( firset_str ) ) == 0 )
 					{
 						int	trl_val = atoi( (char *) replace_str );
 						char	buf[5]	= { 0 };
@@ -1860,7 +1878,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				case oCpBrightness:
 				{
 					char file_name[12];
-					if ( strncmp( firset_str, "CpBrightness", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "CpBrightness", strlen( firset_str ) ) == 0 )
 					{
 						int	trl_val = atoi( (char *) replace_str );
 						char	buf[5]	= { 0 };
@@ -2005,7 +2023,7 @@ int config_set_config( char *filename, const char *original_str, uint8_t *replac
 				break;
 
 				case oAudioBitrate: {
-					if ( strncmp( firset_str, "AudioBitrate", strlen(firset_str) ) == 0 )
+					if ( strncmp( firset_str, "AudioBitrate", strlen( firset_str ) ) == 0 )
 					{
 						char *name;
 						name = get_parse_str( replace_str );
@@ -2053,13 +2071,13 @@ pid_t safe_fork( void )
 
 void video_status_lock()
 {
-	if(get_unlock_menu_exit())
-		return ;
-	
+	if ( get_unlock_menu_exit() )
+		return;
+
 	if ( (M_HDMI == config.scfg_Param.encoder_video_interface) )
 	{
 		/* 设备配置 */
-		int opcode, r_vic = read_vic();
+		int opcode, r_vic = get_vic_code();
 		opcode = freq_parse_token( r_vic );
 		if ( !opcode )
 			opcode = VIDEO_INPUT_UNLOCK;
@@ -2076,10 +2094,10 @@ void video_status_lock()
 	{
 		int optcode;
 
-		
+
 		memset( config.localstatus.encoder_video_resolution, ' ', 16 );
 		memset( config.localstatus.encoder_video_shrot_resolution, ' ', 16 );
-		optcode = pare_YPbPr_HDMI();
+		optcode = get_vic_code();
 
 		switch ( optcode )
 		{
@@ -2122,7 +2140,7 @@ void video_status_lock()
 		int optcode;
 		memset( config.localstatus.encoder_video_resolution, ' ', 16 );
 		memset( config.localstatus.encoder_video_shrot_resolution, ' ', 16 );
-		optcode = pare_cvbs();
+		optcode = get_vic_code();
 
 		switch ( optcode )
 		{

@@ -105,7 +105,7 @@ static int vn_calc( double v_bitrate, double framerate )
 	int	v2	= 183 * 8 * (framerate + 0.5);
 	int	v3	= (v1 + v2) * (188 / 184);
 	res = ( (int) (v3 + 0.5) );
-#if 0
+#if 1
 	DEBUG( "v0=%d \n", v0 );
 	DEBUG( "v1=%d \n", v1 );
 	DEBUG( "v2=%d \n", v2 );
@@ -221,7 +221,7 @@ static int MUX_RATE( int v3, int a3, int s0, int s1, int s2, int s3 )
 	double	tmp;
 	int	res;
 
-	tmp = (v3 + a3 * 1000 + s0 + s1 + s2 + s3) * 1.05 / 1000;
+	tmp = (v3 + a3 + s0 + s1 + s2 + s3) * 1.05 / 1000;
 
 	res = ( (int) (tmp + 0.5) );
 
@@ -952,6 +952,8 @@ void v72060p_mod( int fd )
 
 
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
+
+
 /*
  * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
  * uart_send( fd, buf );
@@ -974,6 +976,70 @@ void v72060p_mod( int fd )
 	 * 2 main profile
 	 * 3 base profile
 	 */
+
+
+/*
+ * buf = "WA015A0";
+ * uart_send( fd, buf );
+ * usleep( 2000 );
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
+
+
+/*
+ * / *
+ *  * buf = "WD0001";
+ *  * uart_send(fd,buf);
+ *  * usleep(2000);
+ *  * /
+ * memset( __buf, 0, 14 );
+ * int v_profile = dconfig->scfg_Param.encoder_video_profile;
+ * sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
+ * uart_send( fd, __buf );
+ * usleep( 2000 );
+ * DEBUG( "v_profile =%s ", __buf );
+ */
+
+
+/*
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
+
+
+	/*
+	 * h.264 Level
+	 *  Level 4   40 =>
+	 */
+	buf = "WA015A0";
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+
+	memset( __buf, 0, 14 );
+	int	v_level		= dconfig->scfg_Param.encoder_video_level;
+	int	v_profile	= dconfig->scfg_Param.encoder_video_profile;
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 1 ) << 6, GET_HEX( v_level, 1 ) );
+	uart_send( fd, __buf );
+	usleep( 2000 );
+	DEBUG( "v_level =%s ", __buf );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+
+#if 0
 	buf = "WA015A0";
 	uart_send( fd, buf );
 	usleep( 2000 );
@@ -1022,6 +1088,7 @@ void v72060p_mod( int fd )
 	uart_send( fd, __buf );
 	usleep( 2000 );
 	DEBUG( "v_level =%s ", __buf );
+#endif
 
 	buf = "WA01422";
 	uart_send( fd, buf );
@@ -1747,6 +1814,8 @@ void v72050p_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
+
+
 /*
  * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
  * uart_send( fd, buf );
@@ -1769,33 +1838,42 @@ void v72050p_mod( int fd )
 	 * 2 main profile
 	 * 3 base profile
 	 */
-	buf = "WA015A0";
-	uart_send( fd, buf );
-	usleep( 2000 );
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
 
 
-	/*
-	 * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
-	 * uart_send(fd,buf);
-	 * usleep(2000);
-	 */
-	memset( __buf, 0, 14 );
-	int v_profile = dconfig->scfg_Param.encoder_video_profile;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
-	uart_send( fd, __buf );
-	usleep( 2000 );
-	DEBUG( "v_profile =%s ", __buf );
+/*
+ * buf = "WA015A0";
+ * uart_send( fd, buf );
+ * usleep( 2000 );
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
 
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
+
+/*
+ * / *
+ *  * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
+ *  * uart_send(fd,buf);
+ *  * usleep(2000);
+ *  * /
+ * memset( __buf, 0, 14 );
+ * int v_profile = dconfig->scfg_Param.encoder_video_profile;
+ * sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
+ * uart_send( fd, __buf );
+ * usleep( 2000 );
+ * DEBUG( "v_profile =%s ", __buf );
+ */
+
+
+/*
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
 
 
 	/*
@@ -1812,11 +1890,16 @@ void v72050p_mod( int fd )
 	}
 
 	memset( __buf, 0, 14 );
-	int v_level = dconfig->scfg_Param.encoder_video_level;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_level, 2 ), GET_HEX( v_level, 1 ) );
+	int	v_level		= dconfig->scfg_Param.encoder_video_level;
+	int	v_profile	= dconfig->scfg_Param.encoder_video_profile;
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 1 ) << 6, GET_HEX( v_level, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
 	DEBUG( "v_level =%s ", __buf );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA01422";
 	uart_send( fd, buf );
@@ -1827,6 +1910,8 @@ void v72050p_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
+
+
 	/*
 	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
 	 * uart_send( fd, buf );
@@ -2555,6 +2640,8 @@ void v57650i_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
+
+
 /*
  * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
  * /	uart_send( fd, buf );
@@ -2577,6 +2664,72 @@ void v57650i_mod( int fd )
 	 * 2 main profile
 	 * 3 base profile
 	 */
+
+
+/*
+ * buf = "WA015A0";
+ * uart_send( fd, buf );
+ * usleep( 2000 );
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
+
+
+/*
+ * // * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
+ * // * uart_send(fd,buf);
+ * // * usleep(2000);
+ * // */
+
+
+/*
+ * memset( __buf, 0, 14 );
+ * int v_profile = dconfig->scfg_Param.encoder_video_profile;
+ * sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
+ * uart_send( fd, __buf );
+ * usleep( 2000 );
+ * DEBUG( "v_profile =%s ", __buf );
+ */
+
+
+/*
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
+
+
+	/*
+	 * h.264 Level
+	 *  Level 4   40 =>
+	 */
+	buf = "WA015A0";
+	uart_send( fd, buf );
+	usleep( 2000 );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+
+	memset( __buf, 0, 14 );
+	int	v_level		= dconfig->scfg_Param.encoder_video_level;
+	int	v_profile	= (dconfig->scfg_Param.encoder_video_profile);
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 1 ) << 6, GET_HEX( v_level, 1 ) );
+	uart_send( fd, __buf );
+	usleep( 2000 );
+	DEBUG( "v_level =%s ", __buf );
+	gettimeofday( &tpstart, NULL );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
+#if 0
 	buf = "WA015A0";
 	uart_send( fd, buf );
 	usleep( 2000 );
@@ -2587,12 +2740,11 @@ void v57650i_mod( int fd )
 	}
 
 
-/*
- * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
- * uart_send(fd,buf);
- * usleep(2000);
- */
-
+	/*
+	 * buf = "WD0001";
+	 * uart_send(fd,buf);
+	 * usleep(2000);
+	 */
 	memset( __buf, 0, 14 );
 	int v_profile = dconfig->scfg_Param.encoder_video_profile;
 	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
@@ -2632,6 +2784,7 @@ void v57650i_mod( int fd )
 	{
 		;
 	}
+#endif
 
 	buf = "WA01422";
 	uart_send( fd, buf );
@@ -2642,6 +2795,8 @@ void v57650i_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
+
+
 	/*
 	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
 	 * uart_send( fd, buf );
@@ -3107,6 +3262,8 @@ void v48050i_mod( int fd )
 	{
 		;
 	}
+
+
 	/*
 	 * buf = "WD0000"; / * V_AVE_BITRATE * /
 	 * uart_send( fd, buf );
@@ -3170,6 +3327,8 @@ void v48050i_mod( int fd )
 	{
 		;
 	}
+
+
 	/*
 	 * buf = "WD1F40"; / * V_MAX_BITRATE * /
 	 * uart_send( fd, buf );
@@ -4428,6 +4587,8 @@ void v48060i_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
+
+
 /*
  * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
  * uart_send( fd, buf );
@@ -4450,34 +4611,44 @@ void v48060i_mod( int fd )
 	 * 2 main profile
 	 * 3 base profile
 	 */
-	buf = "WA015A0";
-	uart_send( fd, buf );
-	usleep( 2000 );
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
 
 
 /*
- * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
- * uart_send(fd,buf);
- * usleep(2000);
+ * buf = "WA015A0";
+ * uart_send( fd, buf );
+ * usleep( 2000 );
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
  */
 
-	memset( __buf, 0, 14 );
-	int v_profile = dconfig->scfg_Param.encoder_video_profile;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
-	uart_send( fd, __buf );
-	usleep( 2000 );
-	DEBUG( "v_profile =%s ", __buf );
 
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
+/*
+ * // * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
+ * // * uart_send(fd,buf);
+ * // * usleep(2000);
+ * // */
+
+
+/*
+ * memset( __buf, 0, 14 );
+ * int v_profile = dconfig->scfg_Param.encoder_video_profile;
+ * sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
+ * uart_send( fd, __buf );
+ * usleep( 2000 );
+ * DEBUG( "v_profile =%s ", __buf );
+ */
+
+
+/*
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
 
 
 /*
@@ -4494,11 +4665,16 @@ void v48060i_mod( int fd )
 	}
 
 	memset( __buf, 0, 14 );
-	int v_level = dconfig->scfg_Param.encoder_video_level;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_level, 2 ), GET_HEX( v_level, 1 ) );
+	int	v_level		= dconfig->scfg_Param.encoder_video_level;
+	int	v_profile	= dconfig->scfg_Param.encoder_video_profile;
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 1 ) << 6, GET_HEX( v_level, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
 	DEBUG( "v_level =%s ", __buf );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA01422";
 	uart_send( fd, buf );
@@ -4509,6 +4685,8 @@ void v48060i_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
+
+
 	/*
 	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
 	 * uart_send( fd, buf );
@@ -5318,6 +5496,8 @@ void v108060i_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
+
+
 /*
  * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
  * uart_send( fd, buf );
@@ -5340,34 +5520,44 @@ void v108060i_mod( int fd )
 	 * 2 main profile
 	 * 3 base profile
 	 */
-	buf = "WA015A0";
-	uart_send( fd, buf );
-	usleep( 2000 );
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
 
 
 /*
- * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
- * uart_send(fd,buf);
- * usleep(2000);
+ * buf = "WA015A0";
+ * uart_send( fd, buf );
+ * usleep( 2000 );
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
  */
 
-	memset( __buf, 0, 14 );
-	int v_profile = dconfig->scfg_Param.encoder_video_profile;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
-	uart_send( fd, __buf );
-	usleep( 2000 );
-	DEBUG( "v_profile =%s ", __buf );
 
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
+/*
+ * // * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
+ * // * uart_send(fd,buf);
+ * // * usleep(2000);
+ * // */
+
+
+/*
+ * memset( __buf, 0, 14 );
+ * int v_profile = dconfig->scfg_Param.encoder_video_profile;
+ * sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
+ * uart_send( fd, __buf );
+ * usleep( 2000 );
+ * DEBUG( "v_profile =%s ", __buf );
+ */
+
+
+/*
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
 
 
 	/*
@@ -5384,11 +5574,16 @@ void v108060i_mod( int fd )
 	}
 
 	memset( __buf, 0, 14 );
-	int v_level = dconfig->scfg_Param.encoder_video_level;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_level, 2 ), GET_HEX( v_level, 1 ) );
+	int	v_level		= dconfig->scfg_Param.encoder_video_level;
+	int	v_profile	= dconfig->scfg_Param.encoder_video_profile;
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 1 ) << 6, GET_HEX( v_level, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
 	DEBUG( "v_level =%s ", __buf );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA01422";
 	uart_send( fd, buf );
@@ -5399,6 +5594,8 @@ void v108060i_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
+
+
 	/*
 	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
 	 * uart_send( fd, buf );
@@ -6223,6 +6420,8 @@ void v108050i_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
+
+
 	/*
 	 * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
 	 * uart_send( fd, buf );
@@ -6245,34 +6444,44 @@ void v108050i_mod( int fd )
 	 * 2 main profile
 	 * 3 base profile
 	 */
-	buf = "WA015A0";
-	uart_send( fd, buf );
-	usleep( 2000 );
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
 
 
 /*
- * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
- * uart_send(fd,buf);
- * usleep(2000);
+ * buf = "WA015A0";
+ * uart_send( fd, buf );
+ * usleep( 2000 );
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
  */
 
-	memset( __buf, 0, 14 );
-	int v_profile = dconfig->scfg_Param.encoder_video_profile;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
-	uart_send( fd, __buf );
-	usleep( 2000 );
-	DEBUG( "v_profile =%s ", __buf );
 
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
+/*
+ * // * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
+ * // * uart_send(fd,buf);
+ * // * usleep(2000);
+ * // */
+
+
+/*
+ * memset( __buf, 0, 14 );
+ * int v_profile = dconfig->scfg_Param.encoder_video_profile;
+ * sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
+ * uart_send( fd, __buf );
+ * usleep( 2000 );
+ * DEBUG( "v_profile =%s ", __buf );
+ */
+
+
+/*
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
 
 
 	/*
@@ -6289,12 +6498,17 @@ void v108050i_mod( int fd )
 	}
 
 	memset( __buf, 0, 14 );
-	int v_level = dconfig->scfg_Param.encoder_video_level;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_level, 2 ), GET_HEX( v_level, 1 ) );
+	int	v_level		= dconfig->scfg_Param.encoder_video_level;
+	int	v_profile	= dconfig->scfg_Param.encoder_video_profile;
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 1 ) << 6, GET_HEX( v_level, 1 ) );
 
 	uart_send( fd, __buf );
 	usleep( 2000 );
 	DEBUG( "v_level =%s ", __buf );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA01422";
 	uart_send( fd, buf );
@@ -6305,6 +6519,8 @@ void v108050i_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
+
+
 	/*
 	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
 	 * uart_send( fd, buf );
@@ -7128,6 +7344,8 @@ void v108050p_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
+
+
 	/*
 	 * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
 	 * uart_send( fd, buf );
@@ -7150,34 +7368,44 @@ void v108050p_mod( int fd )
 	 * 2 main profile
 	 * 3 base profile
 	 */
-	buf = "WA015A0";
-	uart_send( fd, buf );
-	usleep( 2000 );
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
 
 
 /*
- * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
- * uart_send(fd,buf);
- * usleep(2000);
+ * buf = "WA015A0";
+ * uart_send( fd, buf );
+ * usleep( 2000 );
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
  */
 
-	memset( __buf, 0, 14 );
-	int v_profile = dconfig->scfg_Param.encoder_video_profile;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
-	uart_send( fd, __buf );
-	usleep( 2000 );
-	DEBUG( "v_profile =%s ", __buf );
 
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
+/*
+ * // * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
+ * // * uart_send(fd,buf);
+ * // * usleep(2000);
+ * // */
+
+
+/*
+ * memset( __buf, 0, 14 );
+ * int v_profile = dconfig->scfg_Param.encoder_video_profile;
+ * sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
+ * uart_send( fd, __buf );
+ * usleep( 2000 );
+ * DEBUG( "v_profile =%s ", __buf );
+ */
+
+
+/*
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
 
 
 	/*
@@ -7194,11 +7422,16 @@ void v108050p_mod( int fd )
 	}
 
 	memset( __buf, 0, 14 );
-	int v_level = dconfig->scfg_Param.encoder_video_level;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_level, 2 ), GET_HEX( v_level, 1 ) );
+	int	v_level		= dconfig->scfg_Param.encoder_video_level;
+	int	v_profile	= dconfig->scfg_Param.encoder_video_profile;
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 1 ) << 6, GET_HEX( v_level, 1 ) );
 	uart_send( fd, __buf );
 	usleep( 2000 );
 	DEBUG( "v_level =%s ", __buf );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA01422";
 	uart_send( fd, buf );
@@ -7209,6 +7442,8 @@ void v108050p_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
+
+
 	/*
 	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
 	 * uart_send( fd, buf );
@@ -8083,6 +8318,8 @@ void v108060p_mod( int fd )
 		;
 	}
 /*	buf = "WD1770";  //V_MIN_BITRATE=6000kbps */
+
+
 /*
  * buf = "WD0BB8"; / * V_MIN_BITRATE=3000kbps * /
  * uart_send( fd, buf );
@@ -8105,34 +8342,45 @@ void v108060p_mod( int fd )
 	 * 2 main profile
 	 * 3 base profile
 	 */
-	buf = "WA015A0";
-	uart_send( fd, buf );
-	usleep( 2000 );
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
 
 
 /*
- * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
- * uart_send(fd,buf);
- * usleep(2000);
+ * buf = "WA015A0";
+ * uart_send( fd, buf );
+ * usleep( 2000 );
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
  */
 
-	memset( __buf, 0, 14 );
-	int v_profile = dconfig->scfg_Param.encoder_video_profile;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
-	uart_send( fd, __buf );
-	usleep( 2000 );
-	DEBUG( "v_profile =%s ", __buf );
 
-	gettimeofday( &tpstart, NULL );
-	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
-	{
-		;
-	}
+/*
+ * // * buf = "WD0001";  //V_GOP_STRUCT=IBBP V_STRM_FORMAT=0
+ * // * uart_send(fd,buf);
+ * // * usleep(2000);
+ * // */
+
+
+/*
+ * memset( __buf, 0, 14 );
+ * int v_profile = dconfig->scfg_Param.encoder_video_profile;
+ * int v_profile = dconfig->scfg_Param.encoder_video_profile;
+ * sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 2 ), GET_HEX( v_profile, 1 ) );
+ * uart_send( fd, __buf );
+ * usleep( 2000 );
+ * DEBUG( "v_profile =%s ", __buf );
+ */
+
+
+/*
+ * gettimeofday( &tpstart, NULL );
+ * while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+ * {
+ *      ;
+ * }
+ */
 
 
 	/*
@@ -8149,12 +8397,17 @@ void v108060p_mod( int fd )
 	}
 
 	memset( __buf, 0, 14 );
-	int v_level = dconfig->scfg_Param.encoder_video_level;
-	sprintf( __buf, "WD%02x%02x", GET_HEX( v_level, 2 ), GET_HEX( v_level, 1 ) );
+	int	v_level		= dconfig->scfg_Param.encoder_video_level;
+	int	v_profile	= dconfig->scfg_Param.encoder_video_profile;
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 1 ) << 6, GET_HEX( v_level, 1 ) );
 
 	uart_send( fd, __buf );
 	usleep( 2000 );
 	DEBUG( "v_level =%s ", __buf );
+	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
+	{
+		;
+	}
 
 	buf = "WA01422";
 	uart_send( fd, buf );
@@ -8165,6 +8418,8 @@ void v108060p_mod( int fd )
 		;
 	}
 /*	buf = "WD2EE0";  //V_MAX_BITRATE=12000kbps */
+
+
 	/*
 	 * buf = "WD1770"; / * V_MAX_BITRATE=6000kbps * /
 	 * uart_send( fd, buf );
@@ -8725,6 +8980,8 @@ void v108030p_mod( int fd )
 		;
 	}
 	int video_bitrate = dconfig->scfg_Param.encoder_video_bitrate;
+
+
 	/*
 	 * buf = "WD1F40"; / * V_MAX_BITRATE * /
 	 * uart_send( fd, buf );
@@ -9015,8 +9272,12 @@ void v108030p_mod( int fd )
 		;
 	}
 /*	buf = "WD0000";  // */
-	buf = "WD4028"; /*  */
-	uart_send( fd, buf );
+/*	buf = "WD4028"; / *  * / */
+	memset( __buf, 0, 14 );
+	int	v_level		= dconfig->scfg_Param.encoder_video_level;
+	int	v_profile	= dconfig->scfg_Param.encoder_video_profile;
+	sprintf( __buf, "WD%02x%02x", GET_HEX( v_profile, 1 ) << 6, GET_HEX( v_level, 1 ) );
+	uart_send( fd, __buf );
 	usleep( 2000 );
 	gettimeofday( &tpstart, NULL );
 	while ( (uart_rcv_ok( fd ) != 1) && (time_out( tpstart ) <= 50) )
@@ -9477,6 +9738,8 @@ void v57650p_mod( int fd )
 		;
 	}
 	int video_bitrate = dconfig->scfg_Param.encoder_video_bitrate;
+
+
 	/*
 	 * buf = "WD0000"; / * V_AVE_BITRATE * /
 	 * uart_send( fd, buf );
@@ -9516,6 +9779,8 @@ void v57650p_mod( int fd )
 	{
 		;
 	}
+
+
 	/*
 	 * buf = "WD1F40"; / * V_MAX_BITRATE * /
 	 * uart_send( fd, buf );

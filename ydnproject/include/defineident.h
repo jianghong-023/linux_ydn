@@ -322,11 +322,11 @@
 #define CYCOFSIT_MS	(900)
 #define CYCOFPCR_MS	(30)
 
-#define PROFILEDELETEC_P	(0x0001)
-#define PROFILE_STR		"HIGH_CFG"
+#define PROFILEDELETEC_P	(0x0000)
+#define PROFILE_STR		"DEFAULT_CFG"
 
-#define LEVEL_		(0x0028)
-#define LEVEL_NAME	"Level4"
+#define LEVEL_		(0x0000)
+#define LEVEL_NAME	"Leveldefu"
 
 #define VIDEO_BRIGHT		(128)
 #define VIDEO_CONTRAST		(128)

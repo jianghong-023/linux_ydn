@@ -62,6 +62,8 @@ void common_set( int fd );
 
 void CVBS_480ix60_mod( int fd );
 
+void init_adv7842(int fd);
+
 
 void sdp_hue_set( int fd );
 

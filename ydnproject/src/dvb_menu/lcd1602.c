@@ -78,7 +78,7 @@ uint8_t scan_key_resvale( uint8_t choose );
 static void sighandler_str( int sgn );
 
 
-void Change_Menu( signed char keySigNum );
+void Change_Menu( signed char, int );
 
 
 static void monitor_opt( int coder, int flags );
@@ -2495,12 +2495,12 @@ void ChangeMenu( int keySigNum )
 			return;
 		}
 	}  else
-		Change_Menu( keynumber );
+		Change_Menu( keynumber, keySigNum );
 }
 
 
 /* °´¼ü¼ì²â */
-void Change_Menu( signed char keySigNum )
+void Change_Menu( signed char keySigcoed, int keySigNum )
 {
 	signed char	keynumber;
 	static int	lock_count	= 0;
@@ -2526,6 +2526,8 @@ void Change_Menu( signed char keySigNum )
 /* ÃÜÂë£¬ */
 	if ( dconfig->scfg_Param.system_pwd_count == 1 )
 		keynumber = keySigNum;
+	else
+		keynumber = keySigcoed;
 
 
 	/*
@@ -2533,7 +2535,6 @@ void Change_Menu( signed char keySigNum )
 	 * read( discontrl.keyfd, &keynumber, 1 );
 	 */
 
-	keynumber = keySigNum;
 
 	/* DEBUG( "---------args...keySigNum:%d    lock :%d", keynumber, get_unlock_menu_exit() ); */
 

@@ -5,27 +5,31 @@
 menu_cfg_t cfg_level[] = {
 	{
 		.optmenu	= "Level   4",
-		.cfgmenu	= "Level4",
+		.cfgmenu	=  "Level4",
 	},
 	{
 		.optmenu	= "Level 4.1",
 		.cfgmenu	= "Level4_1",
 	},
 	{
-		.optmenu	= "Level 4.2",
-		.cfgmenu	= "Level4_2",
+		.optmenu	=  "Level 4.2",
+		.cfgmenu	=  "Level4_2",
 	},
 	{
 		.optmenu	= "Level   3",
-		.cfgmenu	= "Level3",
+		.cfgmenu	=  "Level3",
 	},
 	{
-		.optmenu	= "Level 3.1",
+		.optmenu	="Level 3.1",
 		.cfgmenu	= "Level3_1",
 	},
 	{
 		.optmenu	= "Level 3.2",
 		.cfgmenu	= "Level3_2",
+	},
+	{
+		.optmenu	="Default  ",
+		.cfgmenu	= "Leveldefu",
 	},
 };
 
@@ -80,6 +84,7 @@ menu_cfg_t cfg_lcnmod[] = {
 	},
 };
 
+	
 menu_cfg_t cfg_profile[] = {
 	{
 		.optmenu	= "High Profile",
@@ -92,6 +97,10 @@ menu_cfg_t cfg_profile[] = {
 	{
 		.optmenu	= "Base Profile",
 		.cfgmenu	= "BASE_CFG",
+	},
+	{
+		.optmenu	= "Default       ",
+		.cfgmenu	= "DEFAULT_CFG",
 	},
 };
 
@@ -472,7 +481,7 @@ menu_opt_t *p_menu_opt_arr()
 int index_cfg_menu( const char *firstitemmenu, const char *cfgmenu )
 {
 	int i, y = 0, res = 0;
-
+	
 	for ( i = 0; i < sizeof(menu_opt) / sizeof(menu_opt[0]); i++ )
 	{
 		if ( strncasecmp( firstitemmenu, (const char *) menu_opt[i].first_menu,
@@ -480,11 +489,11 @@ int index_cfg_menu( const char *firstitemmenu, const char *cfgmenu )
 		{
 			for ( y = 0; y < menu_opt[i].lenth; y++ )
 			{
-				if ( strncasecmp( menu_opt[i].cfg_t[y].cfgmenu, cfgmenu,
-						  strlen( (const char *) menu_opt[i].cfg_t[y].cfgmenu ) - 1 ) == 0 )
+				if ( strncasecmp( menu_opt[i].cfg_t[y].cfgmenu, cfgmenu,strlen(cfgmenu))== 0 )
+						
 				{
 					res = y;
-
+					
 					break;
 				}
 			}

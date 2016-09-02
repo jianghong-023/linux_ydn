@@ -210,7 +210,7 @@ static const struct {
 	{ v2880x288p_50Hz28,		       "2880x288 50p",	    "288p"  },
 	{ v1440x576p_50Hz,		       "1440x576 50p",	    "576p"  },
 	{ v1440x576p_50Hz30,		       "1440x576 50p",	    "576p"  },
-	{ v1920x1080p_50Hz,		       "1920x1080 50p",	    "1080p"  },
+	{ v1920x1080p_50Hz,		       "1920x1080 50p",	    "1080p" },
 	{ v2880x576p_50Hz,		       "2880x576 50p",	    "576p"  },
 	{ v2880x576p_50Hz38,		       "2880x576 50p",	    "576p"  },
 	{ v1920x1080i_or_1250_50Hz,	       "1920x1080 50i",	    "1080i" },
@@ -437,7 +437,7 @@ struct dvb_peripheral ypbpr_input_50Hz_mod[3] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -450,7 +450,7 @@ struct dvb_peripheral ypbpr_input_50Hz_mod[3] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -463,7 +463,7 @@ struct dvb_peripheral ypbpr_input_50Hz_mod[3] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -479,7 +479,7 @@ struct dvb_peripheral ypbpr_input_60_3Hz_mod[2] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -492,7 +492,7 @@ struct dvb_peripheral ypbpr_input_60_3Hz_mod[2] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -508,7 +508,7 @@ struct dvb_peripheral cvbs_input_50Hz_mod[2] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -522,7 +522,7 @@ struct dvb_peripheral cvbs_input_50Hz_mod[2] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -539,7 +539,7 @@ struct dvb_peripheral cvbs_input_60_3Hz_mod[2] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -553,7 +553,7 @@ struct dvb_peripheral cvbs_input_60_3Hz_mod[2] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -576,7 +576,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -590,7 +590,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -603,7 +603,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -617,7 +617,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -631,7 +631,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -645,7 +645,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -658,7 +658,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -671,7 +671,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -684,7 +684,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -697,7 +697,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -710,7 +710,7 @@ struct dvb_peripheral hdmi_input_50Hz_mod[11] = {
 		.video_hz		= v50Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -730,7 +730,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -744,7 +744,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -757,7 +757,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -770,7 +770,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -784,7 +784,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -797,7 +797,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -810,7 +810,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -823,7 +823,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -836,7 +836,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -849,7 +849,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -862,7 +862,7 @@ struct dvb_peripheral hdmi_input_59d94Hz_mod[11] = {
 		.video_hz		= v59_94Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -879,7 +879,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -893,7 +893,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -907,7 +907,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -920,7 +920,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -934,7 +934,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -948,7 +948,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -961,7 +961,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -974,7 +974,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -987,7 +987,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1000,7 +1000,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1014,7 +1014,7 @@ struct dvb_peripheral hdmi_input_60_3Hz_mod[11] = {
 		.video_hz		= v60Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1032,7 +1032,7 @@ struct dvb_peripheral hdmi_input_100Hz_mod[4] = {
 		.video_hz		= v100Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1045,7 +1045,7 @@ struct dvb_peripheral hdmi_input_100Hz_mod[4] = {
 		.video_hz		= v100Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1058,7 +1058,7 @@ struct dvb_peripheral hdmi_input_100Hz_mod[4] = {
 		.video_hz		= v100Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1071,7 +1071,7 @@ struct dvb_peripheral hdmi_input_100Hz_mod[4] = {
 		.video_hz		= v100Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1088,7 +1088,7 @@ struct dvb_peripheral hdmi_input_119d88Hz_mod[4] = {
 		.video_hz		= v119_88Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1101,7 +1101,7 @@ struct dvb_peripheral hdmi_input_119d88Hz_mod[4] = {
 		.video_hz		= v119_88Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1114,7 +1114,7 @@ struct dvb_peripheral hdmi_input_119d88Hz_mod[4] = {
 		.video_hz		= v119_88Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1127,7 +1127,7 @@ struct dvb_peripheral hdmi_input_119d88Hz_mod[4] = {
 		.video_hz		= v119_88Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1144,7 +1144,7 @@ struct dvb_peripheral hdmi_input_120Hz_mod[4] = {
 		.video_hz		= v120Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1157,7 +1157,7 @@ struct dvb_peripheral hdmi_input_120Hz_mod[4] = {
 		.video_hz		= v120Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1170,7 +1170,7 @@ struct dvb_peripheral hdmi_input_120Hz_mod[4] = {
 		.video_hz		= v120Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1183,7 +1183,7 @@ struct dvb_peripheral hdmi_input_120Hz_mod[4] = {
 		.video_hz		= v120Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1200,7 +1200,7 @@ struct dvb_peripheral hdmi_input_200Hz_mod[2] = {
 		.video_hz		= v200Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1213,7 +1213,7 @@ struct dvb_peripheral hdmi_input_200Hz_mod[2] = {
 		.video_hz		= v200Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1230,7 +1230,7 @@ struct dvb_peripheral hdmi_input_239Hz_mod[2] = {
 		.video_hz		= v239Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1243,7 +1243,7 @@ struct dvb_peripheral hdmi_input_239Hz_mod[2] = {
 		.video_hz		= v239Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1260,7 +1260,7 @@ struct dvb_peripheral hdmi_input_240_3Hz_mod[2] = {
 		.video_hz		= v240Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1273,7 +1273,7 @@ struct dvb_peripheral hdmi_input_240_3Hz_mod[2] = {
 		.video_hz		= v240Hz,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1290,7 +1290,7 @@ struct dvb_peripheral hdmi_input_lowfieldrate_mod[3] = {
 		.video_hz		= vlowfieldrate,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1303,7 +1303,7 @@ struct dvb_peripheral hdmi_input_lowfieldrate_mod[3] = {
 		.video_hz		= vlowfieldrate,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1316,7 +1316,7 @@ struct dvb_peripheral hdmi_input_lowfieldrate_mod[3] = {
 		.video_hz		= vlowfieldrate,
 		.i2c_0addr		= CY22393ADDR,
 		.open_clockdev		= &cy22393_open,
-		.open_freqdev		= &adv7842_open,
+		.open_freqdev		= -1,
 		.i2c_0ordernumber	= I2C_NR_0,
 		.i2c_1ordernumber	= I2C_NR_1,
 		.open_uartdev		= &h46_open,
@@ -1329,17 +1329,15 @@ struct dvb_peripheral hdmi_input_lowfieldrate_mod[3] = {
 
 /* #define open_text */
 
-int read_vic()
+int read_vic( int fd )
 {
-
-	
-	int	r_ratio;
+	int r_ratio;
 
 
-	if(get_unlock_menu_exit())
-		return 0;
-	
-	int	fd = adv7842_open();
+	if ( get_unlock_menu_exit() )
+		return(0);
+
+	/* int fd = adv7842_open(); */
 
 	/* PRIM_MODE */
 	uint8_t addr;
@@ -1372,31 +1370,30 @@ int read_vic()
 	DEBUG( "DATA Byta 5,Valid Pixel Repeat Values , pixel data sent VIC5=0x%x times\n",
 	       get_i2c_register_value( fd, addr, 0x05 ) + 1 );
 #endif
-	close( fd );
+	/* close( fd ); */
 	return(r_ratio);
 }
 
 
 /* HDMI detection */
 
-int hdmi_detection(  int r_ratio )
+int hdmi_detection( int r_ratio )
 {
-	int rest = -1,  i;
-	static int item;
+	int		rest = -1, i;
+	static int	item;
 
 #if 1
 	static int bak_r_opcode = 0;
 
-	
 
-	if(bak_r_opcode == r_ratio)
+	if ( bak_r_opcode == r_ratio )
 	{
-		//DEBUG("r_ratio :%d",r_ratio);
+		/* DEBUG("r_ratio :%d",r_ratio); */
 		return(r_ratio);
-	}else if(bak_r_opcode != r_ratio)
+	}else if ( bak_r_opcode != r_ratio )
 		bak_r_opcode = r_ratio;
 
-	//DEBUG("r_ratio :%d",r_ratio);
+	/* DEBUG("r_ratio :%d",r_ratio); */
 #endif
 
 	memset( config.localstatus.encoder_video_resolution, ' ', 16 );
@@ -1413,7 +1410,7 @@ int hdmi_detection(  int r_ratio )
 			snprintf( config.localstatus.encoder_video_shrot_resolution, strlen( auto_resolution[i].short_video_resolution ) + 1
 				  , "%s", auto_resolution[i].short_video_resolution );
 			rest = r_ratio;
-			DEBUG( "%s   %s  %x ", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution ,r_ratio);
+			DEBUG( "%s   %s  %x ", config.localstatus.encoder_video_resolution, config.localstatus.encoder_video_resolution, r_ratio );
 
 			break;
 		}else{
@@ -1423,7 +1420,7 @@ int hdmi_detection(  int r_ratio )
 		}
 	}
 
-	
+
 	return(rest);
 }
 
@@ -1763,7 +1760,7 @@ void hdmi_gpio_dfg( void )
 void ypbpr_cvbs_cfg()
 {
 	/* gpio */
-	DEBUG("----------------------ypbpr_cvbs gpio");
+	DEBUG( "----------------------ypbpr_cvbs gpio" );
 	input_mod_gpio( CVBS | nRST_H46_HI );
 	input_mod_gpio( CVBS | nRST_H46_LO );
 	usleep( 200000 );
@@ -2069,6 +2066,7 @@ void default_7842()
 		exit( -1 );
 	} else {
 		DEBUG( "adv7842 starting configuartion..." );
+		init_adv7842( fd );
 		HDMI_COMP_1080ix50_mod( fd );
 	}
 	close( fd );
@@ -2094,6 +2092,7 @@ void YPbPr_def()
 		exit( -1 );
 	} else {
 		/* YPbPr */
+		init_adv7842( fd );
 		YPbPr_720px60_mod( fd );
 		close( fd );
 	}
@@ -2119,6 +2118,7 @@ void cvbs_def()
 		DEBUG( "7842 device open fail..." );
 		exit( -1 );
 	} else {
+		init_adv7842( fd );
 		CVBS_576ix50_mod( fd );
 		close( fd );
 	}
@@ -2151,24 +2151,27 @@ static int calc_v( int ypbpr_hdmi )
 
 
 /* YPbPr 和 HDMI 格式解析 */
-int pare_YPbPr_HDMI()
+int pare_YPbPr_HDMI( int fd )
 {
-	int		result, fd;
+	int		result;/* , fd; */
 	uint8_t		addr, ch1bl_h, ch1bl_l;
 	uint8_t		ch1lcf_h, ch1lcf_l;
 	unsigned short	bl_, bl_back, bl_calc, lcf;
 
 	result = -1;
 
-	if(get_unlock_menu_exit())
-		return 0;
+	if ( get_unlock_menu_exit() )
+		return(0);
 
-	fd = adv7842_open();
-	if ( fd < 0 )
+/*
+ * fd = adv7842_open();
+ * if ( fd < 0 )
+ * {
+ *      DEBUG( "7842 device open fail..." );
+ *      return(result);
+ * } else
+ */
 	{
-		DEBUG( "7842 device open fail..." );
-		return(result);
-	} else {
 		/*
 		 * DEBUG("adv7842 starting configuartion...");
 		 * common_set(fd);// 初始化7842
@@ -2216,7 +2219,7 @@ int pare_YPbPr_HDMI()
 		ch1lcf_h	= get_i2c_register_value( fd, addr, 0xB3 );
 		ch1lcf_l	= get_i2c_register_value( fd, addr, 0xB4 );
 
-		close( fd );
+		/* close( fd ); */
 
 
 		/* lcf */
@@ -2285,7 +2288,7 @@ int pare_YPbPr_HDMI()
 
 
 /* CVBS */
-int pare_cvbs()
+int pare_cvbs( int i_fd )
 {
 	int		result, fd;
 	uint8_t		addr, sdp_std, sdp_interlaced;
@@ -2315,18 +2318,21 @@ int pare_cvbs()
 
 	addr = 0x90 / 2;
 
-	fd = adv7842_open();
-	if ( fd < 0 )
+/*
+ * fd = adv7842_open();
+ * if ( fd < 0 )
+ * {
+ *      DEBUG( "7842 device open fail..." );
+ *      return(result);
+ * } else
+ */
 	{
-		DEBUG( "7842 device open fail..." );
-		return(result);
-	} else {
 		/* common_set(fd);// 初始化7842 */
 
-		sdp_std		= get_i2c_register_value( fd, addr, 0x52 );
-		sdp_interlaced	= (get_i2c_register_value( fd, addr, 0x57 ) & 0x08) >> 3;
-		sdp_ad_50_60_hz = (get_i2c_register_value( fd, addr, 0x59 ) & 0x08) >> 3;
-		close( fd );
+		sdp_std		= get_i2c_register_value( i_fd, addr, 0x52 );
+		sdp_interlaced	= (get_i2c_register_value( i_fd, addr, 0x57 ) & 0x08) >> 3;
+		sdp_ad_50_60_hz = (get_i2c_register_value( i_fd, addr, 0x59 ) & 0x08) >> 3;
+		/* close( fd ); */
 
 
 		/*

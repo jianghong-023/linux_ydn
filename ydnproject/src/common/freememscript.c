@@ -173,9 +173,9 @@ void sys_ect_conf( void )
 
 		fprintf( file, "VideoNorm AUTO\n\n" );
 		fprintf( file, "# 4.h.246 config\n\n" );
-		fprintf( file, "ProfileConfig  HIGH_CFG\n\n" );
-		fprintf( file, "LevelConfig  Level4\n\n" );
-		fprintf( file, "LcdTime  t10s\n\n" );
+		fprintf( file, "ProfileConfig DEFAULT_CFG\n\n" );
+		fprintf( file, "LevelConfig Leveldefu\n\n" );
+		fprintf( file, "LcdTime t10s\n\n" );
 		fprintf( file, "RateMode CBR\n\n" );
 		fprintf( file, "VideoBitrate 8000 \n\n" );
 		fprintf( file, "AudioBitrate 64_kbps \n\n" );
